@@ -1,21 +1,18 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import LogIn from "./components/auth/LoginPage";
+
 import Home from "./pages/Home";
 import RoleBaseRoute from "./components/auth/RoleBaseRoute";
 import AuthRoute from "./components/auth/AuthRoute";
 import useAuth from "./context/auth/useAuth";
 import SignUp from "./pages/SignUp/SignUpPage";
 import Verify from "./pages/SignUp/Verify";
-import Header from "./components/Layout/components/Header";
-import AboutUs from "./pages/AboutUs/AboutUsPage";
+import Header from "./components/layout/Header";
 import Sidebar from "./pages/Admin/Sidebar";
 import Dashboardview from "./pages/Admin/Dashboardview";
 import Main from "./pages/Admin/Main";
 import SearchPage from "./pages/Search/SearchPage";
-
-
-
+import LogIn from "./components/auth/LoginPage";
 
 function App() {
   const { isAuthenticated, user } = useAuth();
@@ -38,20 +35,7 @@ function App() {
         <Route path='/verify' element={<Verify />} />
         <Route path ='search' element={<SearchPage/>}/>
         {/* Protected Routes */}
-        <Route path='/features' element={
-          <AuthRoute>
-            <RoleBaseRoute accessibleRoles={["Manager"]}>
-              {/* <FeatureSection /> */}
-            </RoleBaseRoute>
-          </AuthRoute>
-        } />
-        <Route path='/about-us' element={
-          <AuthRoute>
-            <RoleBaseRoute accessibleRoles={["Manager"]}>
-              <AboutUs />
-            </RoleBaseRoute>
-          </AuthRoute>
-        } />
+        
 
         {/* Admin Dashboard Route */}
         <Route path='/dashboard' element={
