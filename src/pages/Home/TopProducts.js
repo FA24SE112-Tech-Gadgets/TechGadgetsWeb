@@ -33,7 +33,7 @@ const TopProducts = ({ handleOrderPopup }) => {
     <div>
       <div className="container">
         {/* Header section */}
-        <div className="text-left mb-24">
+        <div className="text-left pt-5 mb-24">
           <p data-aos="fade-up" className="text-sm text-primary">
             Những sản phẩm được đánh giá cao
           </p>

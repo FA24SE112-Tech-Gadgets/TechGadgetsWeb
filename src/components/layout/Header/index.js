@@ -59,10 +59,10 @@ const Header = () => {
       <div className="bg-primary/40 py-2">
         <div className="container flex justify-between items-center">
           <div>
-            <a href="#" className="font-bold text-2xl sm:text-3xl flex gap-2">
+            <Link to="/"  className="font-bold text-2xl sm:text-3xl flex gap-2">
               <img src={Logo} alt="Logo" className="w-10" />
               Tech Gadget
-            </a>
+            </Link>
           </div>
 
           {/* search bar */}
@@ -126,7 +126,7 @@ const Header = () => {
                         Profile
                       </p>
                       <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full ">
-                        Settings
+                        <Link to ="/favorite">Favorite Lists</Link>
                       </p>
                       <p
                         className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-red-600 dark:text-red-400 font-semibold w-full"

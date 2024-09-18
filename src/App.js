@@ -13,6 +13,7 @@ import Dashboardview from "./pages/Admin/Dashboardview";
 import Main from "./pages/Admin/Main";
 import SearchPage from "./pages/Search/SearchPage";
 import LogIn from "./components/auth/LoginPage";
+import FavoritePage from "./pages/Favorite/FavoritePage";
 
 function App() {
   const { isAuthenticated, user } = useAuth();
@@ -34,6 +35,7 @@ function App() {
         <Route path='/signup' element={<SignUp />} />
         <Route path='/verify' element={<Verify />} />
         <Route path ='search' element={<SearchPage/>}/>
+        <Route path ='favorite' element={<FavoritePage/>}/>
         {/* Protected Routes */}
         
 
