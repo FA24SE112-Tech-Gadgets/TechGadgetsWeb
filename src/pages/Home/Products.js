@@ -1,108 +1,159 @@
-import React from "react";
-import Img1 from "../../assets/product/product.png";
-import Img2 from "../../assets/product/product2.png";
-import Img3 from "../../assets/product/product3.png";
-import Img4 from "../../assets/product/product4.png";
-import Img5 from "../../assets/product/product5.png";
-import { FaStar } from "react-icons/fa6";
+import React, { useEffect, useState, useRef } from 'react';
+import { CiHeart } from 'react-icons/ci';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import { Navigation } from 'swiper/modules';
+import { MdNavigateNext } from "react-icons/md";
+import { GrFormPrevious } from "react-icons/gr";
 
-const ProductsData = [
-  {
-    id: 1,
-    img: Img1,
-    title: "Robot hút bụi",
-    rating: 5.0,
-    color: "Trắng",
-    aosDelay: "0",
-  },
-  {
-    id: 2,
-    img: Img2,
-    title: "Tai Nghe Không Dây",
-    rating: 4.5,
-    color: "Đen",
-    aosDelay: "200",
-  },
-  {
-    id: 3,
-    img: Img3,
-    title: "Camera Hành Trình Go Pro",
-    rating: 4.7,
-    color: "Bạc",
-    aosDelay: "400",
-  },
-  {
-    id: 4,
-    img: Img4,
-    title: "Loa Bluetooth",
-    rating: 4.4,
-    color: "Xanh Dương",
-    aosDelay: "600",
-  },
-  {
-    id: 5,
-    img: Img5,
-    title: "Chuột Gaming",
-    rating: 4.5,
-    color: "RGB",
-    aosDelay: "800",
-  },
-];
+const ProductPage = () => {
+  const [products, setProducts] = useState([]);
+  const [swiper, setSwiper] = useState(null); 
+  const filters = ['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'vivo', 'realme', 'ASUS', 'TECNO', 'Nokia', 'Infinix', 'Oneplus', 'Xem tất cả'];
+  
+  const prevRef = useRef(null);
+  const nextRef = useRef(null);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const fakeData = [
+        {
+          name: 'iPhone 16 Pro Max 256GB| Chính Hãng VN/A',
+          image: 'https://s.net.vn/0hT0',
+          price: 34990000,
+          discount: 12,
+          additionalDiscount: 300000,
+        },
+        {
+          name: 'Samsung Galaxy S24 Ultra 12GB 256GB',
+          image: 'https://s.net.vn/gsjW',
+          price: 29990000,
+          discount: 16,
+          additionalDiscount: 600000,
+        },
+        {
+          name: 'Xiaomi Mi 12 5G | Chính Hãng Xiaomi',
+          image: 'https://s.net.vn/ry0D',
+          price: 11990000,
+          discount: 8,
+          additionalDiscount: 200000,
+        },
+        {
+          name: 'OPPO Find X5 Pro 5G 12GB|256GB Gen 5',
+          image: 'https://s.net.vn/Nb72',
+          price: 25990000,
+          discount: 14,
+          additionalDiscount: 400000,
+        },
+        {
+          name: 'Vivo V23 5G Điện thoại (8GB/256GB) Chính Hãng',
+          image: 'https://s.net.vn/FBc4',
+          price: 17990000,
+          discount: 10,
+          additionalDiscount: 250000,
+        },
+        {
+          name: 'realme GT Neo 3 80W 5G Chính Hãng',
+          image: 'https://s.net.vn/uwCW',
+          price: 13990000,
+          discount: 7,
+          additionalDiscount: 150000,
+        },
+        {
+          name: 'ASUS ROG Phone 5 Snapdragon 888 Chính Hãng',
+          image: 'https://s.net.vn/6ssP',
+          price: 19990000,
+          discount: 5,
+          additionalDiscount: 300000,
+        }
+      ];
+      setProducts(fakeData);
+    };
+    fetchData();
+  }, []);
 
-const Products = () => {
+  const handleSwiperInit = (swiperInstance) => {
+    setSwiper(swiperInstance);
+  };
+
+  const handleSlideChange = () => {
+    if (swiper) {
+      const { isBeginning, isEnd } = swiper;
+      prevRef.current.style.opacity = isBeginning ? 0.5 : 1;
+      nextRef.current.style.opacity = isEnd ? 0.5 : 1;
+    }
+  };
+
   return (
-    <div className="mt-14 mb-12">
-      <div className="container">
-        {/* Header section */}
-        <div className="text-center mb-10 max-w-[600px] mx-auto">
-          <p data-aos="fade-up" className="text-sm text-primary">
-            Xếp hạng những sản phẩm bán chạy nhất
-          </p>
-          <h1 data-aos="fade-up" className="text-3xl font-bold">
-            Sản Phẩm
-          </h1>
-          <p data-aos="fade-up" className="text-xs text-gray-400">
-            Chào mừng bạn đến với thế giới của công nghệ
-          </p>
-        </div>
-        {/* Body section */}
-        <div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 place-items-center gap-5">
-            {/* card section */}
-            {ProductsData.map((data) => (
-              <div
-                data-aos="fade-up"
-                data-aos-delay={data.aosDelay}
-                key={data.id}
-                className="space-y-3"
-              >
+    <div data-aos="fade-up" className="container mx-auto px-5">
+      <h2 className="text-3xl font-bold py-4">Điện Thoại Nổi Bật Nhất</h2>
+
+      {/* Bộ lọc */}
+      <div className="flex space-x-2 py-4">
+        {filters.map((filter, index) => (
+          <button key={index} className="bg-gray-200 dark:bg-gray-500 dark:text-white hover:bg-gray-300 px-4 py-2 rounded-lg">
+            {filter}
+          </button>
+        ))}
+      </div>
+
+      {/* Swiper carousel */}
+      <div className="relative">
+        <Swiper
+          slidesPerView={4}
+          spaceBetween={30}
+          navigation={{
+            nextEl: nextRef.current,
+            prevEl: prevRef.current,
+          }}
+          modules={[Navigation]}
+          onInit={handleSwiperInit}
+          onSlideChange={handleSlideChange}
+        >
+          {products.map((product, index) => (
+            <SwiperSlide key={index}>
+              <div className="border p-4 rounded-lg shadow-md flex flex-col justify-between h-full">
+                {/* Product image */}
                 <img
-                  src={data.img}
-                  alt=""
-                  className="h-[220px] w-[150px] object-cover rounded-md"
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-48 object-cover mb-4"
                 />
-                <div>
-                  <h3 className="font-semibold">{data.title}</h3>
-                  <p className="text-sm text-gray-600">{data.color}</p>
-                  <div className="flex items-center gap-1">
-                    <FaStar className="text-yellow-400" />
-                    <span>{data.rating}</span>
+
+                {/* Product details */}
+                <div className="flex-grow">
+                  <h3 className="font-bold text-lg">{product.name}</h3>
+                  <div className="text-red-500 font-semibold text-xl">
+                    {product.price.toLocaleString()}đ
                   </div>
                 </div>
+
+                {/* Favorite button */}
+                <button className="mt-4 text-red-500 flex items-center justify-end">
+                  <CiHeart className="mr-2 text-3xl" /> Yêu thích
+                </button>
               </div>
-            ))}
-          </div>
-          {/* view all button */}
-          <div className="flex justify-center">
-            <button className="text-center mt-10 cursor-pointer bg-primary text-white py-3 px-5 rounded-md">
-              Xem thêm
-            </button>
-          </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+
+        {/* Custom navigation icons */}
+        <div
+          ref={prevRef}
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-gray-300 dark:bg-gray-100 dark:text-black rounded-full cursor-pointer shadow-md"
+        >
+          <GrFormPrevious size={24} />
+        </div>
+        <div
+          ref={nextRef}
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-gray-300 dark:bg-gray-100 dark:text-black rounded-full cursor-pointer shadow-md"
+        >
+          <MdNavigateNext size={24} />
         </div>
       </div>
     </div>
   );
 };
 
-export default Products;
+export default ProductPage;
