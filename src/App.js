@@ -14,6 +14,7 @@ import Main from "./pages/Admin/Main";
 import SearchPage from "./pages/Search/SearchPage";
 import LogIn from "./components/auth/LoginPage";
 import FavoritePage from "./pages/Favorite/FavoritePage";
+import ProfilePage from "./pages/Profile/ProfilePage";
 
 function App() {
   const { isAuthenticated, user } = useAuth();
@@ -36,6 +37,7 @@ function App() {
         <Route path='/verify' element={<Verify />} />
         <Route path ='search' element={<SearchPage/>}/>
         <Route path ='favorite' element={<FavoritePage/>}/>
+        <Route path='/profile' element={<ProfilePage/>}/>
         {/* Protected Routes */}
         
 

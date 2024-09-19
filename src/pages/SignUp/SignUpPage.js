@@ -12,9 +12,9 @@ function SignUp() {
   const { googleLogin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
-    userName: "",
+    fullName: "",
     password: "",
-    role: "Student", // Default role
+    email: "", 
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -53,13 +53,13 @@ function SignUp() {
           <span className="font-light text-gray-400 mb-8">Sign up to get started!</span>
 
           <div className="py-4">
-            <span className="text-base font-semibold text-gray-600">Email</span>
+            <span className="text-base font-semibold text-gray-600">Full name</span>
             <input
-              type="email"
+              type="fullName"
               className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
-              name="email"
-              value={user.userName}
-              onChange={(e) => handleChangeValue("userName", e.target.value)}
+              name="fullName"
+              value={user.fullName}
+              onChange={(e) => handleChangeValue("fullName", e.target.value)}
               required
             />
           </div>
@@ -75,8 +75,19 @@ function SignUp() {
               required
             />
           </div>
-
+          
           <div className="py-4">
+            <span className="text-base font-semibold text-gray-600">Email</span>
+            <input
+              type="email"
+              className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
+              name="email"
+              value={user.email}
+              onChange={(e) => handleChangeValue("email", e.target.value)}
+              required
+            />
+          </div>
+          {/* <div className="py-4">
             <span className="text-base font-semibold text-gray-600">Role</span>
             <select
               name="role"
@@ -88,7 +99,7 @@ function SignUp() {
               <option value="Manager">Manager</option>
               <option value="Student">Student</option>
             </select>
-          </div>
+          </div> */}
 
           <div className="flex justify-between w-full py-4">
             <div className="mr-24">

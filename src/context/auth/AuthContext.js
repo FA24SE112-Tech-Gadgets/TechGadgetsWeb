@@ -65,9 +65,9 @@ const AuthProvider = ({ children }) => {
 		try {
 			console.log("Sending login request...");
 			res = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/account/login`,
+				`${process.env.REACT_APP_PRO_API}/api/auth/login`,
 				{
-					userName: userAccount.userName,
+					email: userAccount.email,
 					password: userAccount.password
 				}
 			);
@@ -85,7 +85,7 @@ const AuthProvider = ({ children }) => {
 			const userInfo = JSON.parse(decode.UserInfo || '{}');
 			const clientRole = userInfo.Role; // Lấy vai trò từ UserInfo
 
-			if (clientRole === "Admin" || clientRole === "Manager" || clientRole === "Student") {
+			if (clientRole === "Buyer" || clientRole === "Seller" || clientRole === "Admin") {
 				localStorage.setItem('token', res.data.token);
 				localStorage.setItem('refreshToken', res.data.refreshToken);
 				let resData;
@@ -147,7 +147,7 @@ const AuthProvider = ({ children }) => {
 		try {
 			console.log("Sending Google login request...");
 			res = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/google/signin/${googleToken}`
+				`${process.env.REACT_APP_PRO_API}/api/auth/google/${googleToken}`
 			);
 			console.log("Google login response received:", res);
 
@@ -223,12 +223,14 @@ const AuthProvider = ({ children }) => {
 		setIsLoading(true);
 		let registerRes;
 		try {
+			console.log("API URL nè:", `${process.env.REACT_APP_PRO_API}/api/auth/signup`);
 			registerRes = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/account/register`,
+				//  `${process.env.REACT_APP_PRO_API}/api/auth/signup`,
+				`https://tech-gadgets-prod.online/api/auth/signup`,
 				{
-					userName: userDetails.userName,
+					fullName: userDetails.fullName,
 					password: userDetails.password,
-					role: userDetails.role,
+					email: userDetails.email,
 				}
 			);
 			console.log("Register response received:", registerRes);
@@ -256,7 +258,7 @@ const AuthProvider = ({ children }) => {
 		try {
 			console.log("Sending request...");
 			verifyRes = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/account/verify`,
+				`${process.env.REACT_APP_PRO_API}/api/auth/verify`,
 				{
 					code: verificationData.code,
 					email: verificationData.email,
@@ -338,7 +340,7 @@ const AuthProvider = ({ children }) => {
 		try {
 			console.log("Sending resend request...");
 			resendRes = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/account/resend`,
+				`${process.env.REACT_APP_PRO_API}/api/auth/resend`,
 				{
 					email: email,
 				}
