@@ -9,20 +9,6 @@ import R from "~/assets/R.png";
 import { Link } from "react-router-dom";
 import Notifications from "~/Notification/Notification";
 import { useNavigate } from "react-router-dom";
-const Menu = [
-  { id: 1, name: "Trang chủ", link: "/#" },
-  { id: 2, name: "Đánh giá hàng đầu", link: "/#services" },
-  { id: 3, name: "Điện Thoại", link: "/#" },
-  { id: 4, name: "Máy Tính", link: "/#" },
-  { id: 5, name: "Thiết bị điện tử", link: "/#" },
-];
-
-const DropdownLinks = [
-  { id: 1, name: "Sản phẩm xu hướng", link: "/#" },
-  { id: 2, name: "Bán chạy nhất", link: "/#" },
-  { id: 3, name: "Đánh giá hàng đầu", link: "/#" },
-];
-
 const Header = () => {
   const [open, setOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -152,46 +138,6 @@ const Header = () => {
             )}
           </div>
         </div>
-      </div>
-
-      {/* lower Navbar */}
-      <div data-aos="zoom-in" className="flex justify-center">
-        <ul className="sm:flex hidden items-center gap-4">
-          {Menu.map((data) => (
-            <li key={data.id}>
-              <a
-                href={data.link}
-                className="inline-block px-4 hover:text-primary duration-200"
-              >
-                {data.name}
-              </a>
-            </li>
-          ))}
-
-          {/* Simple Dropdown and Links */}
-          <li className="group relative cursor-pointer">
-            <a href="#" className="flex items-center gap-[2px] py-2">
-              Sản phẩm xu hướng
-              <span>
-                <FaCaretDown className="transition-all duration-200 group-hover:rotate-180" />
-              </span>
-            </a>
-            <div className="absolute z-[9999] hidden group-hover:block w-[200px] rounded-md bg-white p-2 text-black shadow-md">
-              <ul>
-                {DropdownLinks.map((data) => (
-                  <li key={data.id}>
-                    <a
-                      href={data.link}
-                      className="block p-2 hover:bg-primary hover:text-white rounded-md"
-                    >
-                      {data.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </li>
-        </ul>
       </div>
       
     </div>
