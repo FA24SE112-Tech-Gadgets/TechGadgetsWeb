@@ -2,6 +2,17 @@ import React, { useState } from 'react';
 import { FaPencilAlt, FaSave } from 'react-icons/fa';
 import InputMask from 'react-input-mask';
 
+const labels = {
+  name: 'Tên',
+  address: 'Địa chỉ',
+  cccd: 'CCCD',
+  gender: 'Giới tính',
+  dateOfBirth: 'Ngày sinh',
+  phoneNumber: 'Số điện thoại',
+  email: 'Email',
+  avatar: 'Ảnh đại diện'
+};
+
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
@@ -36,7 +47,17 @@ const ProfilePage = () => {
         <div className="flex">
           <div className="w-1/3 flex flex-col items-center">
             <img src={profile.avatar} alt="Avatar" className="rounded-full w-40 h-40 mb-4" />
-            <h2 className="text-xl font-bold">{profile.name}</h2>
+            {isEditing ? (
+              <input
+                type="text"
+                name="name"
+                value={profile.name}
+                onChange={handleChange}
+                className="mt-2 p-2 border rounded w-full h-10"
+              />
+            ) : (
+              <h2 className="text-xl font-bold">{profile.name}</h2>
+            )}
             {isEditing && (
               <input
                 type="text"
@@ -47,12 +68,12 @@ const ProfilePage = () => {
               />
             )}
           </div>
-          <div className="w-2/3 ml-8">
+          <div className="w-2/3 ml-8 ">
             <div className="grid grid-cols-2 gap-4">
               {Object.keys(profile).map((key) => (
                 key !== 'avatar' && key !== 'name' && (
                   <div key={key} className="mb-4">
-                    <label className="block text-gray-700">{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                    <label className="block text-gray-700">{labels[key]}</label>
                     {isEditing ? (
                       key === 'gender' ? (
                         <select
