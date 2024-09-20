@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import signupp from '~/assets/signupp.jpg';
 import google from '~/assets/google.svg';
 import useAuth from '~/context/auth/useAuth';
@@ -8,13 +8,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function SignUp() {
-  const { signup, error } = useAuth();
-  const { googleLogin } = useAuth();
+  const { signup, googleLogin, error } = useAuth();  // Gọi hàm googleLogin và signup từ useAuth
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
-    userName: "",
-    password: "",
-    role: "Student", // Default role
+   fullName: "",   
+   password: "",
+   email: ""
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -28,7 +27,7 @@ function SignUp() {
   const googleLoginHandler = useGoogleLogin({
     onSuccess: (response) => {
       console.log('Google login successful:', response.access_token);
-      googleLogin(response.access_token);
+      googleLogin(response.access_token);  // Truyền token Google vào hàm googleLogin
     },
     onError: (error) => {
       console.error('Google login error:', error);
@@ -38,8 +37,14 @@ function SignUp() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    signup(user);
-  };
+    try {
+        await signup(user);
+    } catch (err) {
+        console.error('Signup error:', err);
+        // Xử lý lỗi nếu cần
+    }
+};
+
 
   const handleClickShowPassword = () => {
     setShowPassword((prev) => !prev);
@@ -53,16 +58,18 @@ function SignUp() {
           <span className="font-light text-gray-400 mb-8">Sign up to get started!</span>
 
           <div className="py-4">
-            <span className="text-base font-semibold text-gray-600">Email</span>
+            <span className="text-base font-semibold text-gray-600">fullName</span>
             <input
-              type="email"
+              type="text"
               className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
-              name="email"
-              value={user.userName}
-              onChange={(e) => handleChangeValue("userName", e.target.value)}
+              name="fullName"
+              value={user.fullName}  
+              onChange={(e) => handleChangeValue("fullName", e.target.value)}  
               required
             />
           </div>
+
+         
 
           <div className="py-4">
             <span className="text-base font-semibold text-gray-600">Password</span>
@@ -75,19 +82,16 @@ function SignUp() {
               required
             />
           </div>
-
           <div className="py-4">
-            <span className="text-base font-semibold text-gray-600">Role</span>
-            <select
-              name="role"
-              className="w-full p-2 border border-gray-300 rounded-md"
-              value={user.role}
-              onChange={(e) => handleChangeValue("role", e.target.value)}
-            >
-              <option value="Admin">Admin</option>
-              <option value="Manager">Manager</option>
-              <option value="Student">Student</option>
-            </select>
+            <span className="text-base font-semibold text-gray-600">Email</span>
+            <input
+              type="email"
+              className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
+              name="email"
+              value={user.email}  // Sử dụng user.email
+              onChange={(e) => handleChangeValue("email", e.target.value)}  // Đổi fieldName thành "email"
+              required
+            />
           </div>
 
           <div className="flex justify-between w-full py-4">
@@ -112,12 +116,12 @@ function SignUp() {
 
           <div className="mb-2 flex justify-center">
             <button
-             onClick={() => googleLoginHandler ()}
-            class="w-full border border-gray-300 text-md p-2 rounded-lg mb-6 hover:bg-black hover:text-white"
-          >
-            <img src={google} alt="img" class="w-6 h-6 inline mr-2 test-base" />
-            Sign in with Google
-          </button>
+              onClick={googleLoginHandler}
+              className="w-full border border-gray-300 text-md p-2 rounded-lg mb-6 hover:bg-black hover:text-white"
+            >
+              <img src={google} alt="img" className="w-6 h-6 inline mr-2" />
+              Sign in with Google
+            </button>
           </div>
 
           <div className="text-center text-gray-400">

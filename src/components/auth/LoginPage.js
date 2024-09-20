@@ -13,15 +13,15 @@ function LogIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
-    userName: "",
+    email: "",
     password: ""
   });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
   
-    if (!user.userName || !user.password) {
-      toast.error('Username and password are required!');
+    if (!user.email|| !user.password) {
+      toast.error('email and password are required!');
       return;
     }
     
@@ -68,14 +68,14 @@ function LogIn() {
           </span>
           <form onSubmit={handleSubmit}>
             <div className="py-4">
-              <span className="text-base font-semibold text-gray-600">Username</span>
+              <span className="text-base font-semibold text-gray-600">Email</span>
               <input
                 type="text"
                 className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
-                name="userName"
-                id="userName"
-                value={user.userName}
-                onChange={(e) => handleChangeValue("userName", e.target.value)}
+                name="email"
+                id="email"
+                value={user.email}
+                onChange={(e) => handleChangeValue("email", e.target.value)}
               />
             </div>
             <div className="py-4">

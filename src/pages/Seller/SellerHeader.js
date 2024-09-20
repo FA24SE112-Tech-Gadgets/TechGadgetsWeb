@@ -2,21 +2,25 @@ import React from 'react';
 import { Layout, Menu, Dropdown, Avatar } from 'antd';
 import { BellOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import icon from "~/assets/icon.ico"; 
+import useAuth from '~/context/auth/useAuth';
 
 const { Header } = Layout;
 
-const userMenu = (
-  <Menu>
-    <Menu.Item key="profile" icon={<UserOutlined />}>
-      Thông tin cá nhân
-    </Menu.Item>
-    <Menu.Item key="logout" icon={<LogoutOutlined />}>
-      Đăng xuất
-    </Menu.Item>
-  </Menu>
-);
-
 const SellerHeader = () => {
+  const { logout } = useAuth();  // Sử dụng hàm logout từ useAuth
+
+  // Tạo menu cho người dùng với sự kiện onClick cho Đăng xuất
+  const userMenu = (
+    <Menu>
+      <Menu.Item key="profile" icon={<UserOutlined />}>
+        Thông tin cá nhân
+      </Menu.Item>
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={logout}>
+        Đăng xuất
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
     <Header style={{ background: '#fff', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',  borderBottom: '1px solid #e8e8e8' }}>
       {/* Logo Section */}

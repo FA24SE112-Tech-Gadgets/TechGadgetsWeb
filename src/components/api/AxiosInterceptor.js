@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const AxiosInterceptor = axios.create({
-    baseURL: process.env.REACT_APP_PRO_API,
+    baseURL: process.env.NODE_ENV === "development" ? process.env.REACT_APP_DEV_API : process.env.REACT_APP_PRO_API
     
 })
 
@@ -30,7 +30,7 @@ AxiosInterceptor.interceptors.response.use(
             try {
                 if (error.response.data.code === "WEA-0003") {
                     const refreshToken = localStorage.getItem('refreshToken');
-                    const response = await axios.post(`${process.env.REACT_APP_PRO_API}/api/account/refresh`, { refreshToken }) //If api down here then catch err and remove save token
+                    const response = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + '/api/auth/refresh') : (process.env.REACT_APP_PRO_API + '/api/auth/refresh'), { refreshToken }); //If api down here then catch err and remove save token
                     if (response.status >= 200 && response.status < 300) {
                         const { token, refreshToken } = response.data;
                         localStorage.setItem('token', token);

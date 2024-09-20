@@ -14,6 +14,8 @@ import SellerLayout from "./components/layout/SellerLayout";
 import AdminLayout from "./components/layout/AdminLayout";
 import Dashboardview from "./pages/Admin/Dashboardview";
 import Main from "./pages/Admin/Main";
+import AuthRoute from "./components/auth/AuthRoute";
+import RoleBaseRoute from "./components/auth/RoleBaseRoute";
 
 function App() {
   return (
@@ -29,13 +31,26 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path='/' element={<Home />} />
           <Route path='/search' element={<SearchPage />} />
-          <Route path='/favorite' element={<FavoritePage />} />
-          <Route path="/products/coros-watch" element={<Home />} />
+          <Route path='/favorite' element= {
+            <AuthRoute>
+              <RoleBaseRoute accessibleRoles={["Buyer"]}>
+                <FavoritePage/>
+              </RoleBaseRoute>
+            </AuthRoute>
+
+          } />
         </Route>
 
         {/* Seller Route */}
         <Route element={<SellerLayout />}>
-          <Route path='/seller' element={<Order />} />
+          <Route path='/seller' element= {
+            <AuthRoute>
+              <RoleBaseRoute accessibleRoles={["Buyer"]}>
+                <Order/>
+              </RoleBaseRoute>
+            </AuthRoute>
+
+          } />
         </Route>
 
         {/* Admin Route */}

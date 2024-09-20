@@ -36,7 +36,7 @@ const AuthProvider = ({ children }) => {
 			if (token) {
 
 				try {
-					const res = await AxiosInterceptor.get("/api/account");
+					const res = await AxiosInterceptor.get("/api/users/current");
 					// const res = await axios.get(`${process.env.REACT_APP_PRO_API}/api/account`);
 					if (res.status === 200) {
 						setUser(res.data);
@@ -64,12 +64,10 @@ const AuthProvider = ({ children }) => {
 		let res;
 		try {
 			console.log("Sending login request...");
-			res = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/account/login`,
-				{
-					userName: userAccount.userName,
-					password: userAccount.password
-				}
+			res = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/login") : (process.env.REACT_APP_PRO_API + "/api/auth/login"), {
+				email: userAccount.email,
+				password: userAccount.password
+			}
 			);
 			console.log("Login response received:", res);
 		} catch (error) { //res.status !== 200
@@ -84,18 +82,21 @@ const AuthProvider = ({ children }) => {
 			const decode = jwtDecode(res.data.token);
 			const userInfo = JSON.parse(decode.UserInfo || '{}');
 			const clientRole = userInfo.Role; // Lấy vai trò từ UserInfo
+			console.log("role", clientRole);
 
-			if (clientRole === "Admin" || clientRole === "Manager" || clientRole === "Student") {
+			if (clientRole === "Buyer" || clientRole === "Seller") {
 				localStorage.setItem('token', res.data.token);
 				localStorage.setItem('refreshToken', res.data.refreshToken);
 				let resData;
+
 				try {
-					resData = await axios.get(`${process.env.REACT_APP_PRO_API}/api/account`, {
+					resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {
 						headers: {
 							Authorization: `Bearer ${res.data.token}`
 						}
 					}
 					);
+					console.log("data", resData);
 				} catch (error) {
 					await logout();
 					setIsLoading(false);
@@ -106,29 +107,20 @@ const AuthProvider = ({ children }) => {
 					return;
 				}
 				if (resData.status === 200) {
-					// if (resData.data.status === "ACTIVE") {
-					// 	setUser(resData.data);
-					// 	setAuthenticated(true);
-					// 	setError(null);
-					// 	console.log("Login successful, navigating to home...");
-					// 	navigate("/");
-					// } else {
-					// 	await logout();
-					// 	setError({
-					// 		title: "Account Banned",
-					// 		message: "Tài khoản của bạn đã bị khóa, hãy thử lại."
-					// 	});
-					// }
-					setUser(resData.data);
-					setAuthenticated(true);
-					setError(null);
-					console.log("Login successful, navigating to home...");
-
-					if (clientRole === "Admin") {
-						navigate('/dashboard');
+					if (resData.data.status === "Active") {
+						setUser(resData.data);
+						setAuthenticated(true);
+						setError(null);
+						console.log("Login successful, navigating to home...");
+						navigate("/");
 					} else {
-						navigate('/');
+						await logout();
+						setError({
+							title: "Account Banned",
+							message: "Tài khoản của bạn đã bị khóa, hãy thử lại."
+						});
 					}
+
 				}
 			} else {
 				setAuthenticated(false);
@@ -147,7 +139,9 @@ const AuthProvider = ({ children }) => {
 		try {
 			console.log("Sending Google login request...");
 			res = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/google/signin/${googleToken}`
+				process.env.NODE_ENV === "development"
+					? `${process.env.REACT_APP_DEV_API}/api/auth/google/${googleToken}`
+					: `${process.env.REACT_APP_PRO_API}/api/auth/google/${googleToken}`
 			);
 			console.log("Google login response received:", res);
 
@@ -161,10 +155,10 @@ const AuthProvider = ({ children }) => {
 				const userInfo = JSON.parse(decode.UserInfo || '{}');
 				const clientRole = userInfo.Role;
 
-				if (clientRole === "Admin" || clientRole === "Manager" || clientRole === "Student") {
+				if (clientRole === "Buyer" || clientRole === "Seller") {
 					let resData;
 					try {
-						resData = await axios.get(`${process.env.REACT_APP_PRO_API}/api/account`, {
+						resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {
 							headers: {
 								Authorization: `Bearer ${token}`
 							}
@@ -223,12 +217,10 @@ const AuthProvider = ({ children }) => {
 		setIsLoading(true);
 		let registerRes;
 		try {
-			registerRes = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/account/register`,
-				{
-					userName: userDetails.userName,
+				registerRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/signup") : (process.env.REACT_APP_PRO_API + "/api/auth/signup"), {
+					fullName: userDetails.fullName,
 					password: userDetails.password,
-					role: userDetails.role,
+					email: userDetails.email,
 				}
 			);
 			console.log("Register response received:", registerRes);
@@ -255,9 +247,8 @@ const AuthProvider = ({ children }) => {
 		let verifyRes;
 		try {
 			console.log("Sending request...");
-			verifyRes = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/account/verify`,
-				{
+				verifyRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/verify") : (process.env.REACT_APP_PRO_API + "/api/auth/verify"), {
+				
 					code: verificationData.code,
 					email: verificationData.email,
 				}
@@ -276,10 +267,10 @@ const AuthProvider = ({ children }) => {
 				console.log("user info", decode);
 				console.log("Role", clientRole);
 
-				if (clientRole === "Admin" || clientRole === "Manager" || clientRole === "Student") {
+				if (clientRole === "Buyer" || clientRole === "Seller") {
 					let resData;
 					try {
-						resData = await axios.get(`${process.env.REACT_APP_PRO_API}/api/account`, {
+						resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {
 							headers: {
 								Authorization: `Bearer ${token}`
 							}
@@ -337,9 +328,7 @@ const AuthProvider = ({ children }) => {
 		let resendRes;
 		try {
 			console.log("Sending resend request...");
-			resendRes = await axios.post(
-				`${process.env.REACT_APP_PRO_API}/api/account/resend`,
-				{
+				resendRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/resend") : (process.env.REACT_APP_PRO_API + "/api/auth/resend"), {
 					email: email,
 				}
 			);
