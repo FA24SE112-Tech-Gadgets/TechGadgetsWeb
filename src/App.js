@@ -16,10 +16,13 @@ import Dashboardview from "./pages/Admin/Dashboardview";
 import Main from "./pages/Admin/Main";
 import AuthRoute from "./components/auth/AuthRoute";
 import RoleBaseRoute from "./components/auth/RoleBaseRoute";
+import Iphone from "./pages/Gadgets/Phone/Iphone";
+import Mac from "./pages/Gadgets/Laptop/Mac";
+
 
 function App() {
   return (
-    <Fragment>
+   
       <Routes>
         {/* Public Routes */}
         <Route element={<AuthLayout />}>
@@ -31,6 +34,8 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path='/' element={<Home />} />
           <Route path='/search' element={<SearchPage />} />
+          <Route path='/gadget/iphone' element={<Iphone />} />
+          <Route path='/gadget/mac' element={<Mac/>}/>
           <Route path='/favorite' element= {
             <AuthRoute>
               <RoleBaseRoute accessibleRoles={["Buyer"]}>
@@ -66,7 +71,7 @@ function App() {
           } />
         </Route>
       </Routes>
-    </Fragment>
+   
   );
 }
 
