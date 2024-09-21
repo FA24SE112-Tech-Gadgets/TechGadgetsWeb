@@ -39,7 +39,7 @@ const ProfilePage = () => {
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-primary/40 to-secondary/40">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Profile</h1>
+          <h1 className="text-2xl font-bold">Thông tin cá nhân</h1>
           <button onClick={() => setIsEditing(!isEditing)} className="text-gray-500 hover:text-gray-700">
             <FaPencilAlt />
           </button>
