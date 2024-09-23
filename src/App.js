@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import SignUp from "./pages/SignUp/SignUpPage";
 import Verify from "./pages/SignUp/Verify";
-import LogIn from "./components/auth/LoginPage";
+import LogIn from "./pages/SignIn/LoginPage";
 import FavoritePage from "./pages/Favorite/FavoritePage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import SearchPage from "./pages/Search/SearchPage";
