@@ -34,9 +34,9 @@ const AuthProvider = ({ children }) => {
 			setIsLoading(true);
 			const token = localStorage.getItem('token');
 			if (token) {
-
 				try {
 					const res = await AxiosInterceptor.get("/api/users/current");
+					
 					// const res = await axios.get(`${process.env.REACT_APP_PRO_API}/api/account`);
 					if (res.status === 200) {
 						setUser(res.data);
