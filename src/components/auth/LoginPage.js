@@ -62,9 +62,9 @@ function LogIn() {
       <ToastContainer />
       <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
         <div className="flex flex-col justify-center p-8 md:p-14">
-          <span className="mb-3 text-4xl font-bold">Welcome back</span>
+          <span className="mb-3 text-4xl font-bold">Chào mừng trở lại</span>
           <span className="font-light text-gray-400 mb-8">
-            Welcome back! Please enter your details
+            Chào mừng trở lại!
           </span>
           <form onSubmit={handleSubmit}>
             <div className="py-4">
@@ -79,7 +79,7 @@ function LogIn() {
               />
             </div>
             <div className="py-4">
-              <span className="text-base font-semibold text-gray-600">Password</span>
+              <span className="text-base font-semibold text-gray-600">Mật khẩu</span>
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
@@ -92,9 +92,9 @@ function LogIn() {
             <div className="flex justify-between w-full py-4">
               <div className="mr-24">
                 <input type="checkbox" name="ch" id="ch" className="mr-2" />
-                <span className="text-base font-medium text-gray-400">Remember me</span>
+                <span className="text-base font-medium text-gray-400">Ghi nhớ mật khẩu</span>
               </div>
-              <Link to="/forgot-password" className="font-bold text-md italic hover:text-orange-500">Forgot password?</Link>
+              <Link to="/forgot-password" className="font-bold text-md italic hover:text-orange-500">Quên mật khẩu?</Link>
             </div>
             <button
               type="submit"
@@ -104,7 +104,7 @@ function LogIn() {
               {loading ? (
                 <div className="spinner-border animate-spin inline-block w-4 h-4 border-2 rounded-full border-t-transparent border-white"></div>
               ) : (
-                'Sign in'
+                'Đăng nhập'
               )}
             </button>
           </form>
@@ -114,12 +114,12 @@ function LogIn() {
             class="w-full border border-gray-300 text-md p-2 rounded-lg mb-6 hover:bg-black hover:text-white"
           >
             <img src={google} alt="img" class="w-6 h-6 inline mr-2 test-base" />
-            Sign in with Google
+            Đăng nhập với Google
           </button>
           </div>
           <div className="text-center text-gray-400">
-            Don't have an account?
-            <Link to="/signup" className="font-bold text-black hover:text-orange-500"> Sign up for free</Link>
+            Không có tài khoản?
+            <Link to="/signup" className="font-bold text-black hover:text-orange-500"> Đăng ký miễn phí</Link>
           </div>
         </div>
 

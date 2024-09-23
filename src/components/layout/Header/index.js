@@ -109,19 +109,19 @@ const Header = () => {
                   <div className="absolute right-1/2 transform translate-x-1/2 mt-2 w-52 rounded-lg bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg z-50">
                     <div className="py-2 ">
                       <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full ">
-                        Profile
+                        <Link to="/profile">Hồ sơ</Link>
                       </p>
                       <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full ">
-                        <Link to ="/favorite">Favorite Lists</Link>
+                        <Link to ="/favorite">Yêu thích</Link>
                       </p>
                       <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full ">
-                        <Link to ="/seller">Seller</Link>
+                        <Link to ="/seller">Trang người bán</Link>
                       </p>
                       <p
                         className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-red-600 dark:text-red-400 font-semibold w-full"
                         onClick={handleLogout}
                       >
-                        Log out
+                        Đăng Xuất
                       </p>
                     </div>
                   </div>
@@ -130,12 +130,12 @@ const Header = () => {
             ) : (
               <div className="hidden text-white lg:flex justify-center space-x-6 items-center">
                 <Link to="/signin" className="py-2 px-3 rounded-md border-2 text-black/80 dark:text-light dark:text-white border-black ">
-                  Sign In
+                  Đăng Nhập
                 </Link>
                 <Link to="/signup"
                   className="bg-gradient-to-r from-primary to-secondary py-2 px-3 rounded-md text-white"
                 >
-                  Create an account
+                  Tạo tài khoản
                 </Link>
               </div>
             )}

@@ -6,6 +6,7 @@ import SignUp from "./pages/SignUp/SignUpPage";
 import Verify from "./pages/SignUp/Verify";
 import LogIn from "./components/auth/LoginPage";
 import FavoritePage from "./pages/Favorite/FavoritePage";
+import ProfilePage from "./pages/Profile/ProfilePage";
 import SearchPage from "./pages/Search/SearchPage";
 import Order from "./pages/Seller/Order";
 import MainLayout from "./components/layout/MainLayout";
@@ -18,60 +19,74 @@ import AuthRoute from "./components/auth/AuthRoute";
 import RoleBaseRoute from "./components/auth/RoleBaseRoute";
 import Iphone from "./pages/Gadgets/Phone/Iphone";
 import Mac from "./pages/Gadgets/Laptop/Mac";
-
+import SpecificationUnitPage from "./pages/Admin/SpecificationUnit/SpecificationUnitPage";
 
 function App() {
   return (
-   
-      <Routes>
-        {/* Public Routes */}
-        <Route element={<AuthLayout />}>
-          <Route path='/signin' element={<LogIn />} />
-          <Route path='/signup' element={<SignUp />} />
-          <Route path='/verify' element={<Verify />} />
-        </Route>
 
-        <Route element={<MainLayout />}>
-          <Route path='/' element={<Home />} />
-          <Route path='/search' element={<SearchPage />} />
-          <Route path='/gadget/iphone' element={<Iphone />} />
-          <Route path='/gadget/mac' element={<Mac/>}/>
-          <Route path='/favorite' element= {
-            <AuthRoute>
-              <RoleBaseRoute accessibleRoles={["Buyer"]}>
-                <FavoritePage/>
-              </RoleBaseRoute>
-            </AuthRoute>
+    <Routes>
+      {/* Public Routes */}
+      <Route element={<AuthLayout />}>
+        <Route path='/signin' element={<LogIn />} />
+        <Route path='/signup' element={<SignUp />} />
+        <Route path='/verify' element={<Verify />} />
+      </Route>
 
-          } />
-        </Route>
+      <Route element={<MainLayout />}>
+        <Route path='/' element={<Home />} />
+        <Route path='/search' element={<SearchPage />} />
+        <Route path='/gadget/iphone' element={<Iphone />} />
+        <Route path='/gadget/mac' element={<Mac />} />
+        <Route path='/favorite' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Buyer"]}>
+              <FavoritePage />
+            </RoleBaseRoute>
+          </AuthRoute>
 
-        {/* Seller Route */}
-        <Route element={<SellerLayout />}>
-          <Route path='/seller' element= {
-            <AuthRoute>
-              <RoleBaseRoute accessibleRoles={["Buyer"]}>
-                <Order/>
-              </RoleBaseRoute>
-            </AuthRoute>
+        } />
+        <Route path='/profile' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Buyer"]}>
+              <ProfilePage />
+            </RoleBaseRoute>
+          </AuthRoute>
 
-          } />
-        </Route>
+        } />
+      </Route>
 
-        {/* Admin Route */}
-        <Route element={<AdminLayout />}>
-          <Route path='/dashboard' element={
-            <div className="flex overflow-scroll">
-              <div className="basis-[100%] border overflow-scroll h-[100vh]">
-                <Dashboardview />
-                <Main />
+      {/* Seller Route */}
+      <Route element={<SellerLayout />}>
+      <Route path='/seller' element={
+        <AuthRoute>
+          <RoleBaseRoute accessibleRoles={["Buyer"]}>
+            <Order />
+          </RoleBaseRoute>
+        </AuthRoute>
+
+      } />
+      </Route>
+
+      {/* Admin Route */}
+      <Route element={<AdminLayout />}>
+        <Route path='/dashboard' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Admin"]}>
+              <div className="flex overflow-scroll">
+                <div className="basis-[100%] border overflow-scroll h-[100vh]">
+                  <Dashboardview />
+                  <Main />
+                </div>
               </div>
-            </div>
+            </RoleBaseRoute>
+          </AuthRoute>
 
-          } />
-        </Route>
-      </Routes>
-   
+        } />
+        <Route path='/specification-unit' element={<SpecificationUnitPage />} />
+      </Route>
+
+    </Routes>
+
   );
 }
 

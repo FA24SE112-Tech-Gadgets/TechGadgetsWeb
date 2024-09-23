@@ -54,11 +54,11 @@ function SignUp() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
         <div className="flex flex-col justify-center p-8 md:p-14">
-          <span className="mb-3 text-4xl font-bold">Create an account</span>
-          <span className="font-light text-gray-400 mb-8">Sign up to get started!</span>
+          <span className="mb-3 text-4xl font-bold">Tạo tài khoản của bạn</span>
+          <span className="font-light text-gray-400 mb-8">Đăng ký để bắt đầu!</span>
 
           <div className="py-4">
-            <span className="text-base font-semibold text-gray-600">fullName</span>
+            <span className="text-base font-semibold text-gray-600">Tên đầy đủ</span>
             <input
               type="text"
               className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
@@ -72,7 +72,7 @@ function SignUp() {
          
 
           <div className="py-4">
-            <span className="text-base font-semibold text-gray-600">Password</span>
+            <span className="text-base font-semibold text-gray-600">Mật khẩu</span>
             <input
               type={showPassword ? "text" : "password"}
               name="password"
@@ -103,7 +103,7 @@ function SignUp() {
                 className="mr-2"
                 onChange={handleClickShowPassword}
               />
-              <span className="text-base font-medium text-gray-400">Show Password</span>
+              <span className="text-base font-medium text-gray-400">Hiển thị mật khẩu</span>
             </div>
           </div>
 
@@ -111,7 +111,7 @@ function SignUp() {
             onClick={handleSubmit}
             className="w-full p-2 mb-6 bg-black text-white border border-transparent rounded-lg shadow-sm text-base font-medium hover:bg-orange-600"
           >
-            Sign up
+            Đăng ký
           </button>
 
           <div className="mb-2 flex justify-center">
@@ -120,13 +120,13 @@ function SignUp() {
               className="w-full border border-gray-300 text-md p-2 rounded-lg mb-6 hover:bg-black hover:text-white"
             >
               <img src={google} alt="img" className="w-6 h-6 inline mr-2" />
-              Sign in with Google
+              Đăng nhập với Google
             </button>
           </div>
 
           <div className="text-center text-gray-400">
-            Already have an account?
-            <Link to="/signin" className="font-bold text-black hover:text-orange-500"> Sign in</Link>
+            Đã có tài khoản?
+            <Link to="/signin" className="font-bold text-black hover:text-orange-500"> Đăng nhập</Link>
           </div>
         </div>
 

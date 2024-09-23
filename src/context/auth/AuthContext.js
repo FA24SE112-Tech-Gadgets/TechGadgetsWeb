@@ -42,7 +42,7 @@ const AuthProvider = ({ children }) => {
 						setUser(res.data);
 						setAuthenticated(true);
 						setError(null);
-						navigate("/");
+						//  navigate("/");
 					}
 				} catch (error) {
 					setUser(null);
@@ -84,7 +84,7 @@ const AuthProvider = ({ children }) => {
 			const clientRole = userInfo.Role; // Lấy vai trò từ UserInfo
 			console.log("role", clientRole);
 
-			if (clientRole === "Buyer" || clientRole === "Seller") {
+			if (clientRole === "Buyer" || clientRole === "Seller" || clientRole === "Admin") {
 				localStorage.setItem('token', res.data.token);
 				localStorage.setItem('refreshToken', res.data.refreshToken);
 				let resData;
@@ -112,7 +112,11 @@ const AuthProvider = ({ children }) => {
 						setAuthenticated(true);
 						setError(null);
 						console.log("Login successful, navigating to home...");
-						navigate("/");
+						if (clientRole === "Admin") {
+							navigate("/dashboard");
+						} else {
+							navigate("/");
+						}
 					} else {
 						await logout();
 						setError({
@@ -210,7 +214,10 @@ const AuthProvider = ({ children }) => {
 		setError(null);
 		localStorage.removeItem('token');
 		localStorage.removeItem('refreshToken');
+		navigate('/signin');
 	};
+
+
 
 
 	const signup = async (userDetails) => {
