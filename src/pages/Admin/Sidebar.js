@@ -1,6 +1,8 @@
 import React from 'react'
-import { FaTachometerAlt, FaRegSun, FaWrench, FaStickyNote, FaRegChartBar, FaRegCalendarAlt, FaChevronRight, FaChevronLeft, FaBolt } from "react-icons/fa"
+import { FaTachometerAlt, FaRegSun, FaWrench, FaStickyNote, FaRegChartBar, FaRegCalendarAlt } from "react-icons/fa"
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 import icon from "~/assets/icon.ico"
+
 const Sidebar = () => {
     return (
         <div className='bg-primary/40 px-[25px] h-screen'>
@@ -9,22 +11,21 @@ const Sidebar = () => {
                     <img src={icon} alt="" className="h-full w-full rounded-full object-cover" />
                 </div>
             </div>
-            <div className='flex items-center gap-[15px] py-[20px] border-b-[1px] border-[#EDEDED]/[0.3] cursor-pointer'>
+            <div className='flex items-center gap-[15px] py-[20px] border-b-[1px] border-black cursor-pointer'>
                 <FaTachometerAlt color='black' />
-                <p className='text-[14px] leading-[20px] font-bold text-black'>Dashboard</p>
+                <Link to="/dashboard" className='text-[14px] leading-[20px] font-bold text-black'>Dashboard</Link>
             </div>
-            <div className='pt-[15px] border-b-[1px] border-[#EDEDED]/[0.3]'>
-                <div className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
+            <div className='pt-[15px] border-b-[1px] border-black'>
+                <Link to="/specification-unit" className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
                     <div className='flex items-center gap-[10px]'>
-                        <FaRegSun color='black' /> <p className='text-[14px] leading-[20px] font-normal text-black'>Components</p>
+                        <FaRegSun color='black' /> 
+                        <p className='text-[14px] leading-[20px] font-normal text-black whitespace-nowrap'>Quản lý đơn vị</p> 
                     </div>
-
-                </div>
+                </Link>
                 <div className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
                     <div className='flex items-center gap-[10px]'>
                         <FaWrench color='black' /> <p className='text-[14px] leading-[20px] font-normal text-black'>Utilities</p>
                     </div>
-
                 </div>
             </div>
             <div className='pt-[15px] border-b-[1px] border-[#EDEDED]/[0.3]'>

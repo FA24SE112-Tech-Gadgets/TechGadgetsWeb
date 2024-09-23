@@ -3,6 +3,7 @@ import Image1 from "../../assets/hero/camera.png";
 import Image2 from "../../assets/hero/laptop.png";
 import Image3 from "../../assets/hero/sale.png";
 import Slider from "react-slick";
+import { Link } from "react-router-dom";
 
 // Image list for the slider
 const ImageList = [
@@ -43,7 +44,7 @@ const categories = [
       {
         subcategory: "Hãng điện thoại",
         items: [
-          { name: "iPhone", link: "/products/iphone" },
+          { name: "iPhone", link: "/gadget/iphone" },
           { name: "Samsung", link: "/products/samsung" },
           { name: "Xiaomi", link: "/products/xiaomi" },
           { name: "Oppo", link: "/products/oppo" },
@@ -126,7 +127,7 @@ const categories = [
           { name: "Dell", link: "/products/dell" },
           { name: "HP", link: "/products/hp" },
           { name: "Lenovo", link: "/products/lenovo" },
-          { name: "Apple", link: "/products/apple" },
+          { name: "Mac", link: "/gadget/mac" },
           { name: "Asus", link: "/products/asus" },
           { name: "Acer", link: "/products/acer" },
           { name: "MSI", link: "/products/msi" },
@@ -523,9 +524,9 @@ const HeroSection = ({ handleOrderPopup }) => {
                   <ul className="list-none list-inside space-y-2">
                     {detail.items.map((item, id) => (
                       <li key={id} className="text-gray-600 dark:text-gray-300">
-                        <a href={item.link} className="hover:underline">
+                        <Link to={item.link} className="hover:underline">
                           {item.name}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>

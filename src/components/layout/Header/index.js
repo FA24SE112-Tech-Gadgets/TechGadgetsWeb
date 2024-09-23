@@ -9,20 +9,6 @@ import R from "~/assets/R.png";
 import { Link } from "react-router-dom";
 import Notifications from "~/Notification/Notification";
 import { useNavigate } from "react-router-dom";
-const Menu = [
-  { id: 1, name: "Trang chủ", link: "/#" },
-  { id: 2, name: "Đánh giá hàng đầu", link: "/#services" },
-  { id: 3, name: "Điện Thoại", link: "/#" },
-  { id: 4, name: "Máy Tính", link: "/#" },
-  { id: 5, name: "Thiết bị điện tử", link: "/#" },
-];
-
-const DropdownLinks = [
-  { id: 1, name: "Sản phẩm xu hướng", link: "/#" },
-  { id: 2, name: "Bán chạy nhất", link: "/#" },
-  { id: 3, name: "Đánh giá hàng đầu", link: "/#" },
-];
-
 const Header = () => {
   const [open, setOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -123,16 +109,19 @@ const Header = () => {
                   <div className="absolute right-1/2 transform translate-x-1/2 mt-2 w-52 rounded-lg bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg z-50">
                     <div className="py-2 ">
                       <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full ">
-                        Profile
+                        <Link to="/profile">Hồ sơ</Link>
                       </p>
                       <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full ">
-                        <Link to ="/favorite">Favorite Lists</Link>
+                        <Link to ="/favorite">Yêu thích</Link>
+                      </p>
+                      <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full ">
+                        <Link to ="/seller">Trang người bán</Link>
                       </p>
                       <p
                         className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-red-600 dark:text-red-400 font-semibold w-full"
                         onClick={handleLogout}
                       >
-                        Log out
+                        Đăng Xuất
                       </p>
                     </div>
                   </div>
@@ -141,57 +130,17 @@ const Header = () => {
             ) : (
               <div className="hidden text-white lg:flex justify-center space-x-6 items-center">
                 <Link to="/signin" className="py-2 px-3 rounded-md border-2 text-black/80 dark:text-light dark:text-white border-black ">
-                  Sign In
+                  Đăng Nhập
                 </Link>
                 <Link to="/signup"
                   className="bg-gradient-to-r from-primary to-secondary py-2 px-3 rounded-md text-white"
                 >
-                  Create an account
+                  Tạo tài khoản
                 </Link>
               </div>
             )}
           </div>
         </div>
-      </div>
-
-      {/* lower Navbar */}
-      <div data-aos="zoom-in" className="flex justify-center">
-        <ul className="sm:flex hidden items-center gap-4">
-          {Menu.map((data) => (
-            <li key={data.id}>
-              <a
-                href={data.link}
-                className="inline-block px-4 hover:text-primary duration-200"
-              >
-                {data.name}
-              </a>
-            </li>
-          ))}
-
-          {/* Simple Dropdown and Links */}
-          <li className="group relative cursor-pointer">
-            <a href="#" className="flex items-center gap-[2px] py-2">
-              Sản phẩm xu hướng
-              <span>
-                <FaCaretDown className="transition-all duration-200 group-hover:rotate-180" />
-              </span>
-            </a>
-            <div className="absolute z-[9999] hidden group-hover:block w-[200px] rounded-md bg-white p-2 text-black shadow-md">
-              <ul>
-                {DropdownLinks.map((data) => (
-                  <li key={data.id}>
-                    <a
-                      href={data.link}
-                      className="block p-2 hover:bg-primary hover:text-white rounded-md"
-                    >
-                      {data.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </li>
-        </ul>
       </div>
       
     </div>
