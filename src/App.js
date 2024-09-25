@@ -20,6 +20,8 @@ import RoleBaseRoute from "./components/auth/RoleBaseRoute";
 import Iphone from "./pages/Gadgets/Phone/Iphone";
 import Mac from "./pages/Gadgets/Laptop/Mac";
 import SpecificationUnitPage from "./pages/Admin/SpecificationUnit/SpecificationUnitPage";
+import CategoryPage from "./pages/Admin/Category/CategoryPage";
+import BrandPage from "./pages/Admin/Brand/brand";
 
 function App() {
   return (
@@ -82,7 +84,28 @@ function App() {
           </AuthRoute>
 
         } />
-        <Route path='/specification-unit' element={<SpecificationUnitPage />} />
+        <Route path='/specification-unit'  element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Admin"]}>
+                  <SpecificationUnitPage />
+            </RoleBaseRoute>
+          </AuthRoute>
+
+        } />
+        <Route path='/category'  element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Admin"]}>
+                  <CategoryPage />
+            </RoleBaseRoute>
+          </AuthRoute>
+        } />
+         <Route path='/brand'  element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Admin"]}>
+                  <BrandPage />
+            </RoleBaseRoute>
+          </AuthRoute>
+        } />
       </Route>
 
     </Routes>
