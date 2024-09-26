@@ -22,6 +22,7 @@ import Mac from "./pages/Gadgets/Laptop/Mac";
 import SpecificationUnitPage from "./pages/Admin/SpecificationUnit/SpecificationUnitPage";
 import CategoryPage from "./pages/Admin/Category/CategoryPage";
 import BrandPage from "./pages/Admin/Brand/brand";
+import CategoryManage from "./pages/Admin/Category/CategoryManage";
 
 function App() {
   return (
@@ -59,14 +60,14 @@ function App() {
 
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
-      <Route path='/seller' element={
-        <AuthRoute>
-          <RoleBaseRoute accessibleRoles={["Buyer"]}>
-            <Order />
-          </RoleBaseRoute>
-        </AuthRoute>
+        <Route path='/seller' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Buyer"]}>
+              <Order />
+            </RoleBaseRoute>
+          </AuthRoute>
 
-      } />
+        } />
       </Route>
 
       {/* Admin Route */}
@@ -84,30 +85,37 @@ function App() {
           </AuthRoute>
 
         } />
-        <Route path='/specification-unit'  element={
+        <Route path='/specification-unit' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Admin"]}>
-                  <SpecificationUnitPage />
+              <SpecificationUnitPage />
             </RoleBaseRoute>
           </AuthRoute>
 
         } />
-        <Route path='/category'  element={
+        <Route path='/category' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Admin"]}>
-                  <CategoryPage />
+              <CategoryPage />
             </RoleBaseRoute>
           </AuthRoute>
         } />
-         <Route path='/brand'  element={
+        <Route path='/brand' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Admin"]}>
-                  <BrandPage />
+              <BrandPage />
+            </RoleBaseRoute>
+          </AuthRoute>
+        } />
+
+        <Route path='/category-management' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Admin"]}>
+              <CategoryManage />
             </RoleBaseRoute>
           </AuthRoute>
         } />
       </Route>
-
     </Routes>
 
   );

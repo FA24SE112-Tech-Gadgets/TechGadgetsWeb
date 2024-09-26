@@ -27,7 +27,8 @@ AxiosInterceptor.interceptors.response.use(
             originalRequest._retry = true;
             
             try {
-                if (error.response.data.code === "WEB_02") {
+                console.log(error.response.data.code);
+                if (error.response.data.code === "WEB_02" || " ") {
                     const refreshToken = localStorage.getItem('refreshToken');
                   
                     const response = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + '/api/auth/refresh') : (process.env.REACT_APP_PRO_API + '/api/auth/refresh'), { refreshToken }); 
