@@ -108,13 +108,13 @@ function App() {
           </AuthRoute>
         } />
 
-        <Route path='/category-management' element={
+        {/* <Route path='/category-management' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Admin"]}>
               <CategoryManage />
             </RoleBaseRoute>
           </AuthRoute>
-        } />
+        } /> */}
       </Route>
     </Routes>
 

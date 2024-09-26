@@ -31,14 +31,6 @@ const Sidebar = () => {
                     </Link>
                 </div>
                 <div className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
-                    <Link to="/category-management" className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
-                    <div className='flex items-center gap-[10px]'>
-                        <FaWrench color='black' /> 
-                        <p className='text-[14px] leading-[20px] font-normal text-black'>Cài đặt danh mục</p>
-                    </div>
-                    </Link>
-                </div>
-                <div className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
                     <Link to="/brand" className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
                     <div className='flex items-center gap-[10px]'>
                         <FaWrench color='black' /> 

@@ -2,13 +2,22 @@ import React, { useEffect, useState } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { Search, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import CategoryManage from './CategoryManage';
 
 const CategoryPage = () => {
   const [categories, setCategories] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [searchValue, setSearchValue] = useState("");
-  const navigate = useNavigate();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const openModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -63,11 +72,15 @@ const CategoryPage = () => {
             className="pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/70"
           />
         </div>
-        <button
-          className="flex items-center bg-primary/70 text-black font-medium px-4 py-2 rounded-md hover:bg-primary"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Tạo danh mục
-        </button>
+        <div>
+          <button
+            onClick={openModal}
+            className="flex items-center bg-primary/70 text-black font-medium px-4 py-2 rounded-md hover:bg-primary"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Tạo danh mục
+          </button>
+          <CategoryManage visible={isModalVisible} onClose={closeModal} />
+        </div>
       </div>
       <div className="rounded-md border max-w-screen-lg mx-auto">
         <table className="w-full ">
