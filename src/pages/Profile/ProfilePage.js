@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPencilAlt, FaSave } from 'react-icons/fa';
 import InputMask from 'react-input-mask';
+import AxiosInterceptor from '~/components/api/AxiosInterceptor';
+
 
 const labels = {
   name: 'Tên',
@@ -16,15 +18,39 @@ const labels = {
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
-    name: 'Shai',
-    address: '123 Main St, Quận 9, HCM',
-    cccd: '123456789',
-    gender: 'Nam',
-    dateOfBirth: '01/01/2001',
-    phoneNumber: '+1234567890',
-    email: 'shai.do@example.com',
-    avatar: 'https://gratisography.com/wp-content/uploads/2024/01/gratisography-cyber-kitty-800x525.jpg'
+    name: '',
+    address: '',
+    cccd: '',
+    gender: '',
+    dateOfBirth: '',
+    phoneNumber: '',
+    email: '',
+    avatar: ''
   });
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const response = await AxiosInterceptor.get('/api/users/current');
+        const userData = response.data;
+        console.log(userData);
+        setProfile({
+          name: userData.fullName,
+          address: userData.address || '',
+          cccd: userData.cccd || '',
+          gender: userData.gender || '',
+          dateOfBirth: userData.dateOfBirth || '',
+          phoneNumber: userData.phoneNumber || '',
+          email: userData.email,
+          avatar: userData.avatarUrl || ''
+        });
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    getCurrentUser();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
