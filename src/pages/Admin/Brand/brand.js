@@ -15,6 +15,8 @@ const BrandPage = () => {
   const [newBrandName, setNewBrandName] = useState("");
   const [newLogoUrl, setNewLogoUrl] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
+  const [newLogoFile, setNewLogoFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     fetchBrands();
@@ -68,9 +70,14 @@ const BrandPage = () => {
         ? `${process.env.REACT_APP_DEV_API}/api/brands`
         : `${process.env.REACT_APP_PRO_API}/api/brands`;
 
-      const response = await AxiosInterceptor.post(baseUrl, {
-        name: newBrandName,
-        logoUrl: newLogoUrl,
+      const formData = new FormData();
+      formData.append('Name', newBrandName);
+      formData.append('Logo', newLogoFile); // newLogoFile is the file object
+
+      const response = await AxiosInterceptor.post(baseUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       if (response.status === 201) {
@@ -112,6 +119,17 @@ const BrandPage = () => {
 
   const toggleRow = (id) => {
     setExpandedRow(expandedRow === id ? null : id);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setNewLogoFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleRemoveFile = () => {
+    setNewLogoFile(null);
+    setPreviewUrl(null);
   };
 
   return (
@@ -241,13 +259,24 @@ const BrandPage = () => {
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/70 mb-3"
                     />
                     <input
-                      type="text"
-                      placeholder="URL logo"
-                      value={newLogoUrl}
-                      onChange={(e) => setNewLogoUrl(e.target.value)}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/70"
                     />
                   </div>
+
+                  {previewUrl && (
+                    <div className="relative mt-4">
+                      <img src={previewUrl} alt="Preview" className="w-full h-auto rounded-md" />
+                      <button
+                        onClick={handleRemoveFile}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
 
                   <div className="mt-4 flex justify-end">
                     <button
