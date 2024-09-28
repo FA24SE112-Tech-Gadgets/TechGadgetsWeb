@@ -37,11 +37,30 @@ function SignUp() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!user.email && !user.password && !user.fullName) {
+      toast.error('Yêu cầu nhập tên, mật khẩu và email');
+      return;
+    }
+    if (!user.email) {
+      toast.error('Yêu cầu nhập email');
+      return;
+    }
+    if (!user.password) {
+      toast.error('Yêu cầu nhập mật khẩu');
+      return;
+    }
+    if (!user.fullName) {
+      toast.error('Yêu cầu nhập tên');
+      return;
+    }
+    setLoading(true);
     try {
         await signup(user);
     } catch (err) {
         console.error('Signup error:', err);
-        // Xử lý lỗi nếu cần
+    }
+    finally {
+      setLoading(false);
     }
 };
 
@@ -52,6 +71,7 @@ function SignUp() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <ToastContainer />  
       <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
         <div className="flex flex-col justify-center p-8 md:p-14">
           <span className="mb-3 text-4xl font-bold">Tạo tài khoản của bạn</span>

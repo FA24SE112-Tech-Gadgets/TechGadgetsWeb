@@ -232,7 +232,7 @@ const AuthProvider = ({ children }) => {
 			);
 			console.log("Register response received:", registerRes);
 
-			if (registerRes.status === 201) {
+			if (registerRes.status === 204) {
 				// Redirect to verify page
 				navigate('/verify');
 			}
@@ -341,7 +341,7 @@ const AuthProvider = ({ children }) => {
 			);
 			console.log("Resend response received:", resendRes);
 
-			if (resendRes.status === 200) {
+			if (resendRes.status === 204) {
 				setError({
 					title: "Resend Successful",
 					message: "A new verification code has been sent to your email.",
