@@ -19,12 +19,19 @@ function LogIn() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
-    if (!user.email|| !user.password) {
-      toast.error('email and password are required!');
+    if (!user.email && !user.password) {
+      toast.error('Yêu cầu nhập email và mật khẩu');
       return;
     }
-    
+    if (!user.email) {
+      toast.error('Yêu cầu nhập email');
+      return;
+    }
+    if (!user.password) {
+      toast.error('Yêu cầu nhập mật khẩu');
+      return;
+    }
+
     setLoading(true);
     try {
       await login(user);
@@ -34,6 +41,7 @@ function LogIn() {
       setLoading(false);
     }
   };
+  
 
   const googleLoginHandler  = useGoogleLogin({
     onSuccess: (response) => {

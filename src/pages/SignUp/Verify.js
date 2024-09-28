@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '~/context/auth/useAuth';
 import signupp from '~/assets/signupp.jpg';
+import { ToastContainer, toast } from "react-toastify";
 function Verify() {
   const { verify, resend, error } = useAuth();
   const [verificationData, setVerificationData] = useState({
@@ -19,7 +20,24 @@ function Verify() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await verify(verificationData);
+    if (!verificationData.code && !verificationData.email) {
+      toast.error('Yêu cầu nhập mã và email');
+      return;
+    }
+    if (!verificationData.code) {
+      toast.error('Yêu cầu nhập mã');
+      return;
+    }
+    if (!verificationData.email) {
+      toast.error('Yêu cầu nhập email');
+      return;
+    }
+    try{
+      await verify(verificationData);
+    }  catch (err){
+      console.error("verify error:",err);
+    }
+      
   };
 
   const handleResend = async () => {
@@ -35,6 +53,7 @@ function Verify() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <ToastContainer /> 
       <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
         <div className="flex flex-col justify-center p-8 md:p-14">
           <span className="mb-3 text-4xl font-bold">Verify Your Account</span>
