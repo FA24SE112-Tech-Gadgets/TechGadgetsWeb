@@ -5,6 +5,8 @@ import { Search, Plus, X } from 'lucide-react';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css'; 
 import { Trash2, MoreVertical } from 'lucide-react'; 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const BrandPage = () => {
   const [brands, setBrands] = useState([]);
@@ -15,6 +17,8 @@ const BrandPage = () => {
   const [newBrandName, setNewBrandName] = useState("");
   const [newLogoUrl, setNewLogoUrl] = useState("");
   const [expandedRow, setExpandedRow] = useState(null);
+  const [newLogoFile, setNewLogoFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     fetchBrands();
@@ -26,7 +30,7 @@ const BrandPage = () => {
         ? `${process.env.REACT_APP_DEV_API}/api/brands`
         : `${process.env.REACT_APP_PRO_API}/api/brands`;
 
-      // Conditionally build the URL based on whether searchValue is provided
+      
       const url = searchValue
         ? `${baseUrl}?Page=${page}&PageSize=10&Name=${searchValue}`
         : `${baseUrl}?Page=${page}&PageSize=10`;
@@ -68,17 +72,26 @@ const BrandPage = () => {
         ? `${process.env.REACT_APP_DEV_API}/api/brands`
         : `${process.env.REACT_APP_PRO_API}/api/brands`;
 
-      const response = await AxiosInterceptor.post(baseUrl, {
-        name: newBrandName,
-        logoUrl: newLogoUrl,
+      const formData = new FormData();
+      formData.append('Name', newBrandName);
+      formData.append('Logo', newLogoFile); 
+
+      const response = await AxiosInterceptor.post(baseUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (response.status === 201) {
+      if (response.status >= 200 && response.status < 300) {
         fetchBrands();
         handleClose();
+        toast.success("Thêm Thành Công");
+      } else if (response.status >= 400 && response.status <= 500) { 
+        toast.error("Thêm Thất Bại");
       }
     } catch (error) {
       console.error('Error creating brand:', error);
+      toast.error("Thêm Thất Bại");
     }
   };
 
@@ -97,6 +110,7 @@ const BrandPage = () => {
 
               await AxiosInterceptor.delete(`${baseUrl}/${id}`);
               fetchBrands();
+              toast.error("Xóa Thành Công");
             } catch (error) {
               console.error('Error deleting brand:', error);
             }
@@ -112,6 +126,17 @@ const BrandPage = () => {
 
   const toggleRow = (id) => {
     setExpandedRow(expandedRow === id ? null : id);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setNewLogoFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleRemoveFile = () => {
+    setNewLogoFile(null);
+    setPreviewUrl(null);
   };
 
   return (
@@ -241,13 +266,24 @@ const BrandPage = () => {
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/70 mb-3"
                     />
                     <input
-                      type="text"
-                      placeholder="URL logo"
-                      value={newLogoUrl}
-                      onChange={(e) => setNewLogoUrl(e.target.value)}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/70"
                     />
                   </div>
+
+                  {previewUrl && (
+                    <div className="relative mt-4">
+                      <img src={previewUrl} alt="Preview" className="w-full h-auto rounded-md" />
+                      <button
+                        onClick={handleRemoveFile}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
 
                   <div className="mt-4 flex justify-end">
                     <button
@@ -271,6 +307,7 @@ const BrandPage = () => {
           </div>
         </Dialog>
       </Transition>
+      <ToastContainer /> 
     </div>
   );
 };

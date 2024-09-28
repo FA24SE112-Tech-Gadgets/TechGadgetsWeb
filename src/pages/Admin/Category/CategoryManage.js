@@ -3,6 +3,8 @@ import { Button, Input, Space, Modal } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import 'tailwindcss/tailwind.css';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const CategoryManage = ({ visible, onClose }) => {
   const [categories, setCategories] = useState([]);
@@ -10,9 +12,9 @@ const CategoryManage = ({ visible, onClose }) => {
   const addCategory = (parentId = 0) => {
     const newCategory = { id: Date.now(), parentId, name: '', children: [] };
     if (parentId === 0) {
-      setCategories([...categories, newCategory]); // Add root category
+      setCategories([...categories, newCategory]);
     } else {
-      setCategories(updateCategories(categories, parentId, newCategory)); // Add child
+      setCategories(updateCategories(categories, parentId, newCategory));
     }
   };
 
@@ -57,7 +59,6 @@ const CategoryManage = ({ visible, onClose }) => {
         if (category.parentId !== 0) {
           payload.parentId = category.parentId;
         }
-        console.log("hello");
 
         const response = await AxiosInterceptor.post(
           process.env.NODE_ENV === "development"
@@ -82,20 +83,57 @@ const CategoryManage = ({ visible, onClose }) => {
       }
     };
 
-    await saveAllCategories(categories);
+    try {
+      await saveAllCategories(categories);
+      setCategories([]);
+      onClose();
+      toast.success("Lưu Thành Công");
+    } catch (error) {
+      toast.error("Thêm Thất Bại");
+    }
+  };
+  const handleCancel = () => {
+    setCategories([]);
+    onClose();
   };
 
   const renderCategory = (cat) => (
-    <div key={cat.id} className="ml-4">
+    <div key={cat.id} className="ml-4 pt-2">
       <Space>
-        <Input
+        {/* <Input
           value={cat.name}
           onChange={(e) => handleNameChange(cat.id, e.target.value)}
           placeholder="Nhập danh mục"
-          className="w-64"
+          className="w-64 border-primary"
+        /> */}
+        <input
+          id="name"
+          type="text"
+          value={cat.name}
+          onChange={(e) => handleNameChange(cat.id, e.target.value)}
+          placeholder='Nhập danh mục'
+          className="mt-1 block w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary/40 focus:border-primary/40 sm:text-sm"
         />
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => addCategory(cat.id)} />
-        <Button type="danger" icon={<DeleteOutlined />} onClick={() => deleteCategory(cat.id)} />
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => addCategory(cat.id)}
+          style={{ backgroundColor: 'rgba(254, 169, 40, 0.6)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(254, 169, 40, 0.8)';
+            e.currentTarget.style.borderColor = 'rgba(254, 169, 40, 0.8)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(254, 169, 40, 0.6)';
+            e.currentTarget.style.borderColor = 'rgba(254, 169, 40, 0.6)';
+          }}
+        />
+        <Button
+          type="danger"
+          icon={<DeleteOutlined />}
+          onClick={() => deleteCategory(cat.id)}
+          className="hover:bg-red-400"
+        />
       </Space>
       <div className="mt-2">
         {cat.children.map(child => renderCategory(child))}
@@ -104,27 +142,44 @@ const CategoryManage = ({ visible, onClose }) => {
   );
 
   return (
-    <Modal
-      open={visible}
-      onCancel={onClose}
-      footer={[
-        <Button key="cancel" onClick={onClose}>
-          Hủy
-        </Button>,
-        <Button key="save" type="primary" onClick={saveCategories}>
-         Lưu
-        </Button>,
-      ]}
-    >
-      <div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => addCategory()} className="mb-4">
-          thêm danh mục con
-        </Button>
+    <>
+      <ToastContainer />
+      <Modal
+        open={visible}
+        onCancel={onClose}
+        footer={[
+          <div className="mt-4 flex justify-end space-x-2">
+            <button
+              type='button'
+              onClick={handleCancel}
+              className="inline-flexjustify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            >
+              Hủy
+            </button>,
+            <button
+              type="button"
+              className="inline-flex justify-center rounded-md border border-transparent bg-primary/60 px-4 py-2 text-sm font-medium text-white hover:bg-primary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2"
+              onClick={saveCategories}>
+              Lưu
+            </button>
+          </div>
+        ]}
+      >
         <div>
-          {categories.map(cat => renderCategory(cat))}
+
+          <button
+            type="button"
+            className=" justify-center rounded-md border border-transparent bg-primary/60 px-4 py-2 text-sm font-medium text-white hover:bg-primary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2"
+            onClick={() => addCategory()}
+          >
+            <PlusOutlined /> Thêm danh mục con
+          </button>
+          <div>
+            {categories.map(cat => renderCategory(cat))}
+          </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+    </>
   );
 };
 

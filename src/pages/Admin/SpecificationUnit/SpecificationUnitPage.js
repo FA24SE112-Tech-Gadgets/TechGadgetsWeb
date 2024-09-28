@@ -5,6 +5,8 @@ import { Search, Plus, X } from 'lucide-react'
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css'; 
 import { Trash2, MoreVertical } from 'lucide-react'; 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SpecificationUnitPage = () => {
   const [units, setUnits] = useState([]);
@@ -66,12 +68,16 @@ const SpecificationUnitPage = () => {
 
       const response = await AxiosInterceptor.post(baseUrl, { name: newUnitName });
 
-      if (response.status === 201) {
+      if (response.status >= 200 && response.status < 300) { 
         fetchUnits();
         handleClose(); 
+        toast.success("Thêm Thành Công");
+      } else if (response.status >= 400 && response.status <= 500) { 
+        toast.error("Thêm Thất Bại");
       }
     } catch (error) {
       console.error('Error creating unit:', error);
+      toast.error("Thêm Thất Bại");
     }
   };
 
@@ -90,6 +96,7 @@ const SpecificationUnitPage = () => {
 
               await AxiosInterceptor.delete(`${baseUrl}/${id}`);
               fetchUnits();
+              toast.error("Xóa Thành Công");
             } catch (error) {
               console.error('Error deleting unit:', error);
             }
@@ -263,6 +270,7 @@ const SpecificationUnitPage = () => {
           </div>
         </Dialog>
       </Transition>
+      <ToastContainer /> 
     </div>
   );
 };
