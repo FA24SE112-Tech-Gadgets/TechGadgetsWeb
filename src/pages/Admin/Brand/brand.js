@@ -5,6 +5,8 @@ import { Search, Plus, X } from 'lucide-react';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css'; 
 import { Trash2, MoreVertical } from 'lucide-react'; 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const BrandPage = () => {
   const [brands, setBrands] = useState([]);
@@ -28,7 +30,7 @@ const BrandPage = () => {
         ? `${process.env.REACT_APP_DEV_API}/api/brands`
         : `${process.env.REACT_APP_PRO_API}/api/brands`;
 
-      // Conditionally build the URL based on whether searchValue is provided
+      
       const url = searchValue
         ? `${baseUrl}?Page=${page}&PageSize=10&Name=${searchValue}`
         : `${baseUrl}?Page=${page}&PageSize=10`;
@@ -72,7 +74,7 @@ const BrandPage = () => {
 
       const formData = new FormData();
       formData.append('Name', newBrandName);
-      formData.append('Logo', newLogoFile); // newLogoFile is the file object
+      formData.append('Logo', newLogoFile); 
 
       const response = await AxiosInterceptor.post(baseUrl, formData, {
         headers: {
@@ -80,12 +82,16 @@ const BrandPage = () => {
         },
       });
 
-      if (response.status === 201) {
+      if (response.status >= 200 && response.status < 300) {
         fetchBrands();
         handleClose();
+        toast.success("Thêm Thành Công");
+      } else if (response.status >= 400 && response.status <= 500) { 
+        toast.error("Thêm Thất Bại");
       }
     } catch (error) {
       console.error('Error creating brand:', error);
+      toast.error("Thêm Thất Bại");
     }
   };
 
@@ -104,6 +110,7 @@ const BrandPage = () => {
 
               await AxiosInterceptor.delete(`${baseUrl}/${id}`);
               fetchBrands();
+              toast.error("Xóa Thành Công");
             } catch (error) {
               console.error('Error deleting brand:', error);
             }
@@ -300,6 +307,7 @@ const BrandPage = () => {
           </div>
         </Dialog>
       </Transition>
+      <ToastContainer /> 
     </div>
   );
 };

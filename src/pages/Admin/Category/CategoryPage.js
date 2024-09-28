@@ -29,7 +29,7 @@ const CategoryPage = () => {
         ? `${process.env.REACT_APP_DEV_API}/api/categories`
         : `${process.env.REACT_APP_PRO_API}/api/categories`;
 
-      // Conditionally build the URL based on whether searchValue is provided and filter by isRoot: true
+
       const url = searchValue
         ? `${baseUrl}?Page=${page}&PageSize=10&Name=${searchValue}`
         : `${baseUrl}?Page=${page}&PageSize=10`;
@@ -55,9 +55,10 @@ const CategoryPage = () => {
     setPage(newPage);
   };
 
-  // const handleClick = () => {
-  //   navigate('/category-management'); 
-  // };
+  const handleModalClose = () => {
+    closeModal(); 
+    fetchCategories(); 
+  };
 
   return (
     <div className="container mx-auto">
@@ -79,7 +80,7 @@ const CategoryPage = () => {
           >
             <Plus className="mr-2 h-4 w-4" /> Tạo danh mục
           </button>
-          <CategoryManage visible={isModalVisible} onClose={closeModal} />
+          <CategoryManage visible={isModalVisible} onClose={handleModalClose} />
         </div>
       </div>
       <div className="rounded-md border max-w-screen-lg mx-auto">
