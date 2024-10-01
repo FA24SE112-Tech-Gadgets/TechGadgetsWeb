@@ -3,6 +3,7 @@ import { Breadcrumb, Slider, Checkbox, Dropdown, Menu, Button, Card, Row, Col } 
 import { Link } from "react-router-dom";
 import { DownOutlined } from "@ant-design/icons";
 import fakeData from "./fakeData";
+import FilterModal from "../Filter/filter";
 
 export default function Iphone() {
   const [priceRange, setPriceRange] = useState([0, 50000000]);
@@ -138,6 +139,7 @@ export default function Iphone() {
       <div className=" mb-4">
         <h4 className="font-semibold">Tiêu chí:</h4>
         <div className="flex space-x-4">
+        <FilterModal/>
           <Button>
             {createDropdown("Bộ nhớ trong", memoryOptions, "memory")}
           </Button>
