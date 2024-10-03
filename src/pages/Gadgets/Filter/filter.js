@@ -15,13 +15,12 @@ const brands = {
     ell: "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Brands/Apple.jpg",
     ll: "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Brands/Apple.jpg",
 }
-// const brands = ['Samsung', 'iPhone', 'Oppo', 'Xiaomi', 'Vivo', 'Realme', 'Honor', 'TCL'];
 const priceRanges = ['Dưới 2 triệu', 'Từ 2 - 4 triệu', 'Từ 4 - 7 triệu', 'Từ 7 - 13 triệu', 'Từ 13 - 20 triệu', 'Trên 20 triệu'];
 const phoneTypes = [
     { name: 'Android', imageUrl: 'https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Brands/Apple.jpg' },
     { name: 'iPhone (iOS)', imageUrl: 'https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Brands/Apple.jpg' },
 ];
-const needs = ['Chơi game / Cấu hình cao', 'Pin khủng trên 5000 mAh', 'Chụp ảnh, quay phim'];
+const needs = ['Chơi game', 'Pin khủng trên 5000 mAh', 'Chụp ảnh, quay phim'];
 const ramOptions = ['3 GB', '4 GB', '6 GB', '8 GB', '12 GB'];
 const storageOptions = ['64 GB', '128 GB', '256 GB', '512 GB', '1 TB'];
 const screenResolutions = ['QQVGA', 'QVGA', 'HD+', 'Full HD+', '1.5K', '2K+', 'Retina (iPhone)'];
@@ -29,7 +28,22 @@ const refreshRates = ['60 Hz', '90 Hz', '120 Hz', '144 Hz'];
 const chargingFeatures = ['Sạc nhanh (từ 20W)', 'Sạc siêu nhanh (từ 60W)', 'Sạc không dây'];
 const specialFeatures = ['Kháng nước, bụi', 'Hỗ trợ 5G', 'Bảo mật khuôn mặt 3D', 'Công nghệ NFC'];
 
-const FilterModal = () => {
+const FilterModal = ({ onFilterChange }) => {
+    const applyFilters = () => {
+        const newFilters = {
+            brands: selectedBrands,
+            priceRange: priceRange,
+            priceRanges: priceRanges,
+            ram: selectedRam,
+            storage: selectedStorage,
+            refreshRate: selectedRefreshRate,
+            resolution: selectedResolution,
+            specialFeatures: selectedSpecialFeatures,
+            charging: selectedCharging,
+        };
+        onFilterChange(newFilters);
+        handleCancel(); // Đóng modal
+    };
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [selectedPriceRange, setSelectedPriceRange] = useState('');
     const [selectedPhoneType, setSelectedPhoneType] = useState('');
@@ -61,7 +75,7 @@ const FilterModal = () => {
         <div>
             {/* Nút mở modal */}
             <Button type="primary" onClick={showModal}>
-            <FilterOutlined />
+                <FilterOutlined />
 
             </Button>
 
@@ -74,7 +88,7 @@ const FilterModal = () => {
                     <Button key="cancel" onClick={handleCancel}>
                         Hủy
                     </Button>,
-                    <Button key="apply" type="primary">
+                    <Button key="apply" type="primary" onClick={applyFilters}>
                         Áp dụng
                     </Button>,
                 ]}
