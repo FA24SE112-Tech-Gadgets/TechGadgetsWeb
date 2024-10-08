@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Breadcrumb, Button, Tag } from "antd";
 import { Link } from "react-router-dom";
 import fakeData from "./fakeData";
-import FilterModal from "../Filter/filter";
 import PhoneCard from "./phoneCard";
+import FilterPhoneModal from "../Filter/filterPhone";
+import { FilterAltSharp } from "@mui/icons-material";
+import FilterLaptopModal from "../Filter/filterLaptop";
 
 export default function Iphone() {
   const [filters, setFilters] = useState({
@@ -154,7 +156,8 @@ export default function Iphone() {
         </Breadcrumb>
         <div className="mb-4">
           <div className="flex space-x-4">
-            <FilterModal onFilterChange={handleFilterChange} />
+            <FilterPhoneModal onFilterChange={handleFilterChange} />
+            <FilterLaptopModal/>
             {renderSelectedFilters().length > 0 && (
               <>
                 <div className="flex gap-2 flex-wrap">

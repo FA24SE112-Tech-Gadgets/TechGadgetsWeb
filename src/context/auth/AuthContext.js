@@ -84,7 +84,7 @@ const AuthProvider = ({ children }) => {
 			const clientRole = userInfo.Role; // Lấy vai trò từ UserInfo
 			console.log("role", clientRole);
 
-			if (clientRole === "Buyer" || clientRole === "Seller" || clientRole === "Admin") {
+			if (clientRole === "Customer" || clientRole === "Seller" || clientRole === "Admin" || clientRole === "Manager") {
 				localStorage.setItem('token', res.data.token);
 				localStorage.setItem('refreshToken', res.data.refreshToken);
 				let resData;
@@ -111,11 +111,15 @@ const AuthProvider = ({ children }) => {
 						setUser(resData.data);
 						setAuthenticated(true);
 						setError(null);
-						console.log("Login successful, navigating to home...");
-						if (clientRole === "Admin") {
+					
+						console.log("Login successful, navigating to home...",resData);
+						if (clientRole === "Manager") {
 							navigate("/dashboard");
-						} else {
-							navigate("/");
+						} else if(clientRole === "Seller") {
+							navigate("/seller");
+						}
+						else{
+							navigate("/")
 						}
 					} else {
 						await logout();
@@ -159,7 +163,7 @@ const AuthProvider = ({ children }) => {
 				const userInfo = JSON.parse(decode.UserInfo || '{}');
 				const clientRole = userInfo.Role;
 
-				if (clientRole === "Buyer" || clientRole === "Seller") {
+				if (clientRole === "Customer" || clientRole === "Seller") {
 					let resData;
 					try {
 						resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {
@@ -228,6 +232,7 @@ const AuthProvider = ({ children }) => {
 					fullName: userDetails.fullName,
 					password: userDetails.password,
 					email: userDetails.email,
+					role: userDetails.role
 				}
 			);
 			console.log("Register response received:", registerRes);
@@ -274,7 +279,7 @@ const AuthProvider = ({ children }) => {
 				console.log("user info", decode);
 				console.log("Role", clientRole);
 
-				if (clientRole === "Buyer" || clientRole === "Seller") {
+				if (clientRole === "Customer" || clientRole === "Seller") {
 					let resData;
 					try {
 						resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {

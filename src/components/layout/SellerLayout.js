@@ -5,7 +5,7 @@ import SellerSidebar from '~/pages/Seller/SellerSidebar';
 import RoleBaseRoute from '../auth/RoleBaseRoute';
 const SellerLayout = () => {
   return (
-    <RoleBaseRoute accessibleRoles={['Buyer']}>
+    <RoleBaseRoute accessibleRoles={['Seller']}>
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <SellerHeader />
       <div style={{ display: 'flex', flex: 1 }}>

@@ -8,12 +8,13 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function SignUp() {
-  const { signup, googleLogin, error } = useAuth();  // Gọi hàm googleLogin và signup từ useAuth
+  const { signup, googleLogin, error } = useAuth();  
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
-   fullName: "",   
-   password: "",
-   email: ""
+    fullName: "",   
+    password: "",
+    email: "",
+    role: "Customer" // Default role is Customer
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -27,7 +28,7 @@ function SignUp() {
   const googleLoginHandler = useGoogleLogin({
     onSuccess: (response) => {
       console.log('Google login successful:', response.access_token);
-      googleLogin(response.access_token);  // Truyền token Google vào hàm googleLogin
+      googleLogin(response.access_token);  
     },
     onError: (error) => {
       console.error('Google login error:', error);
@@ -62,8 +63,7 @@ function SignUp() {
     finally {
       setLoading(false);
     }
-};
-
+  };
 
   const handleClickShowPassword = () => {
     setShowPassword((prev) => !prev);
@@ -89,8 +89,6 @@ function SignUp() {
             />
           </div>
 
-         
-
           <div className="py-4">
             <span className="text-base font-semibold text-gray-600">Mật khẩu</span>
             <input
@@ -102,16 +100,44 @@ function SignUp() {
               required
             />
           </div>
+
           <div className="py-4">
             <span className="text-base font-semibold text-gray-600">Email</span>
             <input
               type="email"
               className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
               name="email"
-              value={user.email}  // Sử dụng user.email
-              onChange={(e) => handleChangeValue("email", e.target.value)}  // Đổi fieldName thành "email"
+              value={user.email}  
+              onChange={(e) => handleChangeValue("email", e.target.value)}  
               required
             />
+          </div>
+
+          {/* New role selection */}
+          <div className="py-4">
+            <span className="text-base font-semibold text-gray-600">Bạn là:</span>
+            <div className="flex items-center space-x-4">
+              <label>
+                <input
+                  type="radio"
+                  name="role"
+                  value="Customer"
+                  checked={user.role === "Customer"}
+                  onChange={(e) => handleChangeValue("role", e.target.value)}
+                />
+                <span className="ml-2">Khách hàng</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="role"
+                  value="Seller"
+                  checked={user.role === "Seller"}
+                  onChange={(e) => handleChangeValue("role", e.target.value)}
+                />
+                <span className="ml-2">Người bán</span>
+              </label>
+            </div>
           </div>
 
           <div className="flex justify-between w-full py-4">

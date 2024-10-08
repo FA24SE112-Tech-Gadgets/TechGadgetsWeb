@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Button, Checkbox, Select, Radio, Slider, Modal } from 'antd';
 import { FilterOutlined } from '@ant-design/icons';
 
-
-const { Option } = Select;
 const brands = {
     Apple: "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Brands/Apple.jpg",
     Samsung: "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Brands/Apple.jpg",
@@ -28,7 +26,7 @@ const refreshRates = ['60 Hz', '90 Hz', '120 Hz', '144 Hz'];
 const chargingFeatures = ['Sạc nhanh (từ 20W)', 'Sạc siêu nhanh (từ 60W)', 'Sạc không dây'];
 const specialFeatures = ['Kháng nước, bụi', 'Hỗ trợ 5G', 'Bảo mật khuôn mặt 3D', 'Công nghệ NFC'];
 
-const FilterModal = ({ onFilterChange }) => {
+const FilterPhoneModal = ({ onFilterChange }) => {
     const applyFilters = () => {
         const newFilters = {
             brands: selectedBrands,
@@ -326,4 +324,4 @@ const FilterModal = ({ onFilterChange }) => {
     );
 };
 
-export default FilterModal;
+export default FilterPhoneModal;

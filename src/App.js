@@ -12,16 +12,16 @@ import Order from "./pages/Seller/Order";
 import MainLayout from "./components/layout/MainLayout";
 import AuthLayout from "./components/layout/AuthLayout";
 import SellerLayout from "./components/layout/SellerLayout";
-import AdminLayout from "./components/layout/AdminLayout";
-import Dashboardview from "./pages/Admin/Dashboardview";
-import Main from "./pages/Admin/Main";
+import ManagerLayout from "./components/layout/ManagerLayout";
+import Dashboardview from "./pages/Manager/Dashboardview";
+import Main from "./pages/Manager/Main";
 import AuthRoute from "./components/auth/AuthRoute";
 import RoleBaseRoute from "./components/auth/RoleBaseRoute";
 import Iphone from "./pages/Gadgets/Phone/Iphone";
 import Mac from "./pages/Gadgets/Laptop/Mac";
-import SpecificationUnitPage from "./pages/Admin/SpecificationUnit/SpecificationUnitPage";
-import CategoryPage from "./pages/Admin/Category/CategoryPage";
-import BrandPage from "./pages/Admin/Brand/brand";
+import SpecificationUnitPage from "./pages/Manager/SpecificationUnit/SpecificationUnitPage";
+import CategoryPage from "./pages/Manager/Category/CategoryPage";
+import BrandPage from "./pages/Manager/Brand/brand";
 
 
 function App() {
@@ -42,7 +42,7 @@ function App() {
         <Route path='/gadget/mac' element={<Mac />} />
         <Route path='/favorite' element={
           <AuthRoute>
-            <RoleBaseRoute accessibleRoles={["Buyer"]}>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
               <FavoritePage />
             </RoleBaseRoute>
           </AuthRoute>
@@ -50,7 +50,7 @@ function App() {
         } />
         <Route path='/profile' element={
           <AuthRoute>
-            <RoleBaseRoute accessibleRoles={["Buyer"]}>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
               <ProfilePage />
             </RoleBaseRoute>
           </AuthRoute>
@@ -66,7 +66,7 @@ function App() {
       </Route>
 
       {/* Admin Route */}
-      <Route element={<AdminLayout />}>
+      <Route element={<ManagerLayout />}>
         <Route path='/dashboard' element={
           <div className="flex overflow-scroll">
             <div className="basis-[100%] border overflow-scroll h-[100vh]">
