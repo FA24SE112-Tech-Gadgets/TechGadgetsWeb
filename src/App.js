@@ -23,6 +23,7 @@ import SpecificationUnitPage from "./pages/Admin/SpecificationUnit/Specification
 import CategoryPage from "./pages/Admin/Category/CategoryPage";
 import BrandPage from "./pages/Admin/Brand/brand";
 import CategoryManage from "./pages/Admin/Category/CategoryManage";
+import DetailGadgetPage from "./pages/DetailGadget/DetailGadgetPage";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path='/search' element={<SearchPage />} />
         <Route path='/gadget/iphone' element={<Iphone />} />
         <Route path='/gadget/mac' element={<Mac />} />
+        <Route path='/gadget/detail' element={<DetailGadgetPage />} />
         <Route path='/favorite' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Buyer"]}>
