@@ -114,9 +114,6 @@ const Header = () => {
                       <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full ">
                         <Link to ="/favorite">Yêu thích</Link>
                       </p>
-                      <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full ">
-                        <Link to ="/seller">Trang người bán</Link>
-                      </p>
                       <p
                         className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-red-600 dark:text-red-400 font-semibold w-full"
                         onClick={handleLogout}
