@@ -32,8 +32,8 @@ const ProfilePage = () => {
     const getCurrentUser = async () => {
       try {
         const response = await AxiosInterceptor.get('/api/users/current');
-        const userData = response.data;
-        console.log(userData);
+        const userData = response.data.customer;
+        console.log(response.data);
         setProfile({
           name: userData.fullName,
           address: userData.address || '',
@@ -41,7 +41,7 @@ const ProfilePage = () => {
           gender: userData.gender || '',
           dateOfBirth: userData.dateOfBirth || '',
           phoneNumber: userData.phoneNumber || '',
-          email: userData.email,
+          email: response.data.email,
           avatar: userData.avatarUrl || ''
         });
       } catch (error) {

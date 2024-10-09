@@ -56,13 +56,13 @@ function Verify() {
     <ToastContainer /> 
       <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
         <div className="flex flex-col justify-center p-8 md:p-14">
-          <span className="mb-3 text-4xl font-bold">Verify Your Account</span>
+          <span className="mb-3 text-4xl font-bold">Nhập mã xác nhận</span>
           <span className="font-light text-gray-400 mb-8">
-            Enter the verification code sent to your email.
+            Nhập mã xác nhận đã được gửi tới mail của bạn
           </span>
 
           <div className="py-4">
-            <span className="text-base font-semibold text-gray-600">Verification Code</span>
+            <span className="text-base font-semibold text-gray-600">Mã xác nhận</span>
             <input
               type="text"
               name="code"
@@ -89,7 +89,7 @@ function Verify() {
             onClick={handleSubmit}
             className="w-full p-2 mb-6 bg-black text-white border border-transparent rounded-lg shadow-sm text-base font-medium hover:bg-orange-600"
           >
-            Verify
+            Xác thực
           </button>
 
           <button
@@ -97,7 +97,7 @@ function Verify() {
             disabled={resendLoading}
             className="w-full p-2 bg-gray-300 text-black border border-transparent rounded-lg shadow-sm text-base font-medium hover:bg-gray-400"
           >
-            {resendLoading ? "Resending..." : "Resend Verification Code"}
+            {resendLoading ? "Đang gửi..." : "Gửi lại mã xác thực"}
           </button>
         </div>
         <div className="relative">
