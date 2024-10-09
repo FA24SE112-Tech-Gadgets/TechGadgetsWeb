@@ -9,37 +9,28 @@ import { MdNavigateNext } from "react-icons/md";
 import { GrFormPrevious } from "react-icons/gr";
 
 const initialShops = [
-  {
-    name: "Mobile Shop",
-    products: [
-      { id: 1, name: "iPhone 16 Pro Max", image: "https://s.net.vn/0hT0", description: "The latest iPhone with advanced features" },
-      { id: 2, name: "iPhone 15 Pro", image: "https://s.net.vn/gsjW", description: "Powerful iPhone with pro camera system" },
-      { id: 3, name: "Samsung Galaxy S22", image: "https://s.net.vn/ry0D", description: "Android flagship with excellent camera" },
-      { id: 4, name: "Google Pixel 7", image: "https://s.net.vn/Nb72", description: "Pure Android experience with great AI" },
-      { id: 5, name: "OnePlus 10 Pro", image: "https://s.net.vn/FBc4", description: "Fast charging and smooth performance" },
-      { id: 6, name: "Xiaomi Mi 12", image: "https://s.net.vn/uwCW", description: "High-end specs at a competitive price" },
-    ]
-  },
-  {
-    name: "Hadao Shop",
-    products: [
-      { id: 7, name: "Xiaomi ROG", image: "/placeholder.svg", description: "Gaming smartphone with high performance" },
-      { id: 8, name: "Laptop ASUS", image: "/placeholder.svg", description: "Powerful laptop for work and gaming" },
-      { id: 9, name: "Mechanical Keyboard", image: "/placeholder.svg", description: "Tactile typing experience for enthusiasts" },
-      { id: 10, name: "Gaming Mouse", image: "/placeholder.svg", description: "High-precision mouse for competitive gaming" },
-    ]
-  },
-  {
-    name: "Babao",
-    products: [
-      { id: 11, name: "Máy hút bụi", image: "/placeholder.svg", description: "Efficient vacuum cleaner for your home" },
-      { id: 12, name: "EarWireless", image: "/placeholder.svg", description: "High-quality wireless earbuds" },
-      { id: 13, name: "Smart Home Hub", image: "/placeholder.svg", description: "Central control for your smart home devices" },
-      { id: 14, name: "Robot Mop", image: "/placeholder.svg", description: "Automated floor cleaning solution" },
-      { id: 15, name: "Air Purifier", image: "/placeholder.svg", description: "Clean air for a healthier home environment" },
-    ]
-  }
-];
+    {
+      name: "Cửa hàng điện thoại",
+      products: [
+        { id: 1, name: "iPhone 16 Pro Max", image: "https://s.net.vn/0hT0", description: "Chiếc iPhone mới nhất với các tính năng tiên tiến" },
+        { id: 2, name: "iPhone 15 Pro", image: "https://s.net.vn/gsjW", description: "iPhone mạnh mẽ với hệ thống camera chuyên nghiệp" },
+        { id: 3, name: "Samsung Galaxy S22", image: "https://s.net.vn/ry0D", description: "Điện thoại Android hàng đầu với camera tuyệt vời" },
+        { id: 4, name: "Google Pixel 7", image: "https://s.net.vn/Nb72", description: "Trải nghiệm Android thuần túy với AI mạnh mẽ" },
+        { id: 5, name: "OnePlus 10 Pro", image: "https://s.net.vn/FBc4", description: "Sạc nhanh và hiệu suất mượt mà" },
+        { id: 6, name: "Xiaomi Mi 12", image: "https://s.net.vn/uwCW", description: "Cấu hình cao cấp với giá cạnh tranh" },
+      ]
+    },
+    {
+      name: "Cửa hàng Hadao",
+      products: [
+        { id: 7, name: "Xiaomi ROG", image: "https://th.bing.com/th/id/OIP.HHWMvnBQbhpuSvnP9QcCsgHaFo?rs=1&pid=ImgDetMain", description: "Điện thoại chơi game với hiệu năng cao" },
+        { id: 8, name: "Laptop ASUS", image: "https://th.bing.com/th/id/OIP.q6YmIA-h_zO2RPSgmopKHgAAAA?rs=1&pid=ImgDetMain", description: "Laptop mạnh mẽ cho công việc và chơi game" },
+        { id: 9, name: "Bàn phím cơ", image: "https://baochau.vn/media/product/1952_ek387.jpg", description: "Trải nghiệm gõ phím tốt cho người đam mê" },
+        { id: 10, name: "Chuột gaming", image: "https://th.bing.com/th/id/R.9631fcabcabbd9cce93e727b475acf01?rik=IdEQJTl0FnC%2b1g&pid=ImgRaw&r=0", description: "Chuột chính xác cao cho game thủ chuyên nghiệp" },
+      ]
+    },
+  ];
+  
 
 function FavoritePage() {
     const [favorites, setFavorites] = useState(initialShops);
@@ -101,7 +92,7 @@ function FavoritePage() {
         <div className="min-h-screen bg-gradient-to-br from-purple-100 to-indigo-100 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-12">
-                    <h1 className="text-4xl font-extrabold text-center text-indigo-900 dark:text-white">Your Favorites</h1>
+                    <h1 className="text-4xl font-extrabold text-center text-indigo-900 dark:text-white">Danh sách yêu thích</h1>
                 </div>
                 {favorites.map((shop, shopIndex) => (
                     <div key={shop.name} className="mb-16">
