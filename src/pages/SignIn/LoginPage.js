@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 function LogIn() {
   const { login, error } = useAuth();
-  const { googleLogin} = useAuth();
+  const { googleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
@@ -41,9 +41,8 @@ function LogIn() {
       setLoading(false);
     }
   };
-  
 
-  const googleLoginHandler  = useGoogleLogin({
+  const googleLoginHandler = useGoogleLogin({
     onSuccess: (response) => {
       console.log('Google login successful:', response.access_token);
       googleLogin(response.access_token);
@@ -68,6 +67,12 @@ function LogIn() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <ToastContainer />
+      {loading && (
+        <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+        </div>
+      )}
+
       <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
         <div className="flex flex-col justify-center p-8 md:p-14">
           <span className="mb-3 text-4xl font-bold">Chào mừng trở lại</span>
@@ -118,12 +123,12 @@ function LogIn() {
           </form>
           <div className="mb-5 pt-5 flex justify-center">
             <button
-             onClick={() => googleLoginHandler ()}
-            class="w-full border border-gray-300 text-md p-2 rounded-lg mb-6 hover:bg-black hover:text-white"
-          >
-            <img src={google} alt="img" class="w-6 h-6 inline mr-2 test-base" />
-            Đăng nhập với Google
-          </button>
+              onClick={() => googleLoginHandler()}
+              class="w-full border border-gray-300 text-md p-2 rounded-lg mb-6 hover:bg-black hover:text-white"
+            >
+              <img src={google} alt="img" class="w-6 h-6 inline mr-2 test-base" />
+              Đăng nhập với Google
+            </button>
           </div>
           <div className="text-center text-gray-400">
             Không có tài khoản?
