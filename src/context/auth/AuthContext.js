@@ -115,10 +115,14 @@ const AuthProvider = ({ children }) => {
 						console.log("Login successful, navigating to home...",resData);
 						if (clientRole === "Manager") {
 							navigate("/dashboard");
-						} else if(clientRole === "Seller") {
-							navigate("/seller");
-						}
-						else{
+						} else if (clientRole === "Seller") {
+							if (resData.data.seller === null) {
+								console.log('day ne',resData.data.seller);
+								navigate("/seller-application"); 
+							} else {
+								navigate("/seller"); 
+							}
+						} else {
 							navigate("/")
 						}
 					} else {
@@ -190,20 +194,29 @@ const AuthProvider = ({ children }) => {
 					setAuthenticated(false);
 					setError({
 						title: "Access Denied",
-						message: "Your Email need to verify, please Sign Up."
+						message: "Your Email needs to verify, please Sign Up."
 					});
 				}
 			} else {
 				setError({
 					title: "Google Login Failed",
-					message: "Google login failed, please try again."
+					message: "Đăng nhập Google không thành công, vui lòng thử lại."
 				});
 			}
 		} catch (error) {
-			setError({
-				title: "Google Login Error",
-				message: error?.response?.data?.message || "Google login failed, please try again."
-			});
+			
+			const backendError = error?.response?.data;
+			if (backendError) {
+				setError({
+					title: "Lỗi Đăng Nhập",
+					message: (backendError.reasons?.[0]?.message)
+				});
+			} else {
+				setError({
+					title: "Lỗi Đăng Nhập",
+					message: "Đăng nhập Google không thành công, vui lòng thử lại."
+				});
+			}
 		} finally {
 			setIsLoading(false);
 		}
@@ -300,7 +313,7 @@ const AuthProvider = ({ children }) => {
 						setUser(resData.data);
 						setAuthenticated(true);
 						setError(null);
-						navigate("/");
+						navigate("/signin");
 					}
 				} else {
 					setAuthenticated(false);

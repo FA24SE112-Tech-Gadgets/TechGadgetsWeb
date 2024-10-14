@@ -82,7 +82,7 @@ const ProfilePage = () => {
                 className="mt-2 p-2 border rounded w-full h-10"
               />
             ) : (
-              <h2 className="text-xl font-bold">{profile.name}</h2>
+              <h2 className="text-xl font-bold truncate">{profile.name}</h2>
             )}
             {isEditing && (
               <input
@@ -130,7 +130,7 @@ const ProfilePage = () => {
                         />
                       )
                     ) : (
-                      <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10">{profile[key]}</p>
+                      <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10 truncate">{profile[key]}</p>
                     )}
                   </div>
                 )

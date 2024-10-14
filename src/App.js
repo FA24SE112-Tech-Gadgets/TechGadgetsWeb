@@ -23,6 +23,9 @@ import DetailGadgetPage from "./pages/DetailGadget/DetailGadgetPage";
 import SpecificationUnitPage from "./pages/Manager/SpecificationUnit/SpecificationUnitPage";
 import CategoryPage from "./pages/Manager/Category/CategoryPage";
 import BrandPage from "./pages/Manager/Brand/brand";
+import SellerApplication from "./pages/Seller/SellerApplication";
+import HistorySellerApplication from "./pages/Seller/HistorySellerApplication";
+import SellerApplicationLayout from "./components/layout/SellerApplicationLayout";
 
 
 function App() {
@@ -62,11 +65,14 @@ function App() {
 
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
-        <Route path='/seller' element={
-          <Order />
-        } />
+        <Route path='/seller' element={ <Order />} />
       </Route>
 
+      <Route element={<SellerApplicationLayout />}>
+        <Route path='/seller-application' element={<SellerApplication />} />
+        <Route path='/history-seller-application' element={<HistorySellerApplication />} />
+      </Route>
+        
       {/* Admin Route */}
       <Route element={<ManagerLayout />}>
         <Route path='/dashboard' element={
