@@ -26,6 +26,8 @@ import BrandPage from "./pages/Manager/Brand/brand";
 import SellerApplication from "./pages/Seller/SellerApplication";
 import HistorySellerApplication from "./pages/Seller/HistorySellerApplication";
 import SellerApplicationLayout from "./components/layout/SellerApplicationLayout";
+import ManageSellerApplicationPage from "./pages/Manager/SellerApplication/ManageSellerApplication";
+import ForgotPassword from "./pages/ForgotPWD/ForgotPWDPage";
 
 
 function App() {
@@ -37,6 +39,7 @@ function App() {
         <Route path='/signin' element={<LogIn />} />
         <Route path='/signup' element={<SignUp />} />
         <Route path='/verify' element={<Verify />} />
+        <Route path='/forgot-pwd' element={<ForgotPassword />} />
       </Route>
 
       <Route element={<MainLayout />}>
@@ -91,6 +94,9 @@ function App() {
         } />
         <Route path='/brand' element={
           <BrandPage />
+        } />
+        <Route path='/manage-seller-application' element={
+          <ManageSellerApplicationPage />
         } />
       </Route>
     </Routes>

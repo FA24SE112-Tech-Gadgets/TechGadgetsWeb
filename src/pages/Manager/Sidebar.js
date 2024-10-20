@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaTachometerAlt, FaRegSun, FaWrench, FaStickyNote, FaRegChartBar, FaRegCalendarAlt } from "react-icons/fa"
+import { FaTachometerAlt, FaRegSun, FaWrench, FaStickyNote, FaRegChartBar, FaRegCalendarAlt, FaWpforms  } from "react-icons/fa"
 import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 import icon from "~/assets/icon.ico"
 
@@ -35,6 +35,14 @@ const Sidebar = () => {
                     <div className='flex items-center gap-[10px]'>
                         <FaWrench color='black' /> 
                         <p className='text-[14px] leading-[20px] font-normal text-black'>Quản lý thương hiệu</p>
+                    </div>
+                    </Link>
+                </div>
+                <div className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
+                    <Link to="/manage-seller-application" className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
+                    <div className='flex items-center gap-[10px]'>
+                        <FaWpforms color='black' /> 
+                        <p className='text-[14px] leading-[20px] font-normal text-black'>Quản lý đơn người bán</p>
                     </div>
                     </Link>
                 </div>

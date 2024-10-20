@@ -102,7 +102,7 @@ function LogIn() {
                 <input type="checkbox" name="ch" id="ch" className="mr-2" />
                 <span className="text-base font-medium text-gray-400">Ghi nhớ mật khẩu</span>
               </div>
-              <Link to="/forgot-password" className="font-bold text-md italic hover:text-orange-500">Quên mật khẩu?</Link>
+              <Link to="/forgot-pwd" className="font-bold text-md italic hover:text-orange-500">Quên mật khẩu?</Link>
             </div>
             <button
               type="submit"
