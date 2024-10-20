@@ -51,6 +51,7 @@ const AuthProvider = ({ children }) => {
 						title: "Token Error",
 						message: "Phiên đăng nhập của bạn đã hết hạn, hãy đăng nhập lại."
 					});
+					
 					return;
 				}
 			}
@@ -104,6 +105,7 @@ const AuthProvider = ({ children }) => {
 						title: "Token Error",
 						message: "Lỗi xác thực, hãy thử lại."
 					});
+					
 					return;
 				}
 				if (resData.status === 200) {
@@ -140,6 +142,7 @@ const AuthProvider = ({ children }) => {
 					title: "Access Denied",
 					message: "Truy cập của bạn bị từ chối, hãy thử lại."
 				});
+				
 			}
 		}
 		setIsLoading(false);
@@ -181,6 +184,7 @@ const AuthProvider = ({ children }) => {
 							title: "Token Error",
 							message: "Lỗi xác thực, hãy thử lại."
 						});
+						
 						return;
 					}
 
@@ -196,12 +200,14 @@ const AuthProvider = ({ children }) => {
 						title: "Access Denied",
 						message: "Your Email needs to verify, please Sign Up."
 					});
+					
 				}
 			} else {
 				setError({
 					title: "Google Login Failed",
 					message: "Đăng nhập Google không thành công, vui lòng thử lại."
 				});
+				
 			}
 		} catch (error) {
 
@@ -260,7 +266,7 @@ const AuthProvider = ({ children }) => {
 			setError({
 
 				title: "Registration Error",
-				message: error?.response?.data?.reasons[0] || "Failed to register, please try again.",
+				message: error?.response?.data?.reasons[0] || "Đăng kí thất bại, vui lòng thử lại sau",
 			});
 		} finally {
 			setIsLoading(false);
@@ -318,6 +324,7 @@ const AuthProvider = ({ children }) => {
 							title: "Token Error",
 							message: "Lỗi xác thực, hãy thử lại."
 						});
+						
 						return;
 					}
 				} else if (clientRole === "Customer") {
@@ -350,12 +357,14 @@ const AuthProvider = ({ children }) => {
 						title: "Access Denied",
 						message: "Truy cập của bạn bị từ chối, hãy thử lại."
 					});
+					
 				}
 			} else {
 				setError({
 					title: "Verification Failed",
 					message: "Mã xác thực không hợp lệ, hãy thử lại."
 				});
+				
 			}
 		} catch (error) {
 			// Check if the error is a 400 Bad Request
@@ -389,28 +398,26 @@ const AuthProvider = ({ children }) => {
 			console.log("Resend response received:", resendRes);
 
 			if (resendRes.status === 204) {
-				setError({
-					title: "Resend Successful",
-					message: "A new verification code has been sent to your email.",
-				});
+				toast.success("Gửi mã thành công, vui nhập mã")
 			} else {
 				setError({
 					title: "Resend Failed",
-					message: "Failed to resend the verification code, please try again.",
+					message: "Gửi thất bại, vui lòng thử lại ",
 				});
+				
 			}
 		} catch (error) {
 			// Handle specific error cases
 			if (error.response && error.response.status === 400) {
 				setError({
 					title: "Bad Request",
-					message: error.response.data.message || "Invalid request. Please check your data and try again.",
+					message: error.response.data.message || "Thất bại, vui lòng kiểm tra lại ",
 				});
 			} else {
 				// General error handling
 				setError({
 					title: "Resend Error",
-					message: error.response?.data?.message || "Error resending verification code, please try again.",
+					message: error.response?.data?.message || "Gửi lại mã thất bại, vui lòng thử lại",
 				});
 			}
 			console.error("Resend error details:", error.response); // Log error details

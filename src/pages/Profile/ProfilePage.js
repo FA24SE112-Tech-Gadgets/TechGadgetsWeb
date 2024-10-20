@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FaPencilAlt, FaSave } from 'react-icons/fa';
-import InputMask from 'react-input-mask';
+import { FaPencilAlt, FaSave, FaKey } from 'react-icons/fa';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-
+import ChangePassword from './ChangePassword'; 
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import DefaultAvatar from '~/assets/R.png';
 
 const labels = {
   name: 'Tên',
@@ -14,19 +16,36 @@ const labels = {
   email: 'Email',
   avatar: 'Ảnh đại diện'
 };
+const formatDateToDisplay = (dateString) => {
+  if (!dateString) {
+    return ''; 
+  }
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return ''; 
+  }
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [profile, setProfile] = useState({
     name: '',
     address: '',
     cccd: '',
-    gender: '',
-    dateOfBirth: '',
+    gender: 'Male',
+    dateOfBirth: 'DD/MM/YYYY',
     phoneNumber: '',
     email: '',
     avatar: ''
   });
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -34,12 +53,13 @@ const ProfilePage = () => {
         const response = await AxiosInterceptor.get('/api/users/current');
         const userData = response.data.customer;
         console.log(response.data);
+
         setProfile({
           name: userData.fullName,
           address: userData.address || '',
           cccd: userData.cccd || '',
-          gender: userData.gender || '',
-          dateOfBirth: userData.dateOfBirth || '',
+          gender: userData.gender || 'Male',
+          dateOfBirth: formatDateToDisplay(userData.dateOfBirth),
           phoneNumber: userData.phoneNumber || '',
           email: response.data.email,
           avatar: userData.avatarUrl || ''
@@ -57,22 +77,85 @@ const ProfilePage = () => {
     setProfile({ ...profile, [name]: value });
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfile({ ...profile, avatar: file });
+      setPreviewImage(file); 
+    }
   };
+
+  const handleSave = async () => {
+    try {
+      const formData = new FormData();
+
+      if (profile.name) formData.append('FullName', profile.name);
+      if (profile.address) formData.append('Address', profile.address);
+      if (profile.cccd) formData.append('CCCD', profile.cccd);
+      if (profile.gender) formData.append('Gender', profile.gender);
+
+      // Chuyển đổi ngày từ DD/MM/YYYY sang YYYY/MM/DD
+      const [day, month, year] = profile.dateOfBirth.split('/');
+      const formattedDate = `${year}/${month}/${day}`;
+      formData.append('DateOfBirth', formattedDate);
+
+      if (profile.phoneNumber) formData.append('PhoneNumber', profile.phoneNumber);
+
+      if (profile.avatar instanceof File) {
+        formData.append('Avatar', profile.avatar);
+      }
+
+      const response = await AxiosInterceptor.patch('/api/customer', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.status >= 200 && response.status < 300) {
+        setIsEditing(false);
+        toast.success('Cập nhật thông tin thành công!');
+      } else if (response.status >= 400 && response.status < 500) {
+        const errorMessage = response.data.reasons?.[0]?.message || 'Vui lòng thử lại.';
+        toast.error(`${errorMessage}`);
+      } else {
+        toast.error('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.reasons?.[0]?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.';
+      toast.error(`${errorMessage}`);
+    }
+  };
+
+  // Mở và đóng modal
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-primary/40 to-secondary/40">
+      <ToastContainer />
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Thông tin cá nhân</h1>
-          <button onClick={() => setIsEditing(!isEditing)} className="text-gray-500 hover:text-gray-700">
-            <FaPencilAlt />
+          <div className="flex items-center space-x-2">
+            <h1 className="text-2xl font-bold">Thông tin cá nhân</h1>
+            <button onClick={() => setIsEditing(!isEditing)} className="text-gray-500 hover:text-gray-700 text-xl">
+              <FaPencilAlt />
+            </button>
+          </div>
+          <button
+            onClick={openModal}
+            className="text-gray-500 hover:text-gray-700 text-xl"
+          >
+            <FaKey /> {/* Icon cho đổi mật khẩu */}
           </button>
         </div>
         <div className="flex">
           <div className="w-1/3 flex flex-col items-center">
-            <img src={profile.avatar} alt="Avatar" className="rounded-full w-40 h-40 mb-4" />
+            <img
+              src={previewImage ? URL.createObjectURL(previewImage) : (profile.avatar || DefaultAvatar)}
+              alt="User Avatar"
+              className="rounded-full w-40 h-40 mb-4 bg-gray-100"
+            />
+
             {isEditing ? (
               <input
                 type="text"
@@ -85,19 +168,28 @@ const ProfilePage = () => {
               <h2 className="text-xl font-bold truncate">{profile.name}</h2>
             )}
             {isEditing && (
-              <input
-                type="text"
-                name="avatar"
-                value={profile.avatar}
-                onChange={handleChange}
-                className="mt-2 p-2 border rounded w-full h-10"
-              />
+              <div className="mt-1 flex items-center">
+                <input
+                  id="avatar"
+                  type="file"
+                  accept=".jpeg,.jpg,.png"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <label
+                  htmlFor="avatar"
+                  className="cursor-pointer bg-white py-2 px-4 border border-gray-200 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <FaPencilAlt className="h-5 w-5 inline-block mr-2" />
+                  Tải Lên Ảnh
+                </label>
+              </div>
             )}
           </div>
-          <div className="w-2/3 ml-8 ">
+          <div className="w-2/3 ml-8">
             <div className="grid grid-cols-2 gap-4">
-              {Object.keys(profile).map((key) => (
-                key !== 'avatar' && key !== 'name' && (
+              {Object.keys(profile).map((key) =>
+                key !== 'avatar' && key !== 'name' ? (
                   <div key={key} className="mb-4">
                     <label className="block text-gray-700">{labels[key]}</label>
                     {isEditing ? (
@@ -108,18 +200,18 @@ const ProfilePage = () => {
                           onChange={handleChange}
                           className="mt-2 p-2 border rounded w-full h-10"
                         >
-                          <option value="Nam">Nam</option>
-                          <option value="Nữ">Nữ</option>
-                          <option value="Khác">Khác</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
                         </select>
                       ) : key === 'dateOfBirth' ? (
-                        <InputMask
-                          mask="99/99/9999"
+                        <input
+                          type="text"
+                          name="dateOfBirth"
                           value={profile.dateOfBirth}
                           onChange={handleChange}
-                        >
-                          {(inputProps) => <input {...inputProps} type="text" name="dateOfBirth" className=" mt-2 p-2 border rounded w-full h-10" />}
-                        </InputMask>
+                          placeholder="DD/MM/YYYY"
+                          className="mt-2 p-2 border rounded w-full h-10"
+                        />
                       ) : (
                         <input
                           type="text"
@@ -130,15 +222,22 @@ const ProfilePage = () => {
                         />
                       )
                     ) : (
-                      <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10 truncate">{profile[key]}</p>
+                      <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10 truncate">
+                        {key === 'dateOfBirth'
+                          ? profile[key]
+                          : profile[key]}
+                      </p>
                     )}
                   </div>
-                )
-              ))}
+                ) : null
+              )}
             </div>
             {isEditing && (
               <div className="flex justify-center">
-                <button onClick={handleSave} className="mt-4 bg-black text-white p-2 rounded flex items-center">
+                <button
+                  onClick={handleSave}
+                  className="mt-4 bg-black text-white p-2 rounded flex items-center"
+                >
                   <FaSave className="mr-2" /> Lưu
                 </button>
               </div>
@@ -146,6 +245,15 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+        >
+          <ChangePassword closeModal={closeModal} />
+        </div>
+      )}
     </div>
   );
 };
