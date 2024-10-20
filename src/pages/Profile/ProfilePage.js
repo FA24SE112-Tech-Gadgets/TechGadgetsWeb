@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FaPencilAlt, FaSave, FaKey } from 'react-icons/fa';
-import InputMask from 'react-input-mask';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import dayjs from 'dayjs';
-import ChangePassword from './ChangePassword'; // Import ChangePassword component
+import ChangePassword from './ChangePassword'; 
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import DefaultAvatar from '~/assets/R.png';
 
 const labels = {
   name: 'Tên',
@@ -17,21 +16,36 @@ const labels = {
   email: 'Email',
   avatar: 'Ảnh đại diện'
 };
+const formatDateToDisplay = (dateString) => {
+  if (!dateString) {
+    return ''; 
+  }
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return ''; 
+  }
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State để điều khiển modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [profile, setProfile] = useState({
     name: '',
     address: '',
     cccd: '',
     gender: 'Male',
-    dateOfBirth: '',
+    dateOfBirth: 'DD/MM/YYYY',
     phoneNumber: '',
     email: '',
     avatar: ''
   });
-  const [previewImage, setPreviewImage] = useState(null); // State để lưu ảnh preview
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -39,12 +53,13 @@ const ProfilePage = () => {
         const response = await AxiosInterceptor.get('/api/users/current');
         const userData = response.data.customer;
         console.log(response.data);
+
         setProfile({
           name: userData.fullName,
           address: userData.address || '',
           cccd: userData.cccd || '',
           gender: userData.gender || 'Male',
-          dateOfBirth: userData.dateOfBirth || '',
+          dateOfBirth: formatDateToDisplay(userData.dateOfBirth),
           phoneNumber: userData.phoneNumber || '',
           email: response.data.email,
           avatar: userData.avatarUrl || ''
@@ -66,7 +81,7 @@ const ProfilePage = () => {
     const file = e.target.files[0];
     if (file) {
       setProfile({ ...profile, avatar: file });
-      setPreviewImage(file); // Lưu file để hiển thị preview
+      setPreviewImage(file); 
     }
   };
 
@@ -78,8 +93,12 @@ const ProfilePage = () => {
       if (profile.address) formData.append('Address', profile.address);
       if (profile.cccd) formData.append('CCCD', profile.cccd);
       if (profile.gender) formData.append('Gender', profile.gender);
-      if (profile.dateOfBirth) formData.append('DateOfBirth', dayjs(profile.dateOfBirth, 'DD/MM/YYYY').format('YYYY-MM-DD'));
-    
+
+      // Chuyển đổi ngày từ DD/MM/YYYY sang YYYY/MM/DD
+      const [day, month, year] = profile.dateOfBirth.split('/');
+      const formattedDate = `${year}/${month}/${day}`;
+      formData.append('DateOfBirth', formattedDate);
+
       if (profile.phoneNumber) formData.append('PhoneNumber', profile.phoneNumber);
 
       if (profile.avatar instanceof File) {
@@ -91,16 +110,14 @@ const ProfilePage = () => {
           'Content-Type': 'multipart/form-data'
         }
       });
+
       if (response.status >= 200 && response.status < 300) {
         setIsEditing(false);
         toast.success('Cập nhật thông tin thành công!');
-      }
-      else if (response.status >= 400 && response.status < 500) {
+      } else if (response.status >= 400 && response.status < 500) {
         const errorMessage = response.data.reasons?.[0]?.message || 'Vui lòng thử lại.';
         toast.error(`${errorMessage}`);
-      }
-
-      else {
+      } else {
         toast.error('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.');
       }
     } catch (error) {
@@ -108,7 +125,6 @@ const ProfilePage = () => {
       toast.error(`${errorMessage}`);
     }
   };
-
 
   // Mở và đóng modal
   const openModal = () => setIsModalOpen(true);
@@ -135,10 +151,11 @@ const ProfilePage = () => {
         <div className="flex">
           <div className="w-1/3 flex flex-col items-center">
             <img
-              src={previewImage ? URL.createObjectURL(previewImage) : profile.avatar}
-              alt="Avatar"
-              className="rounded-full w-40 h-40 mb-4"
+              src={previewImage ? URL.createObjectURL(previewImage) : (profile.avatar || DefaultAvatar)}
+              alt="User Avatar"
+              className="rounded-full w-40 h-40 mb-4 bg-gray-100"
             />
+
             {isEditing ? (
               <input
                 type="text"
@@ -187,20 +204,14 @@ const ProfilePage = () => {
                           <option value="Female">Female</option>
                         </select>
                       ) : key === 'dateOfBirth' ? (
-                        <InputMask
-                          mask="9999/99/99"
+                        <input
+                          type="text"
+                          name="dateOfBirth"
                           value={profile.dateOfBirth}
                           onChange={handleChange}
-                        >
-                          {(inputProps) => (
-                            <input
-                              {...inputProps}
-                              type="text"
-                              name="dateOfBirth"
-                              className="mt-2 p-2 border rounded w-full h-10"
-                            />
-                          )}
-                        </InputMask>
+                          placeholder="DD/MM/YYYY"
+                          className="mt-2 p-2 border rounded w-full h-10"
+                        />
                       ) : (
                         <input
                           type="text"
@@ -213,7 +224,7 @@ const ProfilePage = () => {
                     ) : (
                       <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10 truncate">
                         {key === 'dateOfBirth'
-                          ? dayjs(profile[key]).format('DD/MM/YYYY')
+                          ? profile[key]
                           : profile[key]}
                       </p>
                     )}
@@ -239,7 +250,6 @@ const ProfilePage = () => {
       {isModalOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
-
         >
           <ChangePassword closeModal={closeModal} />
         </div>
