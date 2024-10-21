@@ -36,7 +36,7 @@ const AuthProvider = ({ children }) => {
 			if (token) {
 				try {
 					const res = await AxiosInterceptor.get("/api/users/current");
-					
+
 					// const res = await axios.get(`${process.env.REACT_APP_PRO_API}/api/account`);
 					if (res.status === 200) {
 						setUser(res.data);
@@ -51,6 +51,7 @@ const AuthProvider = ({ children }) => {
 						title: "Token Error",
 						message: "Phiên đăng nhập của bạn đã hết hạn, hãy đăng nhập lại."
 					});
+					
 					return;
 				}
 			}
@@ -84,7 +85,7 @@ const AuthProvider = ({ children }) => {
 			const clientRole = userInfo.Role; // Lấy vai trò từ UserInfo
 			console.log("role", clientRole);
 
-			if (clientRole === "Buyer" || clientRole === "Seller" || clientRole === "Admin") {
+			if (clientRole === "Customer" || clientRole === "Seller" || clientRole === "Admin" || clientRole === "Manager") {
 				localStorage.setItem('token', res.data.token);
 				localStorage.setItem('refreshToken', res.data.refreshToken);
 				let resData;
@@ -104,6 +105,7 @@ const AuthProvider = ({ children }) => {
 						title: "Token Error",
 						message: "Lỗi xác thực, hãy thử lại."
 					});
+					
 					return;
 				}
 				if (resData.status === 200) {
@@ -111,11 +113,19 @@ const AuthProvider = ({ children }) => {
 						setUser(resData.data);
 						setAuthenticated(true);
 						setError(null);
-						console.log("Login successful, navigating to home...");
-						if (clientRole === "Admin") {
+
+						console.log("Login successful, navigating to home...", resData);
+						if (clientRole === "Manager") {
 							navigate("/dashboard");
+						} else if (clientRole === "Seller") {
+							if (resData.data.seller === null) {
+								console.log('day ne', resData.data.seller);
+								navigate("/seller-application");
+							} else {
+								navigate("/seller");
+							}
 						} else {
-							navigate("/");
+							navigate("/")
 						}
 					} else {
 						await logout();
@@ -132,6 +142,7 @@ const AuthProvider = ({ children }) => {
 					title: "Access Denied",
 					message: "Truy cập của bạn bị từ chối, hãy thử lại."
 				});
+				
 			}
 		}
 		setIsLoading(false);
@@ -159,7 +170,7 @@ const AuthProvider = ({ children }) => {
 				const userInfo = JSON.parse(decode.UserInfo || '{}');
 				const clientRole = userInfo.Role;
 
-				if (clientRole === "Buyer" || clientRole === "Seller") {
+				if (clientRole === "Customer" || clientRole === "Seller") {
 					let resData;
 					try {
 						resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {
@@ -173,6 +184,7 @@ const AuthProvider = ({ children }) => {
 							title: "Token Error",
 							message: "Lỗi xác thực, hãy thử lại."
 						});
+						
 						return;
 					}
 
@@ -186,20 +198,31 @@ const AuthProvider = ({ children }) => {
 					setAuthenticated(false);
 					setError({
 						title: "Access Denied",
-						message: "Your Email need to verify, please Sign Up."
+						message: "Your Email needs to verify, please Sign Up."
 					});
+					
 				}
 			} else {
 				setError({
 					title: "Google Login Failed",
-					message: "Google login failed, please try again."
+					message: "Đăng nhập Google không thành công, vui lòng thử lại."
 				});
+				
 			}
 		} catch (error) {
-			setError({
-				title: "Google Login Error",
-				message: error?.response?.data?.message || "Google login failed, please try again."
-			});
+
+			const backendError = error?.response?.data;
+			if (backendError) {
+				setError({
+					title: "Lỗi Đăng Nhập",
+					message: (backendError.reasons?.[0]?.message)
+				});
+			} else {
+				setError({
+					title: "Lỗi Đăng Nhập",
+					message: "Đăng nhập Google không thành công, vui lòng thử lại."
+				});
+			}
 		} finally {
 			setIsLoading(false);
 		}
@@ -224,15 +247,16 @@ const AuthProvider = ({ children }) => {
 		setIsLoading(true);
 		let registerRes;
 		try {
-				registerRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/signup") : (process.env.REACT_APP_PRO_API + "/api/auth/signup"), {
-					fullName: userDetails.fullName,
-					password: userDetails.password,
-					email: userDetails.email,
-				}
+			registerRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/signup") : (process.env.REACT_APP_PRO_API + "/api/auth/signup"), {
+				fullName: userDetails.fullName,
+				password: userDetails.password,
+				email: userDetails.email,
+				role: userDetails.role
+			}
 			);
 			console.log("Register response received:", registerRes);
 
-			if (registerRes.status === 201) {
+			if (registerRes.status === 204) {
 				// Redirect to verify page
 				navigate('/verify');
 			}
@@ -242,7 +266,7 @@ const AuthProvider = ({ children }) => {
 			setError({
 
 				title: "Registration Error",
-				message: error?.response?.data?.reasons[0] || "Failed to register, please try again.",
+				message: error?.response?.data?.reasons[0] || "Đăng kí thất bại, vui lòng thử lại sau",
 			});
 		} finally {
 			setIsLoading(false);
@@ -254,12 +278,10 @@ const AuthProvider = ({ children }) => {
 		let verifyRes;
 		try {
 			console.log("Sending request...");
-				verifyRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/verify") : (process.env.REACT_APP_PRO_API + "/api/auth/verify"), {
-				
-					code: verificationData.code,
-					email: verificationData.email,
-				}
-			);
+			verifyRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/verify") : (process.env.REACT_APP_PRO_API + "/api/auth/verify"), {
+				code: verificationData.code,
+				email: verificationData.email,
+			});
 			console.log("Verify response received:", verifyRes);
 
 			if (verifyRes.status === 200) {
@@ -274,14 +296,53 @@ const AuthProvider = ({ children }) => {
 				console.log("user info", decode);
 				console.log("Role", clientRole);
 
-				if (clientRole === "Buyer" || clientRole === "Seller") {
+				if (clientRole === "Seller") {
 					let resData;
 					try {
+						// Gọi API để lấy thông tin người dùng hiện tại
 						resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {
 							headers: {
 								Authorization: `Bearer ${token}`
 							}
 						});
+
+						if (resData.status === 200) {
+							// Kiểm tra seller có null hay không
+							if (resData.data.seller === null) {
+								console.log('Seller is null, navigating to seller application...');
+								navigate("/seller-application"); // Điều hướng đến trang đăng ký seller
+							} else {
+								setUser(resData.data); // Lưu thông tin người dùng
+								setAuthenticated(true);
+								setError(null);
+								navigate("/seller"); // Điều hướng đến trang seller
+							}
+						}
+					} catch (error) {
+						await logout();
+						setError({
+							title: "Token Error",
+							message: "Lỗi xác thực, hãy thử lại."
+						});
+						
+						return;
+					}
+				} else if (clientRole === "Customer") {
+					let resData;
+					try {
+						// Gọi API để lấy thông tin người dùng hiện tại
+						resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {
+							headers: {
+								Authorization: `Bearer ${token}`
+							}
+						});
+
+						if (resData.status === 200) {
+							setUser(resData.data); // Lưu thông tin người dùng
+							setAuthenticated(true);
+							setError(null);
+							navigate("/"); // Điều hướng đến trang chính nếu là Customer
+						}
 					} catch (error) {
 						await logout();
 						setError({
@@ -290,25 +351,20 @@ const AuthProvider = ({ children }) => {
 						});
 						return;
 					}
-
-					if (resData.status === 200) {
-						setUser(resData.data);
-						setAuthenticated(true);
-						setError(null);
-						navigate("/");
-					}
 				} else {
 					setAuthenticated(false);
 					setError({
 						title: "Access Denied",
 						message: "Truy cập của bạn bị từ chối, hãy thử lại."
 					});
+					
 				}
 			} else {
 				setError({
 					title: "Verification Failed",
 					message: "Mã xác thực không hợp lệ, hãy thử lại."
 				});
+				
 			}
 		} catch (error) {
 			// Check if the error is a 400 Bad Request
@@ -335,35 +391,33 @@ const AuthProvider = ({ children }) => {
 		let resendRes;
 		try {
 			console.log("Sending resend request...");
-				resendRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/resend") : (process.env.REACT_APP_PRO_API + "/api/auth/resend"), {
-					email: email,
-				}
+			resendRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/resend") : (process.env.REACT_APP_PRO_API + "/api/auth/resend"), {
+				email: email,
+			}
 			);
 			console.log("Resend response received:", resendRes);
 
-			if (resendRes.status === 200) {
-				setError({
-					title: "Resend Successful",
-					message: "A new verification code has been sent to your email.",
-				});
+			if (resendRes.status === 204) {
+				toast.success("Gửi mã thành công, vui nhập mã")
 			} else {
 				setError({
 					title: "Resend Failed",
-					message: "Failed to resend the verification code, please try again.",
+					message: "Gửi thất bại, vui lòng thử lại ",
 				});
+				
 			}
 		} catch (error) {
 			// Handle specific error cases
 			if (error.response && error.response.status === 400) {
 				setError({
 					title: "Bad Request",
-					message: error.response.data.message || "Invalid request. Please check your data and try again.",
+					message: error.response.data.message || "Thất bại, vui lòng kiểm tra lại ",
 				});
 			} else {
 				// General error handling
 				setError({
 					title: "Resend Error",
-					message: error.response?.data?.message || "Error resending verification code, please try again.",
+					message: error.response?.data?.message || "Gửi lại mã thất bại, vui lòng thử lại",
 				});
 			}
 			console.error("Resend error details:", error.response); // Log error details
@@ -392,7 +446,7 @@ const AuthProvider = ({ children }) => {
 				verify,
 				resend,
 				googleLogin,
-				error
+				error,
 			}}
 		>
 			{children}

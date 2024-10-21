@@ -1,181 +1,178 @@
 import React, { useState } from 'react';
-// import { forgotPassword, resetPassword } from '~/api/UserAPI';
+import signupp from '~/assets/signupp.jpg';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { ArrowLeft } from 'lucide-react';
 
 function ForgotPassword() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [enteredOtp, setEnteredOtp] = useState('');
-  const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [otpAttempts, setOtpAttempts] = useState(0); // Track OTP attempts
   const navigate = useNavigate();
 
-//   const handleSendOTP = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-//     try {
-//       const response = await forgotPassword(email);
-//       console.log('OTP sent successfully', response.data);
-//       setOtp(response.data.data);
-//       toast.success('OTP sent successfully!');
-//       setStep(2);
-//     } catch (error) {
-//       console.error('Error sending OTP:', error.response ? error.response.data : error.message);
-//       toast.error('Error sending OTP');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+  const handleSendCode = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error('Vui lòng nhập email!');
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        process.env.NODE_ENV === "development" 
+          ? (process.env.REACT_APP_DEV_API + "/api/auth/resend") 
+          : (process.env.REACT_APP_PRO_API + "/api/auth/resend"), 
+        { email }
+      );
+      if (response.status === 204) {
+        toast.success('Đã gửi mã xác thực!');
+        setStep(2); 
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        const { title, reasons } = error.response.data;
+        const errorMessage = reasons && reasons.length > 0 ? reasons[0].message : title;
+        toast.error(errorMessage); 
+      } else {
+        toast.error('Đã có lỗi xảy ra. Hãy thử lại!');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-//   const handleVerifyOTP = (e) => {
-//     e.preventDefault();
-//     if (enteredOtp === otp) {
-//       setStep(3);
-//     } else {
-//       const newAttempts = otpAttempts + 1;
-//       setOtpAttempts(newAttempts);
-//       if (newAttempts >= 3) {
-//         toast.error('Too many failed attempts. Please try again.');
-//         setTimeout(() => {
-//           navigate('/signin');
-//         }, 2500);
-//       } else {
-//         toast.error('Invalid OTP');
-//       }
-//     }
-//   };
-
-//   const handleResetPassword = async (e) => {
-//     e.preventDefault();
-//     if (password === confirmPassword) {
-//       setLoading(true);
-//       try {
-//         const response = await resetPassword(email, password);
-//         console.log('Password reset successfully', response.data);
-//         toast.success('Password reset successfully!');
-//         // Delay navigate to ensure toast is shown
-//         setTimeout(() => {
-//           navigate('/signin');
-//         }, 2000); // Delay of 2 seconds (2000 milliseconds)
-//       } catch (error) {
-//         console.error('Error resetting password:', error.response ? error.response.data : error.message);
-//         toast.error('Error resetting password');
-//       } finally {
-//         setLoading(false);
-//       }
-//     } else {
-//       console.error('Passwords do not match');
-//       toast.error('Passwords do not match!!!');
-//     }
-//   };
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!newPassword || !confirmPassword || !code) {
+      toast.error('Vui lòng điền đầy đủ thông tin!');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Mật khẩu không khớp!');
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        process.env.NODE_ENV === "development" 
+          ? (process.env.REACT_APP_DEV_API + "/api/auth/forgot-password") 
+          : (process.env.REACT_APP_PRO_API + "/api/auth/forgot-password"), 
+        {
+          email,
+          newPassword,
+          code,
+        }
+      );
+      if (response.status >= 200 && response.status < 300) {
+        toast.success('Thay đổi mật khẩu thành công!');
+        setTimeout(() => {
+          navigate('/signin'); 
+        }, 2000);
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        const { title, reasons } = error.response.data;
+        const errorMessage = reasons && reasons.length > 0 ? reasons[0].message : title;
+        toast.error(errorMessage); 
+      } else {
+        toast.error('Đã có lỗi xảy ra. Hãy thử lại!');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-      <div className="max-w-md mx-auto mt-2 p-6 bg-white rounded-lg shadow-md">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <ToastContainer />
-      {step === 1 && (
-        <>
-          <h1 className="text-center font-bold text-3xl text-black mb-1">Recover Your Password!</h1>
-          <form> 
-             {/* <form onSubmit={handleSendOTP}>  */}
-            <div className="mt-10">
-              <p className="text-center text-base mb-3">
-                Enter your email address you'd like your password reset information sent to
-              </p>
-              <label htmlFor="email" className="text-base font-semibold text-gray-600 p-2">Email</label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="block w-full h-10 mt-1 mb-8 border-gray-300 rounded-md shadow-sm bg-gray-100 p-2"
-                required
-              />
+      <div className="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
+        <div className="flex flex-col justify-center p-8 md:p-14">
+          <button
+            className="absolute top-4 left-4 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-8 w-8" />
+            <span className="sr-only">Quay lại</span>
+          </button>
+          {step === 1 && (
+            <>
+              <span className="mb-3 text-4xl font-bold">Quên mật khẩu</span>
+              <span className="font-light text-gray-400 mb-8">Nhập email của bạn để nhận mã xác thực</span>
+              <div className="py-4">
+                <span className="text-base font-semibold text-gray-600">Email</span>
+                <input
+                  type="email"
+                  className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
               <button
-                type="submit"
-                className="w-full py-2 px-4 bg-black border border-transparent rounded-md shadow-sm text-base font-medium text-white hover:bg-orange-600"
+                onClick={handleSendCode}
+                className="w-full p-2 mb-6 bg-black text-white border border-transparent rounded-lg shadow-sm text-base font-medium hover:bg-orange-600"
                 disabled={loading}
               >
-                {loading ? 'Sending...' : 'Send OTP'}
+                {loading ? 'Đang gửi...' : 'Gửi mã xác thực'}
               </button>
-            </div>
-          </form>
-        </>
-      )}
-      {step === 2 && (
-        <>
-          <h1 className="text-center font-bold text-3xl text-black mb-1">Verify OTP</h1>
-         <form>
-          {/* <form onSubmit={handleVerifyOTP}> */}
-            <div className="mt-10">
-              <p className="text-center text-base mb-3">
-                Enter the OTP sent to your email
-              </p>
-              <label htmlFor="otp" className="text-base font-semibold text-gray-600 p-2">OTP</label>
-              <input
-                type="text"
-                id="otp"
-                value={enteredOtp}
-                onChange={(e) => setEnteredOtp(e.target.value)}
-                placeholder="Enter your OTP"
-                className="block w-full h-10 mt-1 mb-8 border-gray-300 rounded-md shadow-sm bg-gray-100 p-2"
-                required
-              />
+            </>
+          )}
+          {step === 2 && (
+            <>
+              <span className="mb-3 text-4xl font-bold">Đặt lại mật khẩu</span>
+              <div className="py-4">
+                <span className="text-base font-semibold text-gray-600">Mật khẩu mới</span>
+                <input
+                  type="password"
+                  className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="py-4">
+                <span className="text-base font-semibold text-gray-600">Xác nhận mật khẩu</span>
+                <input
+                  type="password"
+                  className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="py-4">
+                <span className="text-base font-semibold text-gray-600">Mã xác thực</span>
+                <input
+                  type="text"
+                  className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                />
+              </div>
               <button
-                type="submit"
-                className="w-full py-2 px-4 bg-black border border-transparent rounded-md shadow-sm text-base font-medium text-white hover:bg-orange-600"
-              >
-                Verify OTP
-              </button>
-            </div>
-          </form>
-        </>
-      )}
-      {step === 3 && (
-        <>
-          <h1 className="text-center font-bold text-3xl text-black mb-1">Reset Your Password</h1>
-          <form>
-          {/* <form onSubmit={handleResetPassword}> */}
-            <div className="mt-10">
-              <label htmlFor="password" className="text-base font-semibold text-gray-600 p-2">New Password</label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your new password"
-                className="block w-full h-10 mt-1 mb-8 border-gray-300 rounded-md shadow-sm bg-gray-100 p-2"
-                required
-              />
-              <label htmlFor="confirmPassword" className="text-base font-semibold text-gray-600 p-2">Confirm Password</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your new password"
-                className="block w-full h-10 mt-1 mb-8 border-gray-300 rounded-md shadow-sm bg-gray-100 p-2"
-                required
-              />
-              <button
-                type="submit"
-                className="w-full py-2 px-4 bg-black border border-transparent rounded-md shadow-sm text-base font-medium text-white hover:bg-orange-600"
+                onClick={handleResetPassword}
+                className="w-full p-2 mb-6 bg-black text-white border border-transparent rounded-lg shadow-sm text-base font-medium hover:bg-orange-600"
                 disabled={loading}
               >
-                {loading ? 'Resetting...' : 'Reset Password'}
+                {loading ? 'Đang đặt lại...' : 'Đặt lại mật khẩu'}
               </button>
-            </div>
-          </form>
-        </>
-      )}
-    </div>
+            </>
+          )}
+        </div>
+        <div className="relative">
+          <img
+            src={signupp}
+            alt="img"
+            className="w-[380px] h-full hidden rounded-r-2xl md:block object-cover"
+          />
+        </div>
+      </div>
     </div>
   );
 }
