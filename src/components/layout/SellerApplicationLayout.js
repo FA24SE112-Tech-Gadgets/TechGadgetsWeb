@@ -2,12 +2,10 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import SellerDashboard from '~/pages/Seller/SellerDashboard';
 import SellerHeader from '~/pages/Seller/SellerHeader';
-import RoleBaseRoute from '../auth/RoleBaseRoute';
 
 const SellerApplicationLayout = () => {
     return (
 
-        <RoleBaseRoute accessibleRoles={['Seller']}>
             <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <SellerHeader />
             <div style={{ display: 'flex', flex: 1 }}>
@@ -17,7 +15,7 @@ const SellerApplicationLayout = () => {
                 </div>
                 </div>
             </div>
-            </RoleBaseRoute>
+          
 
     );
 };
