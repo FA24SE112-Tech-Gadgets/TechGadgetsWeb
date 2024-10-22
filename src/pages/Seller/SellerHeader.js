@@ -3,16 +3,16 @@ import { Layout, Menu, Dropdown, Avatar } from 'antd';
 import { BellOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import icon from "~/assets/icon.ico"; 
 import useAuth from '~/context/auth/useAuth';
-
+import { useNavigate } from 'react-router-dom';
 const { Header } = Layout;
 
 const SellerHeader = () => {
   const { logout } = useAuth();  // Sử dụng hàm logout từ useAuth
-
+  const navigate = useNavigate();
   // Tạo menu cho người dùng với sự kiện onClick cho Đăng xuất
   const userMenu = (
     <Menu>
-      <Menu.Item key="profile" icon={<UserOutlined />}>
+      <Menu.Item key="profile" icon={<UserOutlined />}  onClick={() => navigate('/sellerProfile')}>
         Thông tin cá nhân
       </Menu.Item>
       <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={logout}>

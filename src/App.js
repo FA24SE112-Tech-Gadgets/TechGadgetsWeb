@@ -28,6 +28,8 @@ import HistorySellerApplication from "./pages/Seller/HistorySellerApplication";
 import SellerApplicationLayout from "./components/layout/SellerApplicationLayout";
 import ManageSellerApplicationPage from "./pages/Manager/SellerApplication/ManageSellerApplication";
 import ForgotPassword from "./pages/ForgotPWD/ForgotPWDPage";
+import SellerProfilePage from "./pages/Seller/SellerProfile";
+import SellerHeader from "./pages/Seller/SellerHeader";
 
 
 function App() {
@@ -69,7 +71,22 @@ function App() {
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
         <Route path='/seller' element={ <Order />} />
+        
       </Route>
+
+
+      <Route path="/sellerProfile"element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Seller"]}>
+            <SellerHeader />
+              <SellerProfilePage />
+            </RoleBaseRoute>
+          </AuthRoute>
+
+        } />
+
+      
+
 
       <Route element={<SellerApplicationLayout />}>
         <Route path='/seller-application' element={<SellerApplication />} />

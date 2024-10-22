@@ -79,7 +79,7 @@ const fetchBrandsForCategories = async () => {
           details: [
             {
               subcategory: `Hãng ${category.name}`,
-              items: brandColumns.map((column) => 
+              items: brandColumns.map((column) =>
                 column.map((brand) => ({
                   name: brand.name,
                   // link: `/gadgets/${category.name.toLowerCase()}/${brand.name.toLowerCase()}`,
@@ -105,30 +105,76 @@ const getCategoryIcon = (categoryName) => {
   switch (categoryName.toLowerCase()) {
     case 'laptop':
       return (
-        <svg className="h-8 w-8 text-yellow-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-          <line x1="12" y1="18" x2="12.01" y2="18" />
+        <svg
+          className="h-8 w-8 text-yellow-500"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M3 3h18v12H3z" />
+          <path d="M2 16h20v2H2z" />
+          <path d="M4 16V4h16v12H4z" />
         </svg>
       );
+
+
     case 'tai nghe':
       return (
-        <svg className="h-8 w-8 text-yellow-500" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" />
-          <rect x="3" y="4" width="18" height="12" rx="1" />
-          <line x1="7" y1="20" x2="17" y2="20" />
-          <line x1="9" y1="16" x2="9" y2="20" />
-          <line x1="15" y1="16" x2="15" y2="20" />
+        <svg
+          className="h-8 w-8 text-yellow-500"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 3a9 9 0 00-9 9v3a3 3 0 006 0v-3a3 3 0 006 0v3a3 3 0 006 0v-3a9 9 0 00-9-9z" />
+          <path d="M12 21v1" />
         </svg>
       );
+
+
+    case 'loa':
+      return (
+        <svg
+          className="h-8 w-8 text-yellow-500"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <path d="M9 9h6v6H9z" />
+          <line x1="3" y1="12" x2="0" y2="12" />
+          <line x1="24" y1="12" x2="21" y2="12" />
+        </svg>
+      );
+
+
     case 'điện thoại':
       return (
-        <svg className="h-8 w-8 text-yellow-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
-          <line x1="2" y1="19" x2="22" y2="19" />
-          <line x1="6" y1="2" x2="6" y2="5" />
-          <line x1="18" y1="2" x2="18" y2="5" />
+        <svg
+          className="h-8 w-8 text-yellow-500"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="6" y="2" width="12" height="20" rx="2" ry="2" />
+          <path d="M9 4h6" />
+          <path d="M9 20h6" />
         </svg>
       );
+
+
     default:
       return null;
   }
@@ -185,7 +231,7 @@ const HeroSection = ({ handleOrderPopup }) => {
   };
 
   return (
-    <div className="relative overflow-hidden min-h-[1000px] sm:min-h-[400px] bg-gray-100 flex dark:bg-gray-950 dark:text-white duration-200 p-5">
+    <div className="relative overflow-hidden min-h-[800px] sm:min-h-[100px] bg-gray-100 flex dark:bg-gray-950 dark:text-white duration-200 p-5">
       {/* background pattern */}
       <div className="h-[700px] w-[700px] bg-primary/40 absolute -top-1/2 right-0 rounded-3xl rotate-45 -z[8]"></div>
 
@@ -194,20 +240,24 @@ const HeroSection = ({ handleOrderPopup }) => {
 
         {/* Left Sidebar */}
         <div className="w-[200px] h-[300px] bg-white dark:bg-gray-800 rounded-lg p-4 relative z-20">
-          <ul className="space-y-3">
+          <div className="h-[400px] flex flex-col justify-between p-4">
+          <ul className="flex flex-col">
             {categories.map((category, index) => (
               <li
                 key={index}
                 onMouseEnter={() => handleMouseEnterCategory(index)}
                 onMouseLeave={handleMouseLeaveCategory}
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2 cursor-pointer mb-5"
               >
                 {category.icon}
                 <h3>{category.name}</h3>
               </li>
             ))}
           </ul>
+          </div>
+         
           {/* Brands Panel - Đặt phần này ở cùng vị trí */}
+          
           {(hoveredCategory !== null || isHoveringDetails) && (
             <div
               className="absolute top-0 left-full ml-2 overflow-y-auto w-[955px] bg-white dark:bg-gray-900 p-4 space-x-4 flex z-30"
