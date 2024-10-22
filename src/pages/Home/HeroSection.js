@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image1 from "../../assets/hero/camera.png";
 import Image2 from "../../assets/hero/laptop.png";
 import Image3 from "../../assets/hero/sale.png";
 import Slider from "react-slick";
 import { Link } from "react-router-dom";
-
+import axios from 'axios';
+import slugify from "~/ultis/config";
 // Image list for the slider
 const ImageList = [
   {
@@ -30,130 +31,146 @@ const ImageList = [
   },
 ];
 
-// List of categories for the left sidebar
-const categories = [
-  {
-    name: "Điện thoại",
-    icon: (
-      <svg className="h-8 w-8 text-yellow-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-        <line x1="12" y1="18" x2="12.01" y2="18" />
-      </svg>
-    ),
-    details: [
-      {
-        subcategory: "Hãng điện thoại",
-        items: [
-          { name: "iPhone", link: "/gadget/iphone" },
-          { name: "Samsung", link: "/products/samsung" },
-          { name: "Xiaomi", link: "/products/xiaomi" },
-          { name: "Oppo", link: "/products/oppo" },
-          { name: "Vivo", link: "/products/vivo" },
-          { name: "Realme", link: "/products/realme" },
-          { name: "OnePlus", link: "/products/oneplus" },
-          { name: "Sony", link: "/products/sony" },
-          { name: "Nokia", link: "/products/nokia" },
-          { name: "Huawei", link: "/products/huawei" }
-        ]
+const fetchBrandsForCategories = async () => {
+  try {
+    const categoriesResponse = await axios.get(
+      process.env.NODE_ENV === "development"
+        ? `${process.env.REACT_APP_DEV_API}/api/categories`
+        : `${process.env.REACT_APP_PRO_API}/api/categories`
+    );
 
-      },     
-    ]
-  },
-  {
-    icon: (
-      <svg className="h-8 w-8 text-yellow-500" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" />
-        <rect x="3" y="4" width="18" height="12" rx="1" />
-        <line x1="7" y1="20" x2="17" y2="20" />
-        <line x1="9" y1="16" x2="9" y2="20" />
-        <line x1="15" y1="16" x2="15" y2="20" />
-      </svg>
-    ),
-    name: "Máy tính",
-    details: [
-      {
-        subcategory: "Thương hiệu",
-        items: [
-          { name: "Dell", link: "/products/dell" },
-          { name: "HP", link: "/products/hp" },
-          { name: "Lenovo", link: "/products/lenovo" },
-          { name: "Mac", link: "/gadget/mac" },
-          { name: "Asus", link: "/products/asus" },
-          { name: "Acer", link: "/products/acer" },
-          { name: "MSI", link: "/products/msi" },
-          { name: "Razer", link: "/products/razer" },
-          { name: "Samsung", link: "/products/samsung" }
-        ]
-      },
-        ]
-  },
-  {
-    icon: (
-      <svg className="h-8 w-8 text-yellow-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="7" />
-        <polyline points="12 9 12 12 13.5 13.5" />
-        <path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83" />
-      </svg>
-    ),
-    name: "Đồng hồ",
-    details: [
-      {
-        subcategory: "Hãng đồng hồ",
-        items: [
-          { name: "Apple Watch", link: "/products/apple-watch" },
-          { name: "Samsung", link: "/products/samsung-watch" },
-          { name: "Xiaomi", link: "/products/xiaomi-watch" },
-          { name: "Huawei", link: "/products/huawei-watch" },
-          { name: "Coros", link: "/products/coros-watch" },
-          { name: "Garmin", link: "/products/garmin-watch" },
-          { name: "Kieslect", link: "/products/kieslect-watch" },
-          { name: "Amazfit", link: "/products/amazfit-watch" },
-        ]
-      },
-    ]
-  },
- 
-  {
-    name: "Loa",
-    icon: (
-      <svg className="h-8 w-8 text-yellow-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
-        <line x1="2" y1="19" x2="22" y2="19" />
-        <line x1="6" y1="2" x2="6" y2="5" />
-        <line x1="18" y1="2" x2="18" y2="5" />
-      </svg>
-    ),
-    details: [
-      {
-        subcategory: "Loại PC",
-        items: [
-          { name: "Build PC", link: "/products/build-pc" },
-          { name: "Cấu hình sẵn", link: "/products/preset-pc" },
-          { name: "All In One", link: "/products/all-in-one-pc" },
-          { name: "PC bộ", link: "/products/desktop-pc" },
-          { name: "Chọn PC theo nhu cầu", link: "/products/select-pc-by-need" },
-          { name: "Gaming", link: "/products/gaming-pc" },
-          { name: "Đồ họa", link: "/products/graphic-pc" },
-          { name: "Văn phòng", link: "/products/office-pc" }
-        ]
-      },
+    const categoriesData = categoriesResponse.data.items;
 
-    ]
-  },
- 
-  
-];
+    const updatedCategories = await Promise.all(
+      categoriesData.map(async (category) => {
+        const brands = [];
+        let page = 1;
+        const pageSize = 50; // Giả sử số lượng item mỗi trang là 50
+        let hasNextPage = true;
+
+        while (hasNextPage) {
+          try {
+            const brandsResponse = await axios.get(
+              `${process.env.REACT_APP_DEV_API || process.env.REACT_APP_PRO_API}/api/brands/categories/${category.id}?page=${page}&pageSize=${pageSize}`
+            );
+
+            const brandsPage = brandsResponse.data.items || [];
+            brands.push(...brandsPage); // Gộp thương hiệu mới vào mảng tổng
+
+            hasNextPage = brandsResponse.data.hasNextPage;
+            page++; // Tăng page để lấy trang tiếp theo
+          } catch (error) {
+            console.error(`Error fetching brands for category ${category.name}`, error);
+            break; // Nếu có lỗi, thoát khỏi vòng lặp
+          }
+        }
+
+        // Chia thành từng cột 10 thương hiệu
+        const brandColumns = [];
+        const columnSize = Math.ceil(brands.length / 3); // Tính kích thước cột
+
+        for (let i = 0; i < brands.length; i += columnSize) {
+          brandColumns.push(brands.slice(i, i + columnSize)); // Tạo mảng các cột thương hiệu
+        }
+
+        return {
+          name: category.name,
+          icon: getCategoryIcon(category.name),
+          details: [
+            {
+              subcategory: `Hãng ${category.name}`,
+              items: brandColumns.map((column) => 
+                column.map((brand) => ({
+                  name: brand.name,
+                  // link: `/gadgets/${category.name.toLowerCase()}/${brand.name.toLowerCase()}`,
+                  link: `/gadgets/${slugify(category.name)}/${brand.name.toLowerCase()}`,
+                  logoUrl: brand.logoUrl,
+                }))
+              )
+            }
+          ]
+        };
+      })
+    );
+
+    return updatedCategories;
+  } catch (error) {
+    console.error("Error fetching categories or brands", error);
+    return [];
+  }
+};
 
 
-// Promotional image list
+const getCategoryIcon = (categoryName) => {
+  switch (categoryName.toLowerCase()) {
+    case 'laptop':
+      return (
+        <svg className="h-8 w-8 text-yellow-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+          <line x1="12" y1="18" x2="12.01" y2="18" />
+        </svg>
+      );
+    case 'tai nghe':
+      return (
+        <svg className="h-8 w-8 text-yellow-500" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" />
+          <rect x="3" y="4" width="18" height="12" rx="1" />
+          <line x1="7" y1="20" x2="17" y2="20" />
+          <line x1="9" y1="16" x2="9" y2="20" />
+          <line x1="15" y1="16" x2="15" y2="20" />
+        </svg>
+      );
+    case 'điện thoại':
+      return (
+        <svg className="h-8 w-8 text-yellow-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
+          <line x1="2" y1="19" x2="22" y2="19" />
+          <line x1="6" y1="2" x2="6" y2="5" />
+          <line x1="18" y1="2" x2="18" y2="5" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
 const promoImages = [Image1, Image2, Image3];
 
 const HeroSection = ({ handleOrderPopup }) => {
-  // State to track the hovered category
+  const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [isHoveringDetails, setIsHoveringDetails] = useState(false);
+  useEffect(() => {
+    const loadCategories = async () => {
+      const fetchedCategories = await fetchBrandsForCategories();
+      setCategories(fetchedCategories);
+    };
 
-  // Slider settings
+    loadCategories();
+  }, []);
+
+  const handleMouseEnterCategory = (index) => {
+    setHoveredCategory(index);
+    setIsHoveringDetails(true);
+  };
+
+  const handleMouseLeaveCategory = () => {
+    setIsHoveringDetails(false);
+  };
+
+  const handleBrandClick = (brandLink) => {
+    window.location.href = brandLink;
+  };
+
+
+  const handleMouseEnterDetails = () => {
+    setIsHoveringDetails(true);
+  };
+
+  const handleMouseLeaveDetails = () => {
+    setIsHoveringDetails(false);
+    setHoveredCategory(null);
+  };
   var settings = {
     dots: false,
     arrows: false,
@@ -167,31 +184,13 @@ const HeroSection = ({ handleOrderPopup }) => {
     pauseOnFocus: true,
   };
 
-  const handleMouseEnterCategory = (index) => {
-    setHoveredCategory(index);
-    setIsHoveringDetails(true);
-  };
-
-  const handleMouseLeaveCategory = () => {
-    setIsHoveringDetails(false);
-  };
-
-  const handleMouseEnterDetails = () => {
-    setIsHoveringDetails(true);
-  };
-
-  const handleMouseLeaveDetails = () => {
-    setIsHoveringDetails(false);
-    setHoveredCategory(null);
-  };
-
   return (
-    <div className="relative overflow-hidden min-h-[700px] sm:min-h-[400px] bg-gray-100 flex dark:bg-gray-950 dark:text-white duration-200 p-5">
+    <div className="relative overflow-hidden min-h-[1000px] sm:min-h-[400px] bg-gray-100 flex dark:bg-gray-950 dark:text-white duration-200 p-5">
       {/* background pattern */}
       <div className="h-[700px] w-[700px] bg-primary/40 absolute -top-1/2 right-0 rounded-3xl rotate-45 -z[8]"></div>
 
       {/* Main section */}
-      <div className="container flex gap-4 justify-center sm:pb-0 relative">
+      <div className="container flex gap-2 justify-center sm:pb-0 relative">
 
         {/* Left Sidebar */}
         <div className="w-[200px] h-[300px] bg-white dark:bg-gray-800 rounded-lg p-4 relative z-20">
@@ -199,44 +198,47 @@ const HeroSection = ({ handleOrderPopup }) => {
             {categories.map((category, index) => (
               <li
                 key={index}
-                className="relative group cursor-pointer"
                 onMouseEnter={() => handleMouseEnterCategory(index)}
                 onMouseLeave={handleMouseLeaveCategory}
+                className="flex items-center gap-2 cursor-pointer"
               >
-                <div className="text-gray-800 dark:text-white flex items-center">
-                  {category.icon && category.icon}
-                  {category.name}
-                </div>
+                {category.icon}
+                <h3>{category.name}</h3>
               </li>
             ))}
           </ul>
-          {/* Details on hover */}
+          {/* Brands Panel - Đặt phần này ở cùng vị trí */}
           {(hoveredCategory !== null || isHoveringDetails) && (
             <div
-              className="absolute top-0 left-full ml-2 h-[300px] w-[955px] bg-white dark:bg-gray-900 p-4 space-x-4 flex z-30"
+              className="absolute top-0 left-full ml-2 overflow-y-auto w-[955px] bg-white dark:bg-gray-900 p-4 space-x-4 flex z-30"
               onMouseEnter={handleMouseEnterDetails}
               onMouseLeave={handleMouseLeaveDetails}
             >
               {categories[hoveredCategory]?.details.map((detail, idx) => (
-                <div key={idx} className="flex-1 min-w-[100px]  space-y-4">
+                <div key={idx} className="flex-1 min-w-[100px] space-y-4">
                   <div className="font-semibold text-gray-600 dark:text-gray-300">
                     {detail.subcategory}
                   </div>
-                  <ul className="list-none list-inside space-y-2">
-                    {detail.items.map((item, id) => (
-                      <li key={id} className="text-gray-600 dark:text-gray-300">
-                        <Link to={item.link} className="hover:underline">
-                          {item.name}
-                        </Link>
-                      </li>
+                  <div className="grid grid-cols-3 gap-4">
+                    {detail.items.map((brandColumn, columnIndex) => (
+                      <ul key={columnIndex} className="list-none list-inside space-y-2">
+                        {brandColumn.map((item, id) => (
+                          <li key={id} className="text-gray-600 dark:text-gray-300">
+                            <Link to={item.link} className="hover:underline">
+                              {item.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
 
+
+        </div>
         {/* Slider Container */}
         <div className="flex-grow sm:pb-0 border-1 border-gray-500 rounded-lg h-[300px] w-[700px] relative z-10">
           <Slider {...settings}>
@@ -278,7 +280,7 @@ const HeroSection = ({ handleOrderPopup }) => {
                       <img
                         src={data.img}
                         alt={data.title}
-                        className="w-[300px] h-[300px] sm:h-[300px] sm:w-[200px] sm:scale-105 lg:scale-120 object-contain mx-auto"
+                        className="w-[300px] h-[300px] sm:h-[300px] sm:w-[200px] sm:scale-105 lg:scale -120 object-contain mx-auto"
                       />
                     </div>
                   </div>
