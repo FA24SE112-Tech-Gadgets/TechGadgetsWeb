@@ -33,7 +33,7 @@ const ImageList = [
 // List of categories for the left sidebar
 const categories = [
   {
-    name: "Điện thoại/Máy tính bảng",
+    name: "Điện thoại",
     icon: (
       <svg className="h-8 w-8 text-yellow-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
@@ -56,57 +56,7 @@ const categories = [
           { name: "Huawei", link: "/products/huawei" }
         ]
 
-      },
-      {
-        subcategory: "Mức giá",
-        items: [
-          { name: "Dưới 5 triệu", link: "/products/under-5m" },
-          { name: "5-10 triệu", link: "/products/5-10m" },
-          { name: "Trên 10 triệu", link: "/products/above-10m" },
-          { name: "10-15 triệu", link: "/products/10-15m" },
-          { name: "15-20 triệu", link: "/products/15-20m" },
-          { name: "Trên 20 triệu", link: "/products/above-20m" }
-        ]
-      },
-      {
-        subcategory: "Điện thoại hot",
-        items: [
-          { name: "iPhone 15 Pro Max", link: "/products/iphone-15-pro-max" },
-          { name: "Samsung Galaxy Z Fold 5", link: "/products/samsung-galaxy-z-fold-5" },
-          { name: "Xiaomi 13 Pro", link: "/products/xiaomi-13-pro" },
-          { name: "Oppo Find X6 Pro", link: "/products/oppo-find-x6-pro" },
-          { name: "Google Pixel 8 Pro", link: "/products/google-pixel-8-pro" }
-        ]
-      },
-      {
-        subcategory: "Hãng máy tính bảng",
-        items: [
-          { name: "iPad", link: "/products/ipad" },
-          { name: "Samsung", link: "/products/samsung-tablets" },
-          { name: "Xiaomi", link: "/products/xiaomi-tablets" },
-          { name: "Huawei", link: "/products/huawei-tablets" },
-          { name: "Lenovo", link: "/products/lenovo-tablets" },
-          { name: "Nokia", link: "/products/nokia-tablets" },
-          { name: "Teclast", link: "/products/teclast-tablets" },
-          { name: "Máy đọc sách", link: "/products/e-readers" },
-          { name: "Kindle", link: "/products/kindle" },
-        ]
-      },
-      {
-        subcategory: "Sản phẩm nổi bật",
-        items: [
-          { name: "iPad Air 2024", link: "/products/ipad-air-2024" },
-          { name: "iPad Pro 2024", link: "/products/ipad-pro-2024" },
-          { name: "Galaxy Tab S9 FE 5G", link: "/products/galaxy-tab-s9-fe-5g" },
-          { name: "Galaxy Tab S9 Ultra", link: "/products/galaxy-tab-s9-ultra" },
-          { name: "Xiaomi Pad 6 256GB", link: "/products/xiaomi-pad-6-256gb" },
-          { name: "Huawei Matepad 11.5''S", link: "/products/huawei-matepad-11-5" },
-          { name: "Xiaomi Pad SE", link: "/products/xiaomi-pad-se" },
-          { name: "Xiaomi Redmi Pad Pro", link: "/products/xiaomi-redmi-pad-pro" }
-        ]
-      }
-      
-      
+      },     
     ]
   },
   {
@@ -135,49 +85,7 @@ const categories = [
           { name: "Samsung", link: "/products/samsung" }
         ]
       },
-      
-      {
-        subcategory: "Phân khúc giá",
-        items: [
-          { name: "Dưới 10 triệu", link: "/products/under-10m" },
-          { name: "10-20 triệu", link: "/products/10-20m" },
-          { name: "Trên 20 triệu", link: "/products/above-20m" },
-          { name: "20-30 triệu", link: "/products/20-30m" },
-          { name: "30-40 triệu", link: "/products/30-40m" },
-          { name: "Trên 40 triệu", link: "/products/above-40m" }
         ]
-      },
-      
-      {
-        subcategory: "Nhu cầu sử dụng",
-        items: [
-          { name: "Laptop gaming", link: "/products/laptop-gaming" },
-          { name: "Máy tính văn phòng", link: "/products/office-pc" },
-          { name: "Máy tính đồ họa", link: "/products/graphic-pc" },
-          { name: "Laptop mỏng nhẹ", link: "/products/ultrabook" },
-          { name: "Văn phòng", link: "/products/office" },
-          { name: "Gaming", link: "/products/gaming" },
-          { name: "Mỏng nhẹ", link: "/products/thin-light" },
-          { name: "Đồ họa - Kỹ thuật", link: "/products/graphic-technical" },
-          { name: "Cảm ứng", link: "/products/touch" },
-        ]
-      },
-      {
-        subcategory: "Dòng chip",
-        items: [
-          { name: "Laptop Core i3", link: "/products/laptop-core-i3" },
-          { name: "Laptop Core i5", link: "/products/laptop-core-i5" },
-          { name: "Laptop Core i7", link: "/products/laptop-core-i7" },
-          { name: "Laptop Core i9", link: "/products/laptop-core-i9" },
-          { name: "Apple M1 Series", link: "/products/apple-m1-series" },
-          { name: "Apple M2 Series", link: "/products/apple-m2-series" },
-          { name: "Apple M3 Series", link: "/products/apple-m3-series" },
-          { name: "AMD Ryzen", link: "/products/amd-ryzen" },
-          { name: "Intel Core Ultra", link: "/products/intel-core-ultra" }
-        ]
-      }      
-      
-    ]
   },
   {
     icon: (
@@ -189,16 +97,6 @@ const categories = [
     ),
     name: "Đồng hồ",
     details: [
-      {
-        subcategory: "Loại đồng hồ",
-        items: [
-          { name: "Đồng hồ thông minh", link: "/products/smartwatch" },
-          { name: "Vòng đeo tay thông minh", link: "/products/smartband" },
-          { name: "Đồng hồ định vị trẻ em", link: "/products/kid-gps-watch" },
-          { name: "Dây đeo", link: "/products/watch-strap" }
-        ]
-      },
-      
       {
         subcategory: "Hãng đồng hồ",
         items: [
@@ -212,82 +110,11 @@ const categories = [
           { name: "Amazfit", link: "/products/amazfit-watch" },
         ]
       },
-      
-      {
-        subcategory: "Sản phẩm nổi bật",
-        items: [
-          { name: "Apple Watch Series 10 ", link: "/products/apple-watch-series-10" },
-          { name: "Apple Watch Series 9", link: "/products/apple-watch-series-9" },
-          { name: "Samsung Galaxy Watch 7 ", link: "/products/samsung-galaxy-watch-7" },
-          { name: "Samsung Galaxy Watch Ultra ", link: "/products/samsung-galaxy-watch-ultra" },
-          { name: "Apple Watch Ultra 2 2023", link: "/products/apple-watch-ultra-2-2023" },
-          { name: "Apple Watch SE", link: "/products/apple-watch-se" },
-          { name: "Xiaomi Watch 2", link: "/products/xiaomi-watch-2" },
-          { name: "Garmin Lily 2", link: "/products/garmin-lily-2" },
-          { name: "Huawei Watch GT4", link: "/products/huawei-watch-gt4" },
-        ]
-      }
-      
     ]
   },
+ 
   {
-    icon: (
-      <svg className="h-8 w-8 text-yellow-500" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" />
-        <path d="M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-        <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-      </svg>
-    ),
-    name: "Phụ kiện",
-    details: [
-      {
-        subcategory: "Phụ kiện di động",
-        items: [
-          { name: "Phụ kiện di động", link: "/products/mobile-accessories" },
-          { name: "Phụ kiện Apple", link: "/products/apple-accessories" },
-          { name: "Dán màn hình", link: "/products/screen-protectors" },
-          { name: "Ốp lưng - Bao da", link: "/products/cases-covers" },
-          { name: "Thẻ nhớ", link: "/products/memory-cards" },
-          { name: "Apple Care+", link: "/products/apple-care" },
-          { name: "Samsung Care+", link: "/products/samsung-care" },
-          { name: "Sim 4G", link: "/products/4g-sim" },
-          { name: "Cáp, sạc", link: "/products/cables-chargers" },
-        ]
-      },
-      {
-        subcategory: "Phụ kiện Laptop",
-        items: [
-          { name: "Phụ kiện Laptop", link: "/products/laptop-accessories" },
-          { name: "Chuột, bàn phím", link: "/products/mouse-keyboard" },
-          { name: "Balo Laptop | Túi chống sốc", link: "/products/laptop-bags" },
-          { name: "Sạc laptop", link: "/products/laptop-chargers" }
-        ]
-      },
-      {
-        subcategory: "Phụ kiện khác",
-        items: [
-          { name: "Phần mềm", link: "/products/software" },
-          { name: "Webcam", link: "/products/webcams" },
-          { name: "Giá đỡ", link: "/products/stands" },
-          { name: "Thảm, lót chuột", link: "/products/mouse-pads" }
-        ]
-      },
-      {
-        subcategory: "Thiết bị mạng",
-        items: [
-          { name: "Thiết bị mạng", link: "/products/network-devices" },
-          { name: "Thiết bị phát sóng WiFi", link: "/products/wifi-routers" },
-          { name: "Bộ phát wifi di động", link: "/products/mobile-wifi" },
-          { name: "Bộ kích sóng WiFi", link: "/products/wifi-extenders" },
-          { name: "Xem tất cả thiết bị mạng", link: "/products/all-network-devices" }
-        ]
-      }
-      
-    ]
-  },
-  {
-    name: "PC/Màn hình/Máy in",
+    name: "Loa",
     icon: (
       <svg className="h-8 w-8 text-yellow-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
@@ -310,136 +137,10 @@ const categories = [
           { name: "Văn phòng", link: "/products/office-pc" }
         ]
       },
-      {
-        subcategory: "Linh kiện máy tính",
-        items: [
-          { name: "CPU", link: "/products/cpu" },
-          { name: "Main", link: "/products/motherboard" },
-          { name: "RAM", link: "/products/ram" },
-          { name: "Ổ cứng", link: "/products/storage" },
-          { name: "Nguồn", link: "/products/power-supply" },
-          { name: "VGA", link: "/products/graphics-card" },
-          { name: "Tản nhiệt", link: "/products/cooling" },
-          { name: "Case", link: "/products/case" },
-          { name: "Xem tất cả", link: "/products/all-computer-parts" }
-        ]
-      },
-      {
-        subcategory: "Chọn màn hình theo hãng",
-        items: [
-          { name: "ASUS", link: "/products/asus-monitors" },
-          { name: "Samsung", link: "/products/samsung-monitors" },
-          { name: "DELL", link: "/products/dell-monitors" },
-          { name: "LG", link: "/products/lg-monitors" },
-          { name: "MSI", link: "/products/msi-monitors" },
-          { name: "Acer", link: "/products/acer-monitors" },
-          { name: "Xiaomi", link: "/products/xiaomi-monitors" },
-          { name: "ViewSonic", link: "/products/viewsonic-monitors" },
-          { name: "Philips", link: "/products/philips-monitors" },
-        ]
-      },
-      {
-        subcategory: "Chọn màn hình theo nhu cầu",
-        items: [
-          { name: "Gaming", link: "/products/gaming-monitors" },
-          { name: "Văn phòng", link: "/products/office-monitors" },
-          { name: "Đồ họa", link: "/products/graphic-monitors" },
-          { name: "Lập trình", link: "/products/programming-monitors" },
-          { name: "Màn hình di động", link: "/products/mobile-monitors" },
-          { name: "Arm màn hình", link: "/products/monitor-arms" },
-          { name: "Xem tất cả", link: "/products/all-monitors" }
-        ]
-      },
-      {
-        subcategory: "Gaming Gear",
-        items: [
-          { name: "PlayStation", link: "/products/playstation" },
-          { name: "ROG Ally", link: "/products/rog-ally" },
-          { name: "Bàn phím Gaming", link: "/products/gaming-keyboards" },
-          { name: "Chuột chơi game", link: "/products/gaming-mice" },
-          { name: "Tai nghe Gaming", link: "/products/gaming-headsets" },
-          { name: "Tay cầm chơi Game", link: "/products/gaming-controllers" },
-          { name: "Xem tất cả", link: "/products/all-gaming-gear" }
-        ]
-      },
-      {
-        subcategory: "Thiết bị văn phòng",
-        items: [
-          { name: "Máy in", link: "/products/printers" },
-          { name: "Phần mềm", link: "/products/software" },
-          { name: "Decor bàn làm việc", link: "/products/desk-decor" }
-        ]
-      }
+
     ]
   },
-  {
-    icon: (
-      <svg className="h-8 w-8 text-yellow-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-        <line x1="2" y1="8" x2="22" y2="8" />
-        <path d="M15 19H9v-2h6v2z" />
-      </svg>
-    ),
-    name: "Tivi",
-    details: [
-      {
-        subcategory: "Hãng Tivi",
-        items: [
-          { name: "Samsung", link: "/products/samsung-tv" },
-          { name: "LG", link: "/products/lg-tv" },
-          { name: "Xiaomi", link: "/products/xiaomi-tv" },
-          { name: "Coocaa", link: "/products/coocaa-tv" },
-          { name: "Sony", link: "/products/sony-tv" },
-          { name: "Toshiba", link: "/products/toshiba-tv" },
-          { name: "TCL", link: "/products/tcl-tv" },
-          { name: "Hisense", link: "/products/hisense-tv" },
-        ]
-      },
-      {
-        subcategory: "Mức giá",
-        items: [
-          { name: "Dưới 5 triệu", link: "/products/under-5-million" },
-          { name: "Từ 5 - 9 triệu", link: "/products/5-9-million" },
-          { name: "Từ 9 - 12 triệu", link: "/products/9-12-million" },
-          { name: "Từ 12 - 15 triệu", link: "/products/12-15-million" },
-          { name: "Trên 15 triệu", link: "/products/above-15-million" },
-        ]
-      },
-      {
-        subcategory: "Độ phân giải",
-        items: [
-          { name: "Tivi 4K", link: "/products/4k-tv" },
-          { name: "Tivi 8K", link: "/products/8k-tv" },
-          { name: "Tivi Full HD", link: "/products/full-hd-tv" },
-          { name: "Tivi OLED", link: "/products/oled-tv" },
-          { name: "Tivi QLED", link: "/products/qled-tv" },
-          { name: "Android Tivi", link: "/products/android-tv" },
-        ]
-      },
-      {
-        subcategory: "Kích thước",
-        items: [
-          { name: "Tivi 32 inch", link: "/products/32-inch-tv" },
-          { name: "Tivi 43 inch", link: "/products/43-inch-tv" },
-          { name: "Tivi 50 inch", link: "/products/50-inch-tv" },
-          { name: "Tivi 55 inch", link: "/products/55-inch-tv" },
-          { name: "Tivi 65 inch", link: "/products/65-inch-tv" },
-          { name: "Tivi 70 inch", link: "/products/70-inch-tv" },
-          { name: "Tivi 85 inch", link: "/products/85-inch-tv" },
-        ]
-      },
-      {
-        subcategory: "Sản phẩm nổi bật ⚡",
-        items: [
-          { name: "Xiaomi TV Max 86 inch", link: "/products/xiaomi-tv-max-86-inch" },
-          { name: "Tivi Xiaomi A Pro 55 inch 4K", link: "/products/xiaomi-a-pro-55-inch-4k" },
-          { name: "Tivi LG Stanby Me 27 inch", link: "/products/lg-stanby-me-27-inch" },
-          { name: "Tivi Xiaomi A 32 inch HD", link: "/products/xiaomi-a-32-inch-hd" },
-          { name: "Tivi Samsung QLED 55\" 55Q60BAK", link: "/products/samsung-qled-55-55q60bak" }
-        ]
-      }
-    ]
-  }
+ 
   
 ];
 
