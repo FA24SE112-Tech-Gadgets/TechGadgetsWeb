@@ -9,7 +9,7 @@ function FavoritePage() {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [scrollPositions, setScrollPositions] = useState({});
-
+    const [loading, setLoading] = useState(false);
     useEffect(() => {
         const fetchFavorites = async () => {
             try {
@@ -25,10 +25,11 @@ function FavoritePage() {
                     groups[shopName].products.push(item.gadget);
                     return groups;
                 }, {});
-                
+                setLoading(true);
                 setGroupedFavorites(Object.values(grouped));
             } catch (error) {
                 console.error("Failed to fetch favorites:", error);
+                setLoading(false);
             }
         };
 
@@ -40,8 +41,8 @@ function FavoritePage() {
         if (!container) return;
 
         const scrollAmount = 300; // Điều chỉnh khoảng cách scroll
-        const newScrollLeft = direction === 'left' 
-            ? container.scrollLeft - scrollAmount 
+        const newScrollLeft = direction === 'left'
+            ? container.scrollLeft - scrollAmount
             : container.scrollLeft + scrollAmount;
 
         container.scrollTo({
@@ -109,7 +110,7 @@ function FavoritePage() {
                     ...group,
                     products: group.products.filter(product => product.id !== gadgetId)
                 })).filter(group => group.products.length > 0);
-                
+
                 return newGroups;
             });
         } catch (error) {
@@ -130,11 +131,13 @@ function FavoritePage() {
 
     return (
         <div className="min-h-screen  dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+           
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
                     Danh sách yêu thích
                 </h1>
                 {groupedFavorites.length === 0 ? (
+                    
                     <div className="text-center text-gray-500 dark:text-gray-300">
                         Danh sách này trống
                     </div>
@@ -158,7 +161,7 @@ function FavoritePage() {
                                     )}
 
                                     {/* Container sản phẩm có thể scroll */}
-                                    <div 
+                                    <div
                                         id={`shop-container-${shop.shopInfo.shopName}`}
                                         className="overflow-x-auto scrollbar-hide"
                                         style={{
@@ -168,8 +171,8 @@ function FavoritePage() {
                                     >
                                         <div className="p-4 flex gap-4 min-w-min">
                                             {shop.products.map((product) => (
-                                                <div 
-                                                    key={product.id} 
+                                                <div
+                                                    key={product.id}
                                                     className="border rounded-lg shadow-sm flex-none w-[200px] flex flex-col justify-between relative bg-40"
                                                 >
                                                     {!product.isForSale && (

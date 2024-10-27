@@ -30,6 +30,7 @@ import ManageSellerApplicationPage from "./pages/Manager/SellerApplication/Manag
 import ForgotPassword from "./pages/ForgotPWD/ForgotPWDPage";
 import SellerProfilePage from "./pages/Seller/SellerProfile";
 import SellerHeader from "./pages/Seller/SellerHeader";
+import BrandGadgetPage from "./pages/Gadgets/Gadget";
 
 
 function App() {
@@ -58,6 +59,12 @@ function App() {
           </AuthRoute>
 
         } />
+
+
+        {/* <Route path="/gadgets/:category/:categoryId/:brand/:brandId" element={<BrandGadgetPage />} /> */}
+
+        <Route path="/gadgets/:category/:brand/" element={<BrandGadgetPage />} />
+
         <Route path='/profile' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
@@ -70,29 +77,29 @@ function App() {
 
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
-        <Route path='/seller' element={ <Order />} />
-        
+        <Route path='/seller' element={<Order />} />
+
       </Route>
 
 
-      <Route path="/sellerProfile"element={
-          <AuthRoute>
-            <RoleBaseRoute accessibleRoles={["Seller"]}>
+      <Route path="/sellerProfile" element={
+        <AuthRoute>
+          <RoleBaseRoute accessibleRoles={["Seller"]}>
             <SellerHeader />
-              <SellerProfilePage />
-            </RoleBaseRoute>
-          </AuthRoute>
+            <SellerProfilePage />
+          </RoleBaseRoute>
+        </AuthRoute>
 
-        } />
+      } />
 
-      
+
 
 
       <Route element={<SellerApplicationLayout />}>
         <Route path='/seller-application' element={<SellerApplication />} />
         <Route path='/history-seller-application' element={<HistorySellerApplication />} />
       </Route>
-        
+
       {/* Admin Route */}
       <Route element={<ManagerLayout />}>
         <Route path='/dashboard' element={

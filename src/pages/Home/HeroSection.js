@@ -3,9 +3,10 @@ import Image1 from "../../assets/hero/camera.png";
 import Image2 from "../../assets/hero/laptop.png";
 import Image3 from "../../assets/hero/sale.png";
 import Slider from "react-slick";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
 import slugify from "~/ultis/config";
+import { Button } from "antd";
 // Image list for the slider
 const ImageList = [
   {
@@ -31,7 +32,7 @@ const ImageList = [
   },
 ];
 
-const fetchBrandsForCategories = async () => {
+const fetchBrandsForCategories = async (navigate) => {
   try {
     const categoriesResponse = await axios.get(
       process.env.NODE_ENV === "development"
@@ -82,9 +83,14 @@ const fetchBrandsForCategories = async () => {
               items: brandColumns.map((column) =>
                 column.map((brand) => ({
                   name: brand.name,
-                  // link: `/gadgets/${category.name.toLowerCase()}/${brand.name.toLowerCase()}`,
-                  link: `/gadgets/${slugify(category.name)}/${brand.name.toLowerCase()}`,
-                  logoUrl: brand.logoUrl,
+                  navigate: () =>     navigate(`/gadgets/${slugify(category.name)}/${slugify(brand.name)}`, {
+
+                    state: {
+                      categoryId: category.id,
+                      brandId: brand.id
+                    }
+    
+                  })
                 }))
               )
             }
@@ -183,17 +189,18 @@ const getCategoryIcon = (categoryName) => {
 const promoImages = [Image1, Image2, Image3];
 
 const HeroSection = ({ handleOrderPopup }) => {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [isHoveringDetails, setIsHoveringDetails] = useState(false);
   useEffect(() => {
     const loadCategories = async () => {
-      const fetchedCategories = await fetchBrandsForCategories();
+      const fetchedCategories = await fetchBrandsForCategories(navigate);
       setCategories(fetchedCategories);
     };
 
     loadCategories();
-  }, []);
+  }, [navigate]);
 
   const handleMouseEnterCategory = (index) => {
     setHoveredCategory(index);
@@ -204,8 +211,10 @@ const HeroSection = ({ handleOrderPopup }) => {
     setIsHoveringDetails(false);
   };
 
-  const handleBrandClick = (brandLink) => {
-    window.location.href = brandLink;
+  const handleBrandClick = (navigateFunction) => {
+    if (typeof navigateFunction === 'function') {
+      navigateFunction();
+    }
   };
 
 
@@ -273,10 +282,10 @@ const HeroSection = ({ handleOrderPopup }) => {
                     {detail.items.map((brandColumn, columnIndex) => (
                       <ul key={columnIndex} className="list-none list-inside space-y-2">
                         {brandColumn.map((item, id) => (
-                          <li key={id} className="text-gray-600 dark:text-gray-300">
-                            <Link to={item.link} className="hover:underline">
+                          <li key={id} className="text-gray-600 dark:text-gray-300"   onClick={() => handleBrandClick(item.navigate)}>
+                            <div className="hover:underline">
                               {item.name}
-                            </Link>
+                            </div>
                           </li>
                         ))}
                       </ul>
