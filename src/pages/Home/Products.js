@@ -31,6 +31,8 @@ const categoryPaths = Object.fromEntries(
 );
 
 export default function ProductPage() {
+
+  const [loading, setLoading] = useState(true); 
   const { isAuthenticated } = useAuth();
 
   const navigate = useNavigate();
@@ -57,6 +59,7 @@ export default function ProductPage() {
 
   useEffect(() => {
     const fetchCategoryData = async (category) => {
+      setLoading(true);
       const api = isAuthenticated ? AxiosInterceptor : axios;
       try {
         const productResponse = await api.get(categoryPaths[category]);
@@ -68,6 +71,8 @@ export default function ProductPage() {
       } catch (error) {
         console.error(`Error fetching ${category} data:`, error);
         toast.error(`Có lỗi xảy ra khi lấy dữ liệu ${category}.`);
+      } finally {
+        setLoading(false); 
       }
     };
 
@@ -142,13 +147,6 @@ export default function ProductPage() {
         <h2 className="text-2xl font-bold">{title}</h2>
         <div className="flex flex-wrap space-x-2">
           {brands[category].map((brand) => (
-            // <a
-            //   key={brand.id}
-            //   href={`/gadgets/${slugify(title)}/${categoryIds[category]}/${slugify(brand.name)}/${brand.id}`}
-            //   className="px-2 py-1 bg-gray-100 text-gray-700 rounded"
-            // >
-            //   {brand.name}
-            // </a>
             <Button
               onClick={() => {
                 navigate(`/gadgets/${slugify(title)}/${slugify(brand.name)}`, {
@@ -165,12 +163,19 @@ export default function ProductPage() {
 
             </Button>
           ))}
-          <a
-            href={`/gadgets/${slugify(title)}`}
-            className="px-2 py-1 bg-gray-100 text-gray-700 rounded"
-          >
-            Xem thêm
-          </a>
+           <Button
+              onClick={() => {
+                navigate(`/gadgets/${slugify(title)}`, {
+
+                  state: {
+                    categoryId: categoryIds[category],
+                  }
+  
+                })
+              }}
+            >
+             Xem thêm
+            </Button>
         </div>
       </div>
 
@@ -222,6 +227,11 @@ export default function ProductPage() {
   return (
     <div className="p-6">
       <ToastContainer />
+      {loading && (
+        <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+            <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+        </div>
+         )}
       {renderCategory("laptops", "Laptops")}
       {renderCategory("headphones", "Tai nghe")}
       {renderCategory("speakers", "Loa")}

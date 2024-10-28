@@ -17,8 +17,6 @@ import Dashboardview from "./pages/Manager/Dashboardview";
 import Main from "./pages/Manager/Main";
 import AuthRoute from "./components/auth/AuthRoute";
 import RoleBaseRoute from "./components/auth/RoleBaseRoute";
-import Iphone from "./pages/Gadgets/Phone/Iphone";
-import Mac from "./pages/Gadgets/Laptop/Mac";
 import DetailGadgetPage from "./pages/DetailGadget/DetailGadgetPage";
 import SpecificationUnitPage from "./pages/Manager/SpecificationUnit/SpecificationUnitPage";
 import CategoryPage from "./pages/Manager/Category/CategoryPage";
@@ -31,6 +29,7 @@ import ForgotPassword from "./pages/ForgotPWD/ForgotPWDPage";
 import SellerProfilePage from "./pages/Seller/SellerProfile";
 import SellerHeader from "./pages/Seller/SellerHeader";
 import BrandGadgetPage from "./pages/Gadgets/Gadget";
+import CategoryGadgetPage from "./pages/Gadgets/GadgetPage";
 
 
 function App() {
@@ -48,8 +47,6 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path='/' element={<Home />} />
         <Route path='/search' element={<SearchPage />} />
-        <Route path='/gadget/iphone' element={<Iphone />} />
-        <Route path='/gadget/mac' element={<Mac />} />
         <Route path='/gadget/detail' element={<DetailGadgetPage />} />
         <Route path='/favorite' element={
           <AuthRoute>
@@ -63,8 +60,8 @@ function App() {
 
         {/* <Route path="/gadgets/:category/:categoryId/:brand/:brandId" element={<BrandGadgetPage />} /> */}
 
-        <Route path="/gadgets/:category/:brand/" element={<BrandGadgetPage />} />
-
+        <Route path="/gadgets/:category/:brand" element={<BrandGadgetPage />} />
+        <Route path="/gadgets/:category/" element={<CategoryGadgetPage />} />
         <Route path='/profile' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
