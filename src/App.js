@@ -47,7 +47,7 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path='/' element={<Home />} />
         <Route path='/search' element={<SearchPage />} />
-        <Route path='/gadget/detail' element={<DetailGadgetPage />} />
+        <Route path='/gadget/detail/:id' element={<DetailGadgetPage />} />
         <Route path='/favorite' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>

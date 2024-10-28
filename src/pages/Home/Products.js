@@ -99,7 +99,11 @@ export default function ProductPage() {
   };
 
   const renderProduct = (product, setCategory) => (
-    <div key={product.id} className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105  hover:border-primary/50">
+    <div
+      key={product.id}
+      className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105  hover:border-primary/50"
+      onClick={() => navigate(`/gadget/detail/${product.id}`)}
+    >
       {product.isForSale === false && (
         <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
           Ngừng kinh doanh
