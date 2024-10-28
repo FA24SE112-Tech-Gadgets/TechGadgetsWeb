@@ -9,7 +9,6 @@ import { Breadcrumb, Button } from 'antd';
 import slugify from '~/ultis/config';
 import Filter from './Filter/Filter';
 
-
 function BrandGadgetPage() {
   const location = useLocation();
   const { categoryId, brandId } = location.state || {};
@@ -28,31 +27,48 @@ function BrandGadgetPage() {
   const fetchBrandProducts = async () => {
     setLoading(true);
     const apiClient = isAuthenticated ? AxiosInterceptor : axios;
+
+    // Chuẩn bị các GadgetFilters dưới dạng query string
+    const gadgetFilters = appliedFilters.GadgetFilters
+        ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
+        : '';
+
+    // Thêm MinPrice và MaxPrice vào query nếu có trong appliedFilters
+    const minPrice = appliedFilters.MinPrice ? `MinPrice=${appliedFilters.MinPrice}` : '';
+    const maxPrice = appliedFilters.MaxPrice ? `MaxPrice=${appliedFilters.MaxPrice}` : '';
+
+    // Kết hợp tất cả các tham số query
+    const queryString = [
+        gadgetFilters, 
+        minPrice, 
+        maxPrice
+    ].filter(Boolean).join('&'); // filter(Boolean) để loại bỏ các chuỗi rỗng
+
+    const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}`;
+
+    console.log("API URL:", apiUrl); // Kiểm tra URL để đảm bảo đúng định dạng
+
     try {
-      const response = await apiClient.get(
-        `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}`,
-        { params: appliedFilters } // Apply filters to the request
-      );
-      setProducts(response.data.items);
-      console.log("data nè ", response.data.items);
+        const response = await apiClient.get(apiUrl);
+        setProducts(response.data.items);
     } catch (error) {
-      console.error("Error fetching brand products:", error);
+        console.error("Error fetching brand products:", error);
     } finally {
-      setLoading(false); 
+        setLoading(false);
     }
-  };
+};
 
-  useEffect(() => {
-    fetchBrandProducts();
-  }, [category, brandId, brand, categoryId, appliedFilters]);
+useEffect(() => {
+  fetchBrandProducts();
+}, [categoryId, brandId, appliedFilters, isAuthenticated]);
 
-  const handleNavigation = () => {
-    navigate(`/gadgets/${slugify(category)}`);
-  };
+  // const handleNavigation = () => {
+  //   navigate(`/gadgets/${slugify(category)}`);
+  // };
 
   const toggleFavorite = async (gadgetId, isFavorite) => {
     if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để thêm vào yêu thích!");
+      toast.error("Please log in to add to favorites!");
       return;
     }
     try {
@@ -64,7 +80,7 @@ function BrandGadgetPage() {
       );
     } catch (error) {
       console.error("Error toggling favorite status:", error);
-      toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+      toast.error("An error occurred, please try again.");
     }
   };
 
@@ -73,9 +89,11 @@ function BrandGadgetPage() {
   };
 
   const handleApplyFilters = (filters) => {
+    console.log("Applied Filters: ", filters);
     setAppliedFilters(filters);
     setFilterModalVisible(false); // Close modal after applying filters
-  };
+};
+
 
   return (
     <div>
@@ -89,9 +107,12 @@ function BrandGadgetPage() {
         <div className="w-full px-4">
           <Breadcrumb className="w-full">
             <Breadcrumb.Item>
-              <span onClick={handleNavigation} className="hover:underline cursor-pointer">
+              {/* <span onClick={handleNavigation} className="hover:underline cursor-pointer"> */}
+              <p>
                 {category}
-              </span>
+
+              </p>
+              {/* </span> */}
             </Breadcrumb.Item>
             <Breadcrumb.Item>
               <p>{brand}</p>
@@ -100,15 +121,15 @@ function BrandGadgetPage() {
           <Button onClick={toggleFilterModal} className="mt-4">Filter</Button>
         </div>
 
-        <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8">
+        <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8 ">
           {products.length === 0 && !loading ? (
-            <div className="text-center py-4 text-gray-500">Không có sản phẩm</div>
+            <div className="text-center py-4 text-gray-500">No products available</div>
           ) : (
             products.map((product) => (
-              <div key={product.id} className="relative">
+              <div key={product.id} className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105 hover:border-primary/50">
                 {product.isForSale === false && (
                   <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
-                    Ngừng kinh doanh
+                    Out of stock
                   </div>
                 )}
                 <div className="p-2">
@@ -123,25 +144,12 @@ function BrandGadgetPage() {
                   </div>
                 </div>
                 <div className="p-2">
-                  <div className="w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500">
-                    <span className="mr-2">Yêu thích</span>
-                    <span
-                      onClick={() => toggleFavorite(product.id, product.isFavorite)}
-                      className="cursor-pointer flex items-center"
-                    >
-                      {product.isFavorite ? (
-                        <svg
-                          className="h-8 w-5 text-red-500"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
-                      ) : (
-                        <CiHeart className="h-8 w-5 text-gray-500" />
-                      )}
-                    </span>
+                  <div className="w-full text-sm flex items-center justify-end">
+                    <button onClick={() => toggleFavorite(product.id, product.isFavorite)}>
+                      <CiHeart
+                        className={`h-6 w-6 ${product.isFavorite ? 'text-red-500' : 'text-gray-400'}`}
+                      />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -150,12 +158,10 @@ function BrandGadgetPage() {
         </div>
       </div>
 
-      {/* Filter Modal */}
       <Filter
         isVisible={isFilterModalVisible}
         onClose={toggleFilterModal}
         onApplyFilters={handleApplyFilters}
-        categoryId={categoryId}
       />
     </div>
   );

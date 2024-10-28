@@ -5,8 +5,9 @@ import useAuth from '~/context/auth/useAuth';
 import { toast, ToastContainer } from 'react-toastify';
 import { CiHeart } from 'react-icons/ci';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import { Breadcrumb } from 'antd';
+import { Breadcrumb, Button } from 'antd';
 import slugify from '~/ultis/config';
+import Filter from './Filter/Filter';
 
 function CategoryGadgetPage() {
     const location = useLocation();
@@ -15,28 +16,49 @@ function CategoryGadgetPage() {
     const { isAuthenticated } = useAuth();
     const { category } = useParams();
     const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true); 
+    const [loading, setLoading] = useState(true);
+    const [isFilterModalVisible, setFilterModalVisible] = useState(false);
+    const [appliedFilters, setAppliedFilters] = useState({});
     const apiBaseUrl = process.env.NODE_ENV === "development"
         ? process.env.REACT_APP_DEV_API
         : process.env.REACT_APP_PRO_API;
 
     useEffect(() => {
         const fetchBrandProducts = async () => {
-            setLoading(true); 
+            setLoading(true);
             const apiClient = isAuthenticated ? AxiosInterceptor : axios;
+
+            // Chuẩn bị các GadgetFilters dưới dạng query string
+            const gadgetFilters = appliedFilters.GadgetFilters
+                ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
+                : '';
+
+            // Thêm MinPrice và MaxPrice vào query nếu có trong appliedFilters
+            const minPrice = appliedFilters.MinPrice ? `MinPrice=${appliedFilters.MinPrice}` : '';
+            const maxPrice = appliedFilters.MaxPrice ? `MaxPrice=${appliedFilters.MaxPrice}` : '';
+
+            // Kết hợp tất cả các tham số query
+            const queryString = [
+                gadgetFilters,
+                minPrice,
+                maxPrice
+            ].filter(Boolean).join('&'); // filter(Boolean) để loại bỏ các chuỗi rỗng
+
+            const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}`;
+
+            console.log("API URL:", apiUrl); // Kiểm tra URL để đảm bảo đúng định dạng
+
             try {
-                const response = await apiClient.get(
-                    `${apiBaseUrl}/api/gadgets/category/${categoryId}?Page=1&PageSize=100`
-                );
+                const response = await apiClient.get(apiUrl);
                 setProducts(response.data.items);
             } catch (error) {
                 console.error("Error fetching brand products:", error);
             } finally {
-                setLoading(false); // End loading
+                setLoading(false);
             }
         };
         fetchBrandProducts();
-    }, [category, brandId, categoryId, apiBaseUrl, isAuthenticated]);
+    }, [category, brandId, categoryId, apiBaseUrl, appliedFilters, isAuthenticated]);
 
     const toggleFavorite = async (gadgetId, isFavorite) => {
         if (!isAuthenticated) {
@@ -56,7 +78,7 @@ function CategoryGadgetPage() {
         }
     };
 
-    const handleNavigation = () => navigate(`/gadgets/${slugify(category)}`);
+
 
     const FavoriteIcon = ({ isFavorite, onClick }) => (
         <span onClick={onClick} className="cursor-pointer flex items-center">
@@ -75,6 +97,15 @@ function CategoryGadgetPage() {
         </span>
     );
 
+    const toggleFilterModal = () => {
+        setFilterModalVisible((prev) => !prev);
+    };
+
+    const handleApplyFilters = (filters) => {
+        console.log("Applied Filters: ", filters);
+        setAppliedFilters(filters);
+        setFilterModalVisible(false); // Close modal after applying filters
+    };
     return (
         <div>
             <ToastContainer />
@@ -88,19 +119,20 @@ function CategoryGadgetPage() {
             <div className="bg-gray-100 w-full px-4">
                 <Breadcrumb className="w-full">
                     <Breadcrumb.Item>
-                        <span onClick={handleNavigation} className="black hover:underline cursor-pointer">
+                        <p>
                             {category}
-                        </span>
+                        </p>
                     </Breadcrumb.Item>
                 </Breadcrumb>
             </div>
+                <Button onClick={toggleFilterModal} className="mt-4 px-4">Filter</Button>
 
             <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8">
                 {products.length === 0 && !loading ? (
                     <div className="text-center py-4 text-gray-500">Không có sản phẩm</div>
                 ) : (
                     products.map((product) => (
-                        <div key={product.id} className="relative">
+                        <div key={product.id} className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105  hover:border-primary/50">
                             {!product.isForSale && (
                                 <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
                                     Ngừng kinh doanh
@@ -130,6 +162,11 @@ function CategoryGadgetPage() {
                     ))
                 )}
             </div>
+            <Filter
+                isVisible={isFilterModalVisible}
+                onClose={toggleFilterModal}
+                onApplyFilters={handleApplyFilters}
+            />
         </div>
     );
 }

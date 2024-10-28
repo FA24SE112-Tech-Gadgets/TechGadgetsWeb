@@ -11,7 +11,7 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import slugify from '~/ultis/config';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import { Button } from 'antd';
+
 
 
 
@@ -27,12 +27,12 @@ const apiBase = process.env.NODE_ENV === "development"
   : process.env.REACT_APP_PRO_API + "/";
 
 const categoryPaths = Object.fromEntries(
-  Object.entries(categoryIds).map(([key, id]) => [key, `${apiBase}api/gadgets/category/${id}?Page=1&PageSize=100`])
+  Object.entries(categoryIds).map(([key, id]) => [key, `${apiBase}api/gadgets/category/${id}?Page=1&PageSize=10`])
 );
 
 export default function ProductPage() {
 
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
 
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ export default function ProductPage() {
         console.error(`Error fetching ${category} data:`, error);
         toast.error(`Có lỗi xảy ra khi lấy dữ liệu ${category}.`);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
@@ -99,7 +99,7 @@ export default function ProductPage() {
   };
 
   const renderProduct = (product, setCategory) => (
-    <div key={product.id} className="border rounded-lg shadow-sm flex flex-col justify-between relative">
+    <div key={product.id} className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105  hover:border-primary/50">
       {product.isForSale === false && (
         <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
           Ngừng kinh doanh
@@ -109,7 +109,7 @@ export default function ProductPage() {
         <img
           src={product.thumbnailUrl}
           alt={product.name}
-          className="w-full h-32 object-cover mb-2 rounded"
+          className="w-full h-32 object-cover mb-2 rounded-2xl"
         />
         <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
         <div className="text-red-500 font-semibold text-sm">
@@ -147,7 +147,7 @@ export default function ProductPage() {
         <h2 className="text-2xl font-bold">{title}</h2>
         <div className="flex flex-wrap space-x-2">
           {brands[category].map((brand) => (
-            <Button
+            <button className="bg-gray-200 dark:bg-gray-500 dark:text-white hover:bg-gray-300 px-4 py-2 rounded-lg"
               onClick={() => {
                 navigate(`/gadgets/${slugify(title)}/${slugify(brand.name)}`, {
 
@@ -155,27 +155,27 @@ export default function ProductPage() {
                     categoryId: categoryIds[category],
                     brandId: brand.id
                   }
-  
+
                 })
               }}
             >
               {brand.name}
 
-            </Button>
+            </button>
           ))}
-           <Button
-              onClick={() => {
-                navigate(`/gadgets/${slugify(title)}`, {
+          <button className="bg-gray-200 dark:bg-gray-500 dark:text-white hover:bg-gray-300 px-4 py-2 rounded-lg"
+            onClick={() => {
+              navigate(`/gadgets/${slugify(title)}`, {
 
-                  state: {
-                    categoryId: categoryIds[category],
-                  }
-  
-                })
-              }}
-            >
-             Xem thêm
-            </Button>
+                state: {
+                  categoryId: categoryIds[category],
+                }
+
+              })
+            }}
+          >
+            Xem thêm
+          </button>
         </div>
       </div>
 
@@ -229,9 +229,9 @@ export default function ProductPage() {
       <ToastContainer />
       {loading && (
         <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-            <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
         </div>
-         )}
+      )}
       {renderCategory("laptops", "Laptops")}
       {renderCategory("headphones", "Tai nghe")}
       {renderCategory("speakers", "Loa")}
