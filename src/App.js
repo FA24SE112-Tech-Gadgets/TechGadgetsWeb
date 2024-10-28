@@ -28,6 +28,12 @@ import HistorySellerApplication from "./pages/Seller/HistorySellerApplication";
 import SellerApplicationLayout from "./components/layout/SellerApplicationLayout";
 import ManageSellerApplicationPage from "./pages/Manager/SellerApplication/ManageSellerApplication";
 import ForgotPassword from "./pages/ForgotPWD/ForgotPWDPage";
+import DepositHistory from "./pages/Wallet/DepositHistory";
+import RefundHistory from "./pages/Wallet/RefundHistory";
+import PaymentHistory from "./pages/Wallet/PaymentHistory";
+import WalletLayout from "./pages/Wallet/WalletLayout";
+import DepositSuccess from "./pages/Wallet/DepositSuccess";
+import DepositFail from "./pages/Wallet/DepositFail";
 
 
 function App() {
@@ -64,18 +70,42 @@ function App() {
           </AuthRoute>
 
         } />
+        <Route path='/deposit-success' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
+              <DepositSuccess />
+            </RoleBaseRoute>
+          </AuthRoute>
+
+        } />
+        <Route path='/deposit-fail' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
+              <DepositFail />
+            </RoleBaseRoute>
+          </AuthRoute>
+
+        } />
+
       </Route>
 
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
-        <Route path='/seller' element={ <Order />} />
+        <Route path='/seller' element={<Order />} />
       </Route>
 
       <Route element={<SellerApplicationLayout />}>
         <Route path='/seller-application' element={<SellerApplication />} />
         <Route path='/history-seller-application' element={<HistorySellerApplication />} />
       </Route>
-        
+
+      {/* Wallet Route */}
+      <Route element={<WalletLayout />}>
+        <Route path='/deposit-history' element={<DepositHistory />} />
+        <Route path='/refund-history' element={<RefundHistory />} />
+        <Route path='/payment-history' element={<PaymentHistory />} />
+      </Route>
+
       {/* Admin Route */}
       <Route element={<ManagerLayout />}>
         <Route path='/dashboard' element={
