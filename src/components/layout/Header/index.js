@@ -54,10 +54,10 @@ const Header = () => {
       <div className="bg-primary/40 py-2">
         <div className="container flex justify-between items-center">
           <div>
-            <Link to="/" className="font-bold text-2xl sm:text-3xl flex gap-2">
+            <button onClick={() => navigate("/")} className="font-bold text-2xl sm:text-3xl flex gap-2">
               <img src={Logo} alt="Logo" className="w-10" />
               Tech Gadget
-            </Link>
+            </button>
           </div>
 
           {/* search bar */}
@@ -79,9 +79,11 @@ const Header = () => {
 
             {/* Cart button */}
             <button
+            onClick={()=> navigate("/cart")}
               className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
             >
-              <span className="group-hover:block hidden transition-all duration-200">
+              <span
+               className="group-hover:block hidden transition-all duration-200">
                 Giỏ hàng
               </span>
               <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
@@ -115,16 +117,19 @@ const Header = () => {
                 {open && (
                   <div className="absolute right-1/2 transform translate-x-1/2 mt-2 w-52 rounded-lg bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg z-50">
                     <div className="py-2">
-                      <Link to="/profile">
-                        <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300">
-                          Hồ sơ
-                        </p>
-                      </Link>
-                      <Link to="/favorite">
-                        <p className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300">
-                          Yêu thích
-                        </p>
-                      </Link>
+                      <button
+                        onClick={() => navigate("/profile")}
+                        className="flex justify-start cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300"
+                      >
+                        <p>Hồ sơ</p>
+                      </button>
+                      <button
+                        onClick={() => navigate("/favorite")}
+                        className="flex justify-start cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300"
+                      >
+                        <p>Yêu thích</p>
+                      </button>
+
                       <p
                         className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-red-600 dark:text-red-400 font-semibold w-full transition-colors duration-300"
                         onClick={handleLogout}

@@ -30,6 +30,7 @@ import SellerProfilePage from "./pages/Seller/SellerProfile";
 import SellerHeader from "./pages/Seller/SellerHeader";
 import BrandGadgetPage from "./pages/Gadgets/Gadget";
 import CategoryGadgetPage from "./pages/Gadgets/GadgetPage";
+import CartPage from "./pages/Cart/cart";
 
 
 function App() {
@@ -66,6 +67,14 @@ function App() {
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
               <ProfilePage />
+            </RoleBaseRoute>
+          </AuthRoute>
+
+        } />
+          <Route path='/cart' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
+              <CartPage />
             </RoleBaseRoute>
           </AuthRoute>
 

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import useAuth from '~/context/auth/useAuth';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
+import { toast, ToastContainer } from 'react-toastify';
 
 const DetailGadgetPage = () => {
     const { isAuthenticated } = useAuth();
@@ -14,6 +15,7 @@ const DetailGadgetPage = () => {
     const [activeTab, setActiveTab] = useState('specifications');
     const [error, setError] = useState(null);
     const [thumbnailUrl, setThumbnailUrl] = useState(''); // State for thumbnail URL
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         const apiClient = isAuthenticated ? AxiosInterceptor : axios;
@@ -40,8 +42,37 @@ const DetailGadgetPage = () => {
     if (error) return <div>{error}</div>;
     if (!product) return <div>Loading...</div>;
 
+    const handleQuantityChange = (type) => {
+        setQuantity(prev => type === 'increment' ? prev + 1 : Math.max(1, prev - 1));
+    };
+
+    const handleBuyNow = async () => {
+        try {
+            const response = await AxiosInterceptor.put("/api/carts", {
+                gadgetId: id,
+                quantity,
+            });
+            console.log("Product added to cart", response);
+            toast.success("Thêm sản phẩm thành công");
+
+            // const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+            // const productIndex = cart.findIndex(item => item.productId === productId);
+            // if (productIndex >= 0) {
+            //     cart[productIndex].quantity += quantity;
+            // } else {
+            //     cart.push({ productId, quantity });
+            // }
+
+            // localStorage.setItem("cart", JSON.stringify(cart));
+        } catch (error) {
+            console.error("Error adding product to cart:", error);
+            toast.error("Thêm sản phẩm thất bại");
+        }
+    };
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <ToastContainer />
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Left column */}
                 <div className="lg:w-2/3">
@@ -142,11 +173,30 @@ const DetailGadgetPage = () => {
                         </div>
 
                         <div className="space-y-2 mb-6">
-                            <button className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition duration-200">
-                                Mua ngay
+                            <div className="flex items-center space-x-3 mb-4">
+                                <button
+                                    className="px-2 py-1 bg-gray-200 rounded-md"
+                                    onClick={() => handleQuantityChange('decrement')}
+                                >
+                                    -
+                                </button>
+                                <span className="text-xl font-semibold">{quantity}</span>
+                                <button
+                                    className="px-2 py-1 bg-gray-200 rounded-md"
+                                    onClick={() => handleQuantityChange('increment')}
+                                >
+                                    +
+                                </button>
+                            </div>
+
+                            <button
+                                className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition duration-200"
+                                onClick={handleBuyNow}
+                            >
+                                Thêm vào giỏ hàng
                             </button>
                             <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200">
-                                Mua trả góp
+                                Mua ngay
                             </button>
                         </div>
 
