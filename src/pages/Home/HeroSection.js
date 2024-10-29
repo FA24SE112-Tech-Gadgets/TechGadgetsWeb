@@ -65,6 +65,17 @@ const fetchBrandsForCategories = async (navigate) => {
             break; // Nếu có lỗi, thoát khỏi vòng lặp
           }
         }
+        let hotGadgets = [];
+        try {
+          const hotGadgetsResponse = await axios.get(
+            `${process.env.REACT_APP_DEV_API || process.env.REACT_APP_PRO_API}/api/gadgets/hot?categoryId=${category.id}`
+          );
+          hotGadgets = hotGadgetsResponse.data.items || []; // Store hot gadgets
+          console.log("hot gadgtes", hotGadgetsResponse.data.items);
+
+        } catch (error) {
+          console.error(`Error fetching hot gadgets for category ${category.name}`, error);
+        }
 
         // Chia thành từng cột 10 thương hiệu
         const brandColumns = [];
@@ -83,16 +94,24 @@ const fetchBrandsForCategories = async (navigate) => {
               items: brandColumns.map((column) =>
                 column.map((brand) => ({
                   name: brand.name,
-                  navigate: () =>     navigate(`/gadgets/${slugify(category.name)}/${slugify(brand.name)}`, {
+                  navigate: () => navigate(`/gadgets/${slugify(category.name)}/${slugify(brand.name)}`, {
 
                     state: {
                       categoryId: category.id,
                       brandId: brand.id
                     }
-    
+
                   })
                 }))
-              )
+              ),
+              hotGadgets: hotGadgets.map(gadget => ({
+                name: gadget.name,
+                navigate: () => navigate(`/gadget/detail/${gadget.id}`, {
+                  state: {
+                    gadgetId: gadget.id
+                  }
+                })
+              }))
             }
           ]
         };
@@ -250,50 +269,79 @@ const HeroSection = ({ handleOrderPopup }) => {
         {/* Left Sidebar */}
         <div className="w-[200px] h-[300px] bg-white dark:bg-gray-800 rounded-lg p-4 relative z-20">
           <div className="h-[400px] flex flex-col justify-between p-4">
-          <ul className="flex flex-col">
-            {categories.map((category, index) => (
-              <li
-                key={index}
-                onMouseEnter={() => handleMouseEnterCategory(index)}
-                onMouseLeave={handleMouseLeaveCategory}
-                className="flex items-center gap-2 cursor-pointer mb-5"
-              >
-                {category.icon}
-                <h3>{category.name}</h3>
-              </li>
-            ))}
-          </ul>
-          </div>
-         
-          {/* Brands Panel - Đặt phần này ở cùng vị trí */}
-          
-          {(hoveredCategory !== null || isHoveringDetails) && (
-            <div
-              className="absolute top-0 left-full ml-2 overflow-y-auto w-[955px] bg-white dark:bg-gray-900 p-4 space-x-4 flex z-30"
-              onMouseEnter={handleMouseEnterDetails}
-              onMouseLeave={handleMouseLeaveDetails}
-            >
-              {categories[hoveredCategory]?.details.map((detail, idx) => (
-                <div key={idx} className="flex-1 min-w-[100px] space-y-4">
-                  <div className="font-semibold text-gray-600 dark:text-gray-300">
-                    {detail.subcategory}
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {detail.items.map((brandColumn, columnIndex) => (
-                      <ul key={columnIndex} className="list-none list-inside space-y-2">
-                        {brandColumn.map((item, id) => (
-                          <li key={id} className="text-gray-600 dark:text-gray-300"   onClick={() => handleBrandClick(item.navigate)}>
-                            <div className="hover:underline">
-                              {item.name}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ))}
-                  </div>
-                </div>
+            <ul className="flex flex-col">
+              {categories.map((category, index) => (
+                <li
+                  key={index}
+                  onMouseEnter={() => handleMouseEnterCategory(index)}
+                  onMouseLeave={handleMouseLeaveCategory}
+                  className="flex items-center gap-2 cursor-pointer mb-5"
+                >
+                  {category.icon}
+                  <h3>{category.name}</h3>
+                </li>
               ))}
-            </div>
+            </ul>
+          </div>
+
+          {/* Brands Panel - Đặt phần này ở cùng vị trí */}
+
+          {(hoveredCategory !== null || isHoveringDetails) && (
+       <div
+       className="absolute top-0 left-full ml-2 overflow-y-auto w-[955px] bg-white dark:bg-gray-900 p-4 flex z-30" 
+       onMouseEnter={handleMouseEnterDetails} 
+       onMouseLeave={handleMouseLeaveDetails}
+     >
+       {categories[hoveredCategory]?.details.map((detail, idx) => (
+         <div key={idx} className="flex justify-between">
+           {/* Phần tử bên trái */}
+           <div className="flex-1 min-w-[100px] space-y-4">
+             <div className="font-semibold text-gray-600 dark:text-gray-300">
+               {detail.subcategory}
+             </div>
+             <div className="grid grid-cols-3 gap-4">
+               {detail.items.map((brandColumn, columnIndex) => (
+                 <ul key={columnIndex} className="list-none list-inside space-y-2">
+                   {brandColumn.map((item, id) => (
+                     <li
+                       key={id}
+                       className="text-gray-600 dark:text-gray-300"
+                       onClick={() => handleBrandClick(item.navigate)}
+                     >
+                       <div className="hover:underline">
+                         {item.name}
+                       </div>
+                     </li>
+                   ))}
+                 </ul>
+               ))}
+             </div>
+           </div>
+     
+           {/* Phần tử bên phải */}
+           <div className="flex-1 min-w-[100px] space-y-4 ml-auto"> {/* Thêm ml-auto để đẩy sang phải */}
+             <h3 className="font-semibold text-gray-600 dark:text-gray-300 mb-4">
+               Sản phẩm nổi bật
+             </h3>
+             <div className="grid gap-4">
+               {detail.hotGadgets?.map((gadget, index) => (
+                 <div
+                   key={index}
+                   className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded"
+                   onClick={() => handleBrandClick(gadget.navigate)}
+                 >
+                   <div className="font-medium text-sm hover:text-primary">
+                     {gadget.name}
+                   </div>
+                 </div>
+               ))}
+             </div>
+           </div>
+         </div>
+       ))}
+     </div>
+     
+         
           )}
 
 

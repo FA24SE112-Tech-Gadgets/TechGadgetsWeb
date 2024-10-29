@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { toast,ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 
 const CartPage = () => {
     const [sellers, setSellers] = useState([]);
@@ -43,41 +43,49 @@ const CartPage = () => {
             )
         }));
     };
-    const handleRemoveItem = async (sellerId, productId) => {
+
+    const handleRemoveItemsForSeller = async (sellerId) => {
         try {
-            await AxiosInterceptor.delete(`/api/carts/seller/${sellerId}`, {
-                data: { gadgetId: productId }
-            });
-            
-            // Update state after successful deletion
+            await AxiosInterceptor.delete(`/api/carts/seller/${sellerId}`); // Adjust the API as needed
+
+            // Remove all items for the seller from the state
             setCartItemsBySeller(prev => ({
                 ...prev,
-                [sellerId]: prev[sellerId].filter(item => item.gadget.id !== productId)
+                [sellerId]: [] // Clear items for this seller
             }));
-            
+
             // Show success toast notification
-            toast.success("Xóa khỏi giỏ hàng thành công");
+            toast.success("Xóa tất cả sản phẩm khỏi giỏ hàng thành công");
         } catch (error) {
-            console.error(`Error removing item from seller ${sellerId}:`, error);
-            toast.error("Xóa khỏi giỏ hàng thất bại.");
+            console.error(`Error removing items from seller ${sellerId}:`, error);
+            toast.error("Xóa tất cả sản phẩm khỏi giỏ hàng thất bại.");
         }
-    }
+    };
+
     return (
         <div className="max-w-7xl mx-auto p-4">
-            <ToastContainer/>
+            <ToastContainer />
             {sellers.map(seller => (
                 <div key={seller.id} className="mb-8 p-4 border rounded-lg shadow-sm bg-white">
                     <div className="mb-4">
                         <h2 className="text-lg font-semibold">{seller.shopName}</h2>
                         <p>{seller.shopAddress}</p>
                         <p>Phone: {seller.phoneNumber}</p>
+                        <div className='flex justify-end mt-2'>
+                            <button
+                                onClick={() => handleRemoveItemsForSeller(seller.id)}
+                                className="text-red-500 hover:underline mt-2"
+                            >
+                                Remove All
+                            </button>
+                        </div>
                     </div>
 
                     <div className="space-y-4">
                         {(cartItemsBySeller[seller.id] || []).map(item => (
                             <div key={item.gadget.id} className="flex items-start gap-4 p-4 border rounded-md shadow-sm bg-gray-100">
                                 <img src={item.gadget.thumbnailUrl} alt={item.gadget.name} className="w-20 h-20 object-cover rounded-md" />
-                                
+
                                 <div className="flex-grow">
                                     <h4 className="font-bold">{item.gadget.name}</h4>
                                     <p>Hãng: {item.gadget.brand.name}</p>
@@ -86,8 +94,8 @@ const CartPage = () => {
                                         <span className="font-semibold text-red-500 mr-2">
                                             ₫{item.gadget.price.toLocaleString()}
                                         </span>
-                                      
                                     </div>
+
                                 </div>
 
                                 <div className="flex flex-col items-center gap-2">
@@ -107,12 +115,7 @@ const CartPage = () => {
                                             <PlusOutlined />
                                         </button>
                                     </div>
-                                    <button
-                                        onClick={() => handleRemoveItem(seller.id, item.gadget.id)}
-                                        className="text-red-500 hover:underline mt-2"
-                                    >
-                                        Remove
-                                    </button>
+
                                 </div>
                             </div>
                         ))}

@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 
 const categoryIds = {
-  laptops: "458d7752-e45e-444a-adf9-f7201c07acd1",
+  laptop: "458d7752-e45e-444a-adf9-f7201c07acd1",
   headphones: "9f6ac480-e673-49ec-9bc0-7566cca80b86",
   speakers: "bb65a310-e28e-4226-a562-0b6ea27f4faa",
   phones: "ea4183e8-5a94-401c-865d-e000b5d2b72d"
@@ -37,21 +37,21 @@ export default function ProductPage() {
 
   const navigate = useNavigate();
   const [products, setProducts] = useState({
-    laptops: [],
+    laptop: [],
     headphones: [],
     speakers: [],
     phones: []
   });
 
   const [brands, setBrands] = useState({
-    laptops: [],
+    laptop: [],
     headphones: [],
     speakers: [],
     phones: []
   });
 
   const navigationRefs = {
-    laptops: { prev: useRef(null), next: useRef(null) },
+    laptop: { prev: useRef(null), next: useRef(null) },
     headphones: { prev: useRef(null), next: useRef(null) },
     speakers: { prev: useRef(null), next: useRef(null) },
     phones: { prev: useRef(null), next: useRef(null) }
@@ -236,7 +236,7 @@ export default function ProductPage() {
           <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
         </div>
       )}
-      {renderCategory("laptops", "Laptops")}
+      {renderCategory("laptop", "Laptop")}
       {renderCategory("headphones", "Tai nghe")}
       {renderCategory("speakers", "Loa")}
       {renderCategory("phones", "Điện thoại")}
