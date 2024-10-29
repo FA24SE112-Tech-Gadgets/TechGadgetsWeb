@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import useAuth from '~/context/auth/useAuth';
@@ -14,9 +14,9 @@ const DetailGadgetPage = () => {
     const [product, setProduct] = useState(null);
     const [activeTab, setActiveTab] = useState('specifications');
     const [error, setError] = useState(null);
-    const [thumbnailUrl, setThumbnailUrl] = useState(''); // State for thumbnail URL
+   
     const [quantity, setQuantity] = useState(1);
-
+    const [price, setPrice] = useState(0);
     useEffect(() => {
         const apiClient = isAuthenticated ? AxiosInterceptor : axios;
         const fetchProduct = async () => {
@@ -25,7 +25,9 @@ const DetailGadgetPage = () => {
                 const response = await apiClient(`${apiBase}api/gadgets/${id}`);
                 console.log("API Response:", response.data);
                 setProduct(response.data);
-                setThumbnailUrl(response.data.thumbnailUrl); // Set initial thumbnail URL
+                setPrice(response.price);
+                console.log("giá",response.data.price);
+                
             } catch (error) {
                 console.error("Error fetching product details:", error);
                 setError("Failed to fetch product details.");
@@ -34,42 +36,47 @@ const DetailGadgetPage = () => {
 
         fetchProduct();
     }, [id, isAuthenticated, apiBase]);
+    const imgRef = useRef(null); // Tạo ref để tham chiếu đến hình ảnh chính
 
     const handleImageClick = (imageUrl) => {
-        setThumbnailUrl(imageUrl); // Update thumbnail URL when an image is clicked
+        if (imgRef.current) {
+            imgRef.current.src = imageUrl; // Cập nhật src của hình ảnh chính
+        }
     };
-
     if (error) return <div>{error}</div>;
-    if (!product) return <div>Loading...</div>;
+    if (!product) return <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+    <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+  </div>;
 
     const handleQuantityChange = (type) => {
         setQuantity(prev => type === 'increment' ? prev + 1 : Math.max(1, prev - 1));
     };
 
     const handleBuyNow = async () => {
+        const totalPrice = price * quantity; 
+        console.log("giá",price);
+        console.log("số lượng",quantity)
+
         try {
             const response = await AxiosInterceptor.put("/api/carts", {
                 gadgetId: id,
                 quantity,
             });
+    
+           
+            console.log("Total Price before saving:", totalPrice);
+            localStorage.setItem(`cartItem_${id}`, JSON.stringify({
+                totalPrice: totalPrice,
+            }));
+    
             console.log("Product added to cart", response);
             toast.success("Thêm sản phẩm thành công");
-
-            // const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-            // const productIndex = cart.findIndex(item => item.productId === productId);
-            // if (productIndex >= 0) {
-            //     cart[productIndex].quantity += quantity;
-            // } else {
-            //     cart.push({ productId, quantity });
-            // }
-
-            // localStorage.setItem("cart", JSON.stringify(cart));
         } catch (error) {
             console.error("Error adding product to cart:", error);
             toast.error("Thêm sản phẩm thất bại");
         }
     };
+    
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <ToastContainer />
@@ -80,7 +87,8 @@ const DetailGadgetPage = () => {
 
                     <div className="mb-6">
                         <img
-                            src={thumbnailUrl} // Use the updated thumbnail URL
+                            ref={imgRef} // Gán ref cho hình ảnh chính
+                            src={product.thumbnailUrl} // Giá trị khởi tạo
                             alt={product.name}
                             width={300}
                             height={200}
@@ -97,7 +105,7 @@ const DetailGadgetPage = () => {
                                 width={100}
                                 height={100}
                                 className="rounded-md border border-gray-200 cursor-pointer"
-                                onClick={() => handleImageClick(image)} // Add click event
+                                onClick={() => handleImageClick(image)}
                             />
                         ))}
                     </div>
