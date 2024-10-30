@@ -13,7 +13,7 @@ const DetailGadgetPage = () => {
         : process.env.REACT_APP_PRO_API + "/";
     // const { id } = useParams();
     const location = useLocation();
-    const {productId } = location.state || {};
+    const { productId } = location.state || {};
     const [product, setProduct] = useState(null);
     const [activeTab, setActiveTab] = useState('specifications');
     const [error, setError] = useState(null);
@@ -61,7 +61,7 @@ const DetailGadgetPage = () => {
         console.log("số lượng", quantity)
 
         try {
-            const response = await AxiosInterceptor.put("/api/carts", {
+            const response = await AxiosInterceptor.post("/api/cart", {
                 gadgetId: productId,
                 quantity,
             });
@@ -83,7 +83,7 @@ const DetailGadgetPage = () => {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <Breadcrumb className="w-full">
-            <Breadcrumb.Item>
+                <Breadcrumb.Item>
                     <p>
                         {product.category?.name}
                     </p>
@@ -194,10 +194,21 @@ const DetailGadgetPage = () => {
                 {/* Right column */}
                 <div className="lg:w-1/3">
                     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <div className="mb-4">
-                            <span className="text-3xl font-bold text-red-600">
-                                {product.price.toLocaleString()}₫
-                            </span>
+                        <div className="flex py-4">
+                            {product.discountPercentage > 0 ? (
+                                <>
+                                    <div className="mr-2 text-3xl font-bold text-red-600">
+                                        ₫{product.discountPrice.toLocaleString()}
+                                    </div>
+                                    <span className="line-through text-gray-500">
+                                        {product.price.toLocaleString()}đ
+                                    </span>
+                                </>
+                            ) : (
+                                <div className="text-gray-800 font-semibold text-3xl">
+                                    ₫{product.price.toLocaleString()}
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-2 mb-6">

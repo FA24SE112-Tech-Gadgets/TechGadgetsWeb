@@ -10,7 +10,7 @@ const CartPage = () => {
     useEffect(() => {
         const fetchSellers = async () => {
             try {
-                const response = await AxiosInterceptor.get('/api/carts/sellers?Page=1&PageSize=100');
+                const response = await AxiosInterceptor.get('/api/cart/sellers?Page=1&PageSize=100');
                 setSellers(response.data.items);
             } catch (error) {
                 console.error("Error fetching sellers:", error);
@@ -23,7 +23,7 @@ const CartPage = () => {
     useEffect(() => {
         const fetchCartItemsForSeller = async (sellerId) => {
             try {
-                const response = await AxiosInterceptor.get(`/api/carts/seller/${sellerId}`);
+                const response = await AxiosInterceptor.get(`/api/cart/seller/${sellerId}`);
                 setCartItemsBySeller(prev => ({ ...prev, [sellerId]: response.data.items }));
             } catch (error) {
                 console.error(`Error fetching cart items for seller ${sellerId}:`, error);
@@ -40,30 +40,30 @@ const CartPage = () => {
                     // Lưu giá trị trước khi thay đổi vào localStorage
                     const previousTotalPrice = item.gadget.price * item.quantity;
                     localStorage.setItem(`previousTotalPrice_${productId}`, previousTotalPrice);
-    
+
                     // Cập nhật số lượng mới
                     const newQuantity = Math.max(1, item.quantity + change);
                     const newTotalPrice = item.gadget.price * newQuantity;
-    
+
                     // Lưu giá trị mới sau khi thay đổi vào localStorage
                     localStorage.setItem(`currentTotalPrice_${productId}`, newTotalPrice);
-    
+
                     return { ...item, quantity: newQuantity };
                 }
                 return item;
             });
-    
+
             return {
                 ...prev,
                 [sellerId]: updatedItems,
             };
         });
     };
-    
+
 
     const handleRemoveItemsForSeller = async (sellerId) => {
         try {
-            await AxiosInterceptor.delete(`/api/carts/seller/${sellerId}`);
+            await AxiosInterceptor.delete(`/api/cart/seller/${sellerId}`);
 
             setCartItemsBySeller(prev => ({
                 ...prev,
@@ -107,19 +107,40 @@ const CartPage = () => {
                             {(cartItemsBySeller[seller.id] || []).map(item => (
                                 <div key={item.gadget.id} className="flex items-start gap-4 p-4 border rounded-md shadow-sm bg-gray-100">
                                     <img src={item.gadget.thumbnailUrl} alt={item.gadget.name} className="w-20 h-20 object-cover rounded-md" />
-
-                                    <div className="flex-grow">
+                                    <div className="flex-grow flex flex-col space-y-2">
                                         <h4 className="font-bold">{item.gadget.name}</h4>
                                         <p>Hãng: {item.gadget.brand.name}</p>
                                         <p>Loại sản phẩm: {item.gadget.category.name}</p>
                                         <div className="flex items-center mt-2">
+                                            <p>Đơn giá:   </p>
+                                                {item.gadget.discountPercentage > 0 ? (
+                                                    <>
+                                                        <div className="text-red-500 font-semibold text-sm mr-2">
+                                                            ₫{item.gadget.discountPrice.toLocaleString()}
+                                                        </div>
+                                                        <span className="line-through text-gray-500">
+                                                            {item.gadget.price.toLocaleString()}đ
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <div className="text-gray-800 font-semibold text-sm">
+                                                        ₫{item.gadget.price.toLocaleString()}
+                                                    </div>
+                                                )}
+                                          
+                                        </div>
+                                        <div className="flex items-center mt-2">
+                                            <p>Thành tiền: </p>
                                             <span className="font-semibold text-red-500 mr-2">
-                                                ₫{(item.gadget.price * item.quantity).toLocaleString()}
+                                                ₫{(
+                                                    (item.gadget.discountPercentage > 0
+                                                        ? item.gadget.discountPrice
+                                                        : item.gadget.price) * item.quantity
+                                                ).toLocaleString()}
                                             </span>
                                         </div>
-
-
                                     </div>
+
 
                                     <div className="flex flex-col items-center gap-2">
                                         <div className="flex items-center gap-2">

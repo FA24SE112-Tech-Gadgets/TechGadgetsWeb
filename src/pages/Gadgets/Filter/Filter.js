@@ -124,7 +124,7 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
 
       ]}
     >
-      <div className="filter-container">
+   
         {renderSelectedFilters()}
         {renderFilterGroup()}
         <div className="price-filter max-w-md w-full">
@@ -141,7 +141,7 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
             <span>Giá thấp nhất: {priceRange[1].toLocaleString()} VND</span>
           </div>
         </div>
-      </div>
+     
     </Modal>
   );
 }

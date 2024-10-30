@@ -135,12 +135,17 @@ function CategoryGadgetPage() {
                             <div
                                 key={product.id}
                                 className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105  hover:border-primary/50"
-                                onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`,{
-                                    state:{
-                                      productId : product.id,
-                                    } 
-                                  })}
+                                onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
+                                    state: {
+                                        productId: product.id,
+                                    }
+                                })}
                             >
+                                {product.discountPercentage > 0 && (
+                                    <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md">
+                                        Giảm {`${product.discountPercentage}%`}
+                                    </div>
+                                )}
                                 {!product.isForSale && (
                                     <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
                                         Ngừng kinh doanh
@@ -153,9 +158,23 @@ function CategoryGadgetPage() {
                                         className="w-full h-32 object-cover mb-2 rounded"
                                     />
                                     <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
-                                    <div className="text-red-500 font-semibold text-sm">
-                                        {product.price.toLocaleString()}đ
+                                    <div className="flex py-4">
+                                        {product.discountPercentage > 0 ? (
+                                            <>
+                                                <div className="text-red-500 font-semibold text-sm mr-2">
+                                                    ₫{product.discountPrice.toLocaleString()}
+                                                </div>
+                                                <span className="line-through text-gray-500">
+                                                    {product.price.toLocaleString()}đ
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <div className="text-gray-800 font-semibold text-sm">
+                                                ₫{product.price.toLocaleString()}
+                                            </div>
+                                        )}
                                     </div>
+
                                 </div>
                                 <div className="p-2">
                                     <div className="w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500">

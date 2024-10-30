@@ -64,6 +64,7 @@ export default function ProductPage() {
       try {
         const productResponse = await api.get(categoryPaths[category]);
         setProducts((prev) => ({ ...prev, [category]: productResponse.data.items }));
+        console.log("data ne", productResponse.data.items);
 
         const brandResponse = await axios.get(`${apiBase}api/brands/categories/${categoryIds[category]}`);
         setBrands((prev) => ({ ...prev, [category]: brandResponse.data.items }));
@@ -102,12 +103,17 @@ export default function ProductPage() {
     <div
       key={product.id}
       className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105  hover:border-primary/50"
-      onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`,{
-        state:{
-          productId : product.id,
-        } 
+      onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
+        state: {
+          productId: product.id,
+        }
       })}
     >
+      {product.discountPercentage > 0 && (
+        <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md">
+          Giảm {`${product.discountPercentage}%`}
+        </div>
+      )}
       {product.isForSale === false && (
         <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
           Ngừng kinh doanh
@@ -120,8 +126,21 @@ export default function ProductPage() {
           className="w-full h-32 object-cover mb-2 rounded-2xl"
         />
         <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
-        <div className="text-red-500 font-semibold text-sm">
-          {product.price.toLocaleString()}đ
+        <div className="flex py-4">
+          {product.discountPercentage > 0 ? (
+            <>
+              <div className="text-red-500 font-semibold text-sm mr-2">
+                ₫{product.discountPrice.toLocaleString()}
+              </div>
+              <span className="line-through text-gray-500">
+                {product.price.toLocaleString()}đ
+              </span>
+            </>
+          ) : (
+            <div className="text-gray-800 font-semibold text-sm">
+              ₫{product.price.toLocaleString()}
+            </div>
+          )}
         </div>
       </div>
       <div className="p-2">

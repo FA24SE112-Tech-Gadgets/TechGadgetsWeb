@@ -16,7 +16,7 @@ function BrandGadgetPage() {
   const { isAuthenticated } = useAuth();
   const { category, brand } = useParams();
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({});
   const apiBaseUrl = process.env.NODE_ENV === "development"
@@ -30,8 +30,8 @@ function BrandGadgetPage() {
 
     // Chuẩn bị các GadgetFilters dưới dạng query string
     const gadgetFilters = appliedFilters.GadgetFilters
-        ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
-        : '';
+      ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
+      : '';
 
     // Thêm MinPrice và MaxPrice vào query nếu có trong appliedFilters
     const minPrice = appliedFilters.MinPrice ? `MinPrice=${appliedFilters.MinPrice}` : '';
@@ -39,9 +39,9 @@ function BrandGadgetPage() {
 
     // Kết hợp tất cả các tham số query
     const queryString = [
-        gadgetFilters, 
-        minPrice, 
-        maxPrice
+      gadgetFilters,
+      minPrice,
+      maxPrice
     ].filter(Boolean).join('&'); // filter(Boolean) để loại bỏ các chuỗi rỗng
 
     const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}&Page=1&PageSize=100`;
@@ -49,18 +49,18 @@ function BrandGadgetPage() {
     console.log("API URL:", apiUrl); // Kiểm tra URL để đảm bảo đúng định dạng
 
     try {
-        const response = await apiClient.get(apiUrl);
-        setProducts(response.data.items);
+      const response = await apiClient.get(apiUrl);
+      setProducts(response.data.items);
     } catch (error) {
-        console.error("Error fetching brand products:", error);
+      console.error("Error fetching brand products:", error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
 
-useEffect(() => {
-  fetchBrandProducts();
-}, [categoryId, brandId, appliedFilters, isAuthenticated]);
+  useEffect(() => {
+    fetchBrandProducts();
+  }, [categoryId, brandId, appliedFilters, isAuthenticated]);
 
   // const handleNavigation = () => {
   //   navigate(`/gadgets/${slugify(category)}`);
@@ -92,7 +92,7 @@ useEffect(() => {
     console.log("Applied Filters: ", filters);
     setAppliedFilters(filters);
     setFilterModalVisible(false); // Close modal after applying filters
-};
+  };
 
 
   return (
@@ -104,40 +104,45 @@ useEffect(() => {
         </div>
       )}
       <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-       
-          <Breadcrumb className="w-full">
-            <Breadcrumb.Item>
-              {/* <span onClick={handleNavigation} className="hover:underline cursor-pointer"> */}
-              <p>
-                {category}
 
-              </p>
-              {/* </span> */}
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              <p>{brand}</p>
-            </Breadcrumb.Item>
-          </Breadcrumb>
-          <Button onClick={toggleFilterModal} className="mt-4">Filter</Button>
-       
+        <Breadcrumb className="w-full">
+          <Breadcrumb.Item>
+            {/* <span onClick={handleNavigation} className="hover:underline cursor-pointer"> */}
+            <p>
+              {category}
+
+            </p>
+            {/* </span> */}
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <p>{brand}</p>
+          </Breadcrumb.Item>
+        </Breadcrumb>
+        <Button onClick={toggleFilterModal} className="mt-4">Filter</Button>
+
 
         <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8 ">
           {products.length === 0 && !loading ? (
             <div className="text-center py-4 text-gray-500">No products available</div>
           ) : (
             products.map((product) => (
-              <div 
-              key={product.id} 
-              className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105 hover:border-primary/50"
-              onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`,{
-                state:{
-                  productId : product.id,
-                } 
-              })}
+              <div
+                key={product.id}
+                className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105 hover:border-primary/50"
+                onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
+                  state: {
+                    productId: product.id,
+                  }
+                })}
               >
+                {product.discountPercentage > 0 && (
+                  <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md">
+                    Giảm {`${product.discountPercentage}%`}
+                  </div>
+                )}
                 {product.isForSale === false && (
                   <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
-                    Out of stock
+                    Ngường kinh doanh
                   </div>
                 )}
                 <div className="p-2">
@@ -147,8 +152,21 @@ useEffect(() => {
                     className="w-full h-32 object-cover mb-2 rounded"
                   />
                   <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
-                  <div className="text-red-500 font-semibold text-sm">
-                    {product.price.toLocaleString()}đ
+                  <div className="flex py-4">
+                    {product.discountPercentage > 0 ? (
+                      <>
+                        <div className="text-red-500 font-semibold text-sm mr-2">
+                          ₫{product.discountPrice.toLocaleString()}
+                        </div>
+                        <span className="line-through text-gray-500">
+                          {product.price.toLocaleString()}đ
+                        </span>
+                      </>
+                    ) : (
+                      <div className="text-gray-800 font-semibold text-sm">
+                        ₫{product.price.toLocaleString()}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="p-2">
