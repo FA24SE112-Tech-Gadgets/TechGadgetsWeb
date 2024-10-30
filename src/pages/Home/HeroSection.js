@@ -94,7 +94,7 @@ const fetchBrandsForCategories = async (navigate) => {
               items: brandColumns.map((column) =>
                 column.map((brand) => ({
                   name: brand.name,
-                  navigate: () => navigate(`/gadgets/${slugify(category.name)}/${slugify(brand.name)}`, {
+                  navigate: () => navigate(`/gadgets/${category.name}/${slugify(brand.name)}`, {
 
                     state: {
                       categoryId: category.id,
@@ -106,9 +106,9 @@ const fetchBrandsForCategories = async (navigate) => {
               ),
               hotGadgets: hotGadgets.map(gadget => ({
                 name: gadget.name,
-                navigate: () => navigate(`/gadget/detail/${gadget.id}`, {
+                navigate: () => navigate(`/gadget/detail/${slugify(gadget.name)}`, {
                   state: {
-                    gadgetId: gadget.id
+                    productId: gadget.id
                   }
                 })
               }))

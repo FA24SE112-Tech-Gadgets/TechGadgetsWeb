@@ -107,7 +107,7 @@ function CategoryGadgetPage() {
         setFilterModalVisible(false); // Close modal after applying filters
     };
     return (
-        <div>
+        <div className="bg-white dark:bg-gray-900 dark:text-white">
             <ToastContainer />
 
             {loading && (
@@ -115,8 +115,8 @@ function CategoryGadgetPage() {
                     <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
                 </div>
             )}
+            <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            <div className="bg-gray-100 w-full px-4">
                 <Breadcrumb className="w-full">
                     <Breadcrumb.Item>
                         <p>
@@ -124,47 +124,52 @@ function CategoryGadgetPage() {
                         </p>
                     </Breadcrumb.Item>
                 </Breadcrumb>
-            </div>
+
                 <Button onClick={toggleFilterModal} className="mt-4 px-4">Filter</Button>
 
-            <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8">
-                {products.length === 0 && !loading ? (
-                    <div className="text-center py-4 text-gray-500">Không có sản phẩm</div>
-                ) : (
-                    products.map((product) => (
-                        <div 
-                        key={product.id} 
-                        className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105  hover:border-primary/50"
-                        onClick={() => navigate(`/gadget/detail/${product.id}`)}
-                        >
-                            {!product.isForSale && (
-                                <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
-                                    Ngừng kinh doanh
-                                </div>
-                            )}
-                            <div className="p-2">
-                                <img
-                                    src={product.thumbnailUrl}
-                                    alt={product.name}
-                                    className="w-full h-32 object-cover mb-2 rounded"
-                                />
-                                <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
-                                <div className="text-red-500 font-semibold text-sm">
-                                    {product.price.toLocaleString()}đ
-                                </div>
-                            </div>
-                            <div className="p-2">
-                                <div className="w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500">
-                                    <span className="mr-2">Yêu thích</span>
-                                    <FavoriteIcon
-                                        isFavorite={product.isFavorite}
-                                        onClick={() => toggleFavorite(product.id, product.isFavorite)}
+                <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8">
+                    {products.length === 0 && !loading ? (
+                        <div className="text-center py-4 text-gray-500">Không có sản phẩm</div>
+                    ) : (
+                        products.map((product) => (
+                            <div
+                                key={product.id}
+                                className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105  hover:border-primary/50"
+                                onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`,{
+                                    state:{
+                                      productId : product.id,
+                                    } 
+                                  })}
+                            >
+                                {!product.isForSale && (
+                                    <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
+                                        Ngừng kinh doanh
+                                    </div>
+                                )}
+                                <div className="p-2">
+                                    <img
+                                        src={product.thumbnailUrl}
+                                        alt={product.name}
+                                        className="w-full h-32 object-cover mb-2 rounded"
                                     />
+                                    <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
+                                    <div className="text-red-500 font-semibold text-sm">
+                                        {product.price.toLocaleString()}đ
+                                    </div>
+                                </div>
+                                <div className="p-2">
+                                    <div className="w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500">
+                                        <span className="mr-2">Yêu thích</span>
+                                        <FavoriteIcon
+                                            isFavorite={product.isFavorite}
+                                            onClick={() => toggleFavorite(product.id, product.isFavorite)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))
-                )}
+                        ))
+                    )}
+                </div>
             </div>
             <Filter
                 isVisible={isFilterModalVisible}

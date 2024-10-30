@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Modal, Checkbox, Button, Slider, Row, Col } from 'antd';
+import { Modal, Checkbox, Button, Slider, Tag } from 'antd';
 import { useLocation } from 'react-router-dom';
 
 function Filter({ isVisible, onClose, onApplyFilters }) {
@@ -28,45 +28,57 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
     }
   }, [categoryId]);
 
-
-  const handleCheckboxChange = (specKeyName, filterId) => {
+  const handleCheckboxChange = (specKeyName, filterId, filterValue) => {
     setSelectedFilters((prevFilters) => ({
       ...prevFilters,
       [specKeyName]: {
         ...prevFilters[specKeyName],
-        [filterId]: !prevFilters[specKeyName]?.[filterId],
+        [filterId]: prevFilters[specKeyName]?.[filterId] ? undefined : filterValue,
       },
     }));
   };
 
+  const removeSelectedFilter = (specKeyName, filterId) => {
+    setSelectedFilters((prevFilters) => {
+      const updatedFilters = { ...prevFilters };
+      delete updatedFilters[specKeyName][filterId];
+      if (Object.keys(updatedFilters[specKeyName]).length === 0) {
+        delete updatedFilters[specKeyName];
+      }
+      return updatedFilters;
+    });
+  };
 
   const applyFilters = () => {
     const gadgetFilters = Object.entries(selectedFilters).flatMap(([key, filters]) =>
       Object.keys(filters).filter(filterId => filters[filterId]).map(filterId => filterId)
     );
 
-    onApplyFilters({ 
+    onApplyFilters({
       GadgetFilters: gadgetFilters,
-      MinPrice: priceRange[0], 
+      MinPrice: priceRange[0],
       MaxPrice: priceRange[1]
-    }); 
+    });
 
     onClose();
   };
-  // Choose render function based on category
+
   const renderFilterGroup = () => (
     <div className="space-y-6">
-      <h3 className="text-center font-semibold text-xl mb-4">Filter Options</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filters.map((filterCategory) => (
           <div key={filterCategory.specificationKeyName} className="filter-group">
-            <h4 className="text-lg font-medium mb-2">{filterCategory.specificationKeyName}</h4>
+            <h4 className="text-sm font-semibold mb-2 text-gray-700">{filterCategory.specificationKeyName}</h4>
             <div className="space-y-2">
               {filterCategory.gadgetFilters.map((filterOption) => (
                 <Checkbox
                   key={filterOption.gadgetFilterId}
                   checked={selectedFilters[filterCategory.specificationKeyName]?.[filterOption.gadgetFilterId] || false}
-                  onChange={() => handleCheckboxChange(filterCategory.specificationKeyName, filterOption.gadgetFilterId)}
+                  onChange={() => handleCheckboxChange(
+                    filterCategory.specificationKeyName,
+                    filterOption.gadgetFilterId,
+                    filterOption.value
+                  )}
                 >
                   <span className="text-sm">{filterOption.value}</span>
                 </Checkbox>
@@ -76,29 +88,47 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
         ))}
       </div>
     </div>
-  )
-  
+  );
+
+  const renderSelectedFilters = () => (
+    <div className="bg-gray-50 p-4 rounded-lg mb-4">
+      <h4 className="text-sm font-semibold mb-2 text-gray-700">Đã chọn: </h4>
+      <div className="flex flex-wrap gap-2">
+        {Object.entries(selectedFilters).flatMap(([specKeyName, filters]) =>
+          Object.entries(filters).filter(([, value]) => value).map(([filterId, value]) => (
+            <Tag
+              closable
+              onClose={() => removeSelectedFilter(specKeyName, filterId)}
+              key={`${specKeyName}-${filterId}`}
+            >
+              {specKeyName}: {value}
+            </Tag>
+          ))
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <Modal
-      title="Filter Products"
       visible={isVisible}
       onCancel={onClose}
+      width={900}
       footer={[
         <Button key="cancel" onClick={onClose}>
-          Cancel
+          Hủy
         </Button>,
         <Button key="apply" type="primary" onClick={applyFilters}>
-          Apply
+          Xác nhận
         </Button>,
+
       ]}
     >
       <div className="filter-container">
+        {renderSelectedFilters()}
         {renderFilterGroup()}
-        
-        {/* Thêm bộ lọc MinPrice và MaxPrice */}
-        <div className="price-filter my-4">
-          <h4 className="text-lg font-semibold mb-2">Price Range</h4>
+        <div className="price-filter max-w-md w-full">
+          <h4 className="text-lg font-semibold mb-2">Giá</h4>
           <Slider
             range
             min={0}
@@ -106,9 +136,9 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
             defaultValue={priceRange}
             onChange={(value) => setPriceRange(value)}
           />
-          <div className="flex justify-between">
-          <span>Min: {priceRange[0].toLocaleString()} VND</span>
-          <span>Max: {priceRange[1].toLocaleString()} VND</span>
+          <div className="flex justify-between mt-2 text-sm">
+            <span>Giá cao nhất: {priceRange[0].toLocaleString()} VND</span>
+            <span>Giá thấp nhất: {priceRange[1].toLocaleString()} VND</span>
           </div>
         </div>
       </div>

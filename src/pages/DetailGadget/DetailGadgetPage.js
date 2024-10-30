@@ -1,33 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
 import useAuth from '~/context/auth/useAuth';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from 'react-toastify';
+import { Breadcrumb } from 'antd';
 
 const DetailGadgetPage = () => {
     const { isAuthenticated } = useAuth();
     const apiBase = process.env.NODE_ENV === "development"
         ? process.env.REACT_APP_DEV_API + "/"
         : process.env.REACT_APP_PRO_API + "/";
-    const { id } = useParams();
+    // const { id } = useParams();
+    const location = useLocation();
+    const {productId } = location.state || {};
     const [product, setProduct] = useState(null);
     const [activeTab, setActiveTab] = useState('specifications');
     const [error, setError] = useState(null);
-   
+
     const [quantity, setQuantity] = useState(1);
     const [price, setPrice] = useState(0);
     useEffect(() => {
         const apiClient = isAuthenticated ? AxiosInterceptor : axios;
         const fetchProduct = async () => {
             try {
-                console.log("Fetching product with ID:", id);
-                const response = await apiClient(`${apiBase}api/gadgets/${id}`);
+                console.log("Fetching product with ID:", productId);
+                const response = await apiClient(`${apiBase}api/gadgets/${productId}`);
                 console.log("API Response:", response.data);
                 setProduct(response.data);
                 setPrice(response.price);
-                console.log("giá",response.data.price);
-                
+                console.log("giá", response.data.price);
+
             } catch (error) {
                 console.error("Error fetching product details:", error);
                 setError("Failed to fetch product details.");
@@ -35,7 +38,7 @@ const DetailGadgetPage = () => {
         };
 
         fetchProduct();
-    }, [id, isAuthenticated, apiBase]);
+    }, [productId, isAuthenticated, apiBase]);
     const imgRef = useRef(null); // Tạo ref để tham chiếu đến hình ảnh chính
 
     const handleImageClick = (imageUrl) => {
@@ -45,30 +48,30 @@ const DetailGadgetPage = () => {
     };
     if (error) return <div>{error}</div>;
     if (!product) return <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-    <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-  </div>;
+        <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+    </div>;
 
     const handleQuantityChange = (type) => {
         setQuantity(prev => type === 'increment' ? prev + 1 : Math.max(1, prev - 1));
     };
 
     const handleBuyNow = async () => {
-        const totalPrice = price * quantity; 
-        console.log("giá",price);
-        console.log("số lượng",quantity)
+        const totalPrice = price * quantity;
+        console.log("giá", price);
+        console.log("số lượng", quantity)
 
         try {
             const response = await AxiosInterceptor.put("/api/carts", {
-                gadgetId: id,
+                gadgetId: productId,
                 quantity,
             });
-    
-           
+
+
             console.log("Total Price before saving:", totalPrice);
-            localStorage.setItem(`cartItem_${id}`, JSON.stringify({
+            localStorage.setItem(`cartItem_${productId}`, JSON.stringify({
                 totalPrice: totalPrice,
             }));
-    
+
             console.log("Product added to cart", response);
             toast.success("Thêm sản phẩm thành công");
         } catch (error) {
@@ -76,9 +79,26 @@ const DetailGadgetPage = () => {
             toast.error("Thêm sản phẩm thất bại");
         }
     };
-    
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <Breadcrumb className="w-full">
+            <Breadcrumb.Item>
+                    <p>
+                        {product.category?.name}
+                    </p>
+                </Breadcrumb.Item>
+                <Breadcrumb.Item>
+                    <p>
+                        {product.brand?.name}
+                    </p>
+                </Breadcrumb.Item>
+                <Breadcrumb.Item>
+                    <p>
+                        {product.name}
+                    </p>
+                </Breadcrumb.Item>
+            </Breadcrumb>
             <ToastContainer />
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Left column */}

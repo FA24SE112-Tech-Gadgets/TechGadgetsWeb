@@ -96,15 +96,15 @@ useEffect(() => {
 
 
   return (
-    <div>
+    <div className="bg-white dark:bg-gray-900 dark:text-white">
       <ToastContainer />
       {loading && (
         <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
           <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
         </div>
       )}
-      <div className="bg-white dark:bg-gray-900 dark:text-white">
-        <div className="w-full px-4">
+      <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+       
           <Breadcrumb className="w-full">
             <Breadcrumb.Item>
               {/* <span onClick={handleNavigation} className="hover:underline cursor-pointer"> */}
@@ -119,7 +119,7 @@ useEffect(() => {
             </Breadcrumb.Item>
           </Breadcrumb>
           <Button onClick={toggleFilterModal} className="mt-4">Filter</Button>
-        </div>
+       
 
         <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8 ">
           {products.length === 0 && !loading ? (
@@ -129,7 +129,11 @@ useEffect(() => {
               <div 
               key={product.id} 
               className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105 hover:border-primary/50"
-              onClick={() => navigate(`/gadget/detail/${product.id}`)}
+              onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`,{
+                state:{
+                  productId : product.id,
+                } 
+              })}
               >
                 {product.isForSale === false && (
                   <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">

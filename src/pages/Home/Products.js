@@ -102,7 +102,11 @@ export default function ProductPage() {
     <div
       key={product.id}
       className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105  hover:border-primary/50"
-      onClick={() => navigate(`/gadget/detail/${product.id}`)}
+      onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`,{
+        state:{
+          productId : product.id,
+        } 
+      })}
     >
       {product.isForSale === false && (
         <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
@@ -153,7 +157,7 @@ export default function ProductPage() {
           {brands[category].map((brand) => (
             <button className="bg-gray-200 dark:bg-gray-500 dark:text-white hover:bg-gray-300 px-4 py-2 rounded-lg"
               onClick={() => {
-                navigate(`/gadgets/${slugify(title)}/${slugify(brand.name)}`, {
+                navigate(`/gadgets/${title}/${slugify(brand.name)}`, {
 
                   state: {
                     categoryId: categoryIds[category],
@@ -169,7 +173,7 @@ export default function ProductPage() {
           ))}
           <button className="bg-gray-200 dark:bg-gray-500 dark:text-white hover:bg-gray-300 px-4 py-2 rounded-lg"
             onClick={() => {
-              navigate(`/gadgets/${slugify(title)}`, {
+              navigate(`/gadgets/${title}`, {
 
                 state: {
                   categoryId: categoryIds[category],
