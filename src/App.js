@@ -26,10 +26,16 @@ import HistorySellerApplication from "./pages/Seller/HistorySellerApplication";
 import SellerApplicationLayout from "./components/layout/SellerApplicationLayout";
 import ManageSellerApplicationPage from "./pages/Manager/SellerApplication/ManageSellerApplication";
 import ForgotPassword from "./pages/ForgotPWD/ForgotPWDPage";
-import SellerProfilePage from "./pages/Seller/SellerProfile";
-import SellerHeader from "./pages/Seller/SellerHeader";
+import DepositHistory from "./pages/Wallet/DepositHistory";
+import RefundHistory from "./pages/Wallet/RefundHistory";
+import PaymentHistory from "./pages/Wallet/PaymentHistory";
+import WalletLayout from "./pages/Wallet/WalletLayout";
+import DepositSuccess from "./pages/Wallet/DepositSuccess";
+import DepositFail from "./pages/Wallet/DepositFail";
 import BrandGadgetPage from "./pages/Gadgets/Gadget";
 import CategoryGadgetPage from "./pages/Gadgets/GadgetPage";
+import SellerHeader from "./pages/Seller/SellerHeader";
+import SellerProfilePage from "./pages/Seller/SellerProfile";
 import CartPage from "./pages/Cart/cart";
 
 
@@ -58,7 +64,14 @@ function App() {
 
         } />
 
+        <Route path='/cart' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
+              <CartPage />
+            </RoleBaseRoute>
+          </AuthRoute>
 
+        } />
         {/* <Route path="/gadgets/:category/:categoryId/:brand/:brandId" element={<BrandGadgetPage />} /> */}
 
         <Route path="/gadgets/:category/:brand" element={<BrandGadgetPage />} />
@@ -71,20 +84,28 @@ function App() {
           </AuthRoute>
 
         } />
-          <Route path='/cart' element={
+        <Route path='/deposit-success' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
-              <CartPage />
+              <DepositSuccess />
             </RoleBaseRoute>
           </AuthRoute>
 
         } />
+        <Route path='/deposit-fail' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
+              <DepositFail />
+            </RoleBaseRoute>
+          </AuthRoute>
+
+        } />
+
       </Route>
 
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
         <Route path='/seller' element={<Order />} />
-
       </Route>
 
 
@@ -104,6 +125,13 @@ function App() {
       <Route element={<SellerApplicationLayout />}>
         <Route path='/seller-application' element={<SellerApplication />} />
         <Route path='/history-seller-application' element={<HistorySellerApplication />} />
+      </Route>
+
+      {/* Wallet Route */}
+      <Route element={<WalletLayout />}>
+        <Route path='/deposit-history' element={<DepositHistory />} />
+        <Route path='/refund-history' element={<RefundHistory />} />
+        <Route path='/payment-history' element={<PaymentHistory />} />
       </Route>
 
       {/* Admin Route */}
