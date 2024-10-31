@@ -155,144 +155,151 @@ const CartPage = () => {
             <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
                 Giỏ hàng của bạn
             </h1>
-            <div className="mb-4">
-                <input
-                    type="checkbox"
-                    onChange={handleSelectAll}
-                    checked={Object.keys(selectedItems).length === sellers.length &&
-                        sellers.every(seller => selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length)}
-                />
-                <label className="ml-2">Sản phẩm</label>
-            </div>
+
             {/* Kiểm tra nếu giỏ hàng trống */}
             {sellers.length === 0 || Object.values(cartItemsBySeller).every(items => items.length === 0) ? (
                 <div className="text-center text-gray-500 text-lg font-semibold py-8">
                     Giỏ hàng trống
                 </div>
             ) : (
-                sellers.map(seller => (
-                    (cartItemsBySeller[seller.id]?.length > 0) && (
-                        <div key={seller.id} className="mb-8 p-4 border rounded-lg shadow-sm bg-white">
-                            <div className="mb-4">
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        onChange={() => handleSelectAllForSeller(seller.id)}
-                                        checked={selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length}
-                                    />
-                                    <h2 className="text-lg font-semibold">{seller.shopName}</h2>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <HomeOutlined />
-                                    <p style={{ marginLeft: '8px' }}>{seller.shopAddress}</p>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <PhoneOutlined />
-                                    <p style={{ marginLeft: '8px' }}>SĐT: {seller.phoneNumber}</p>
-                                </div>
+                <>
+                    <div className="mb-4">
+                        <input
+                            type="checkbox"
+                            onChange={handleSelectAll}
+                            checked={Object.keys(selectedItems).length === sellers.length &&
+                                sellers.every(seller => selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length)}
+                        />
+                        <label className="ml-2">Sản phẩm</label>
+                    </div>
 
-
-                                <div className='flex justify-end '>
-                                    <button
-                                        onClick={() => handleRemoveItemsForSeller(seller.id)}
-                                        className="text-red-500 hover:underline"
-                                    >
-                                        Xóa tất cả
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                            <div className="space-y-4">
-                                {(cartItemsBySeller[seller.id] || []).map(item => (
-                                    <div key={item.gadget.id} className="flex items-start gap-4 p-4 border rounded-md shadow-sm bg-gray-100">
+                    {sellers.map(seller => (
+                        (cartItemsBySeller[seller.id]?.length > 0) && (
+                            <div key={seller.id} className="mb-8 p-4 border rounded-lg shadow-sm bg-white">
+                                <div className="mb-4">
+                                    <div className="flex items-center">
                                         <input
                                             type="checkbox"
-                                            checked={selectedItems[seller.id]?.includes(item.gadget.id) || false}
-                                            onChange={() => handleSelectItem(seller.id, item.gadget.id)}
-                                            className="mt-1"
+                                            onChange={() => handleSelectAllForSeller(seller.id)}
+                                            checked={selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length}
                                         />
-                                        <img src={item.gadget.thumbnailUrl} alt={item.gadget.name} className="w-20 h-20 object-cover rounded-md" />
-                                        <div className="flex-grow flex flex-col space-y-2">
-                                            <h4 className="font-bold">{item.gadget.name}</h4>
-                                            <p>Hãng: {item.gadget.brand.name}</p>
-                                            <p>Loại sản phẩm: {item.gadget.category.name}</p>
-                                            <div className="flex items-center mt-2">
-                                                <p>Đơn giá:   </p>
-                                                {item.gadget.discountPercentage > 0 ? (
-                                                    <>
-                                                        <div className="text-red-500 font-semibold text-sm mr-2">
-                                                            ₫{item.gadget.discountPrice.toLocaleString()}
-                                                        </div>
-                                                        <span className="line-through text-gray-500">
-                                                            {item.gadget.price.toLocaleString()}đ
-                                                        </span>
-                                                    </>
-                                                ) : (
-                                                    <div className="text-gray-800 font-semibold text-sm">
-                                                        ₫{item.gadget.price.toLocaleString()}
-                                                    </div>
-                                                )}
-
-                                            </div>
-                                            <div className="flex items-center mt-2">
-                                                <p>Thành tiền: </p>
-                                                <span className="font-semibold text-red-500 mr-2">
-                                                    ₫{(
-                                                        (item.gadget.discountPercentage > 0
-                                                            ? item.gadget.discountPrice
-                                                            : item.gadget.price) * item.quantity
-                                                    ).toLocaleString()}
-                                                </span>
-                                            </div>
-                                        </div>
-
-
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => handleQuantityChange(seller.id, item.gadget.id, -1)}
-                                                    disabled={item.quantity <= 1}
-                                                    className="p-2 bg-gray-200 rounded hover:bg-gray-300"
-                                                >
-                                                    <MinusOutlined />
-                                                </button>
-                                                <span>{item.quantity}</span>
-                                                <button
-                                                    onClick={() => handleQuantityChange(seller.id, item.gadget.id, 1)}
-                                                    className="p-2 bg-gray-200 rounded hover:bg-gray-300"
-                                                >
-                                                    <PlusOutlined />
-                                                </button>
-                                            </div>
-
-                                        </div>
+                                        <h2 className="text-lg font-semibold">{seller.shopName}</h2>
                                     </div>
-                                ))}
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <HomeOutlined />
+                                        <p style={{ marginLeft: '8px' }}>{seller.shopAddress}</p>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <PhoneOutlined />
+                                        <p style={{ marginLeft: '8px' }}>SĐT: {seller.phoneNumber}</p>
+                                    </div>
+
+
+                                    <div className='flex justify-end '>
+                                        <button
+                                            onClick={() => handleRemoveItemsForSeller(seller.id)}
+                                            className="text-red-500 hover:underline"
+                                        >
+                                            Xóa tất cả
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                                <div className="space-y-4">
+                                    {(cartItemsBySeller[seller.id] || []).map(item => (
+                                        <div key={item.gadget.id} className="flex items-start gap-4 p-4 border rounded-md shadow-sm bg-gray-100">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedItems[seller.id]?.includes(item.gadget.id) || false}
+                                                onChange={() => handleSelectItem(seller.id, item.gadget.id)}
+                                                className="mt-1"
+                                            />
+                                            <img src={item.gadget.thumbnailUrl}
+                                                alt={item.gadget.name}
+                                                className="w-20 h-20 object-contain rounded-md"
+                                            />
+                                            <div className="flex-grow flex flex-col space-y-2">
+                                                <h4 className="font-bold">{item.gadget.name}</h4>
+                                                <p>Hãng: {item.gadget.brand.name}</p>
+                                                <p>Loại sản phẩm: {item.gadget.category.name}</p>
+                                                <div className="flex items-center mt-2">
+                                                    <p>Đơn giá:   </p>
+                                                    {item.gadget.discountPercentage > 0 ? (
+                                                        <>
+                                                            <div className="text-red-500 font-semibold text-sm mr-2">
+                                                                ₫{item.gadget.discountPrice.toLocaleString()}
+                                                            </div>
+                                                            <span className="line-through text-gray-500">
+                                                                {item.gadget.price.toLocaleString()}đ
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <div className="text-gray-800 font-semibold text-sm">
+                                                            ₫{item.gadget.price.toLocaleString()}
+                                                        </div>
+                                                    )}
+
+                                                </div>
+                                                <div className="flex items-center mt-2">
+                                                    <p>Thành tiền: </p>
+                                                    <span className="font-semibold text-red-500 mr-2">
+                                                        ₫{(
+                                                            (item.gadget.discountPercentage > 0
+                                                                ? item.gadget.discountPrice
+                                                                : item.gadget.price) * item.quantity
+                                                        ).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => handleQuantityChange(seller.id, item.gadget.id, -1)}
+                                                        disabled={item.quantity <= 1}
+                                                        className="p-2 bg-gray-200 rounded hover:bg-gray-300"
+                                                    >
+                                                        <MinusOutlined />
+                                                    </button>
+                                                    <span>{item.quantity}</span>
+                                                    <button
+                                                        onClick={() => handleQuantityChange(seller.id, item.gadget.id, 1)}
+                                                        className="p-2 bg-gray-200 rounded hover:bg-gray-300"
+                                                    >
+                                                        <PlusOutlined />
+                                                    </button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
+                        )
+                    ))}
+
+                    {totalPrice > 0 && (
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 py-3 shadow-2xl px-4 flex justify-between items-center">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                                <p className="text-lg font-semibold text-gray-700">Tổng tiền:</p>
+                                <p className="text-xl font-bold text-red-500">{totalPrice.toLocaleString()} VNĐ</p>
+                                <p className="text-lg font-semibold text-gray-700 sm:border-l sm:pl-4 sm:ml-4">Sản phẩm đã chọn:
+                                    <span className="text-blue-600 font-bold ml-2">{selectedItemCount}</span>
+                                </p>
+                            </div>
+                            <button
+                                onClick={handleCheckout}
+                                className="bg-red-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold transition duration-200"
+                            >
+                                Mua ngay
+                            </button>
                         </div>
-                    ))
-                ))}
-
-            {totalPrice > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 py-3 shadow-2xl px-4 flex justify-between items-center">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
-                        <p className="text-lg font-semibold text-gray-700">Tổng tiền:</p>
-                        <p className="text-xl font-bold text-red-500">{totalPrice.toLocaleString()} VNĐ</p>
-                        <p className="text-lg font-semibold text-gray-700 sm:border-l sm:pl-4 sm:ml-4">Sản phẩm đã chọn:
-                            <span className="text-blue-600 font-bold ml-2">{selectedItemCount}</span>
-                        </p>
-                    </div>
-                    <button
-                        onClick={handleCheckout}
-                        className="bg-red-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold transition duration-200"
-                    >
-                        Mua ngay
-                    </button>
-                </div>
-            )}
-
+                    )}
+                </>
+ )}
         </div>
     );
 };

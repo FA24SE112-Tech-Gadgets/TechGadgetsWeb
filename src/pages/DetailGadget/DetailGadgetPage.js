@@ -129,15 +129,16 @@ const DetailGadgetPage = () => {
                 <div className="lg:w-2/3">
                     <h1 className="text-2xl font-bold mb-4">{product.name}</h1>
 
-                    <div className="mb-6">
-                        <img
-                            ref={imgRef} // Gán ref cho hình ảnh chính
-                            src={product.thumbnailUrl} // Giá trị khởi tạo
-                            alt={product.name}
-                            width={300}
-                            height={200}
-                            className="w-full h-auto rounded-lg"
-                        />
+                    <div className="mb-6 flex justify-center items-center">
+                        <div className="mb-6 flex justify-center items-center">
+                            <img
+                                ref={imgRef}
+                                src={product.thumbnailUrl}
+                                alt={product.name}
+                                className="w-full max-w-md h-90 object-contain rounded-lg border-none"
+                            />
+                        </div>
+
                     </div>
 
                     <div className="flex space-x-2 mb-6 overflow-x-auto">

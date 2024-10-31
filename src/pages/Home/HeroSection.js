@@ -71,7 +71,7 @@ const fetchBrandsForCategories = async (navigate) => {
             `${process.env.REACT_APP_DEV_API || process.env.REACT_APP_PRO_API}/api/gadgets/hot?categoryId=${category.id}`
           );
           hotGadgets = hotGadgetsResponse.data.items || []; // Store hot gadgets
-          console.log("hot gadgtes", hotGadgetsResponse.data.items);
+     
 
         } catch (error) {
           console.error(`Error fetching hot gadgets for category ${category.name}`, error);

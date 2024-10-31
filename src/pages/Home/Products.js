@@ -65,7 +65,7 @@ export default function ProductPage() {
         const productResponse = await api.get(categoryPaths[category]);
         const activeProducts = productResponse.data.items.filter(product => product.sellerStatus === 'Active');
         setProducts((prev) => ({ ...prev, [category]: activeProducts }));
-        console.log("Filtered active products:", activeProducts);
+       
   
         const brandResponse = await axios.get(`${apiBase}api/brands/categories/${categoryIds[category]}`);
         setBrands((prev) => ({ ...prev, [category]: brandResponse.data.items }));
@@ -126,7 +126,7 @@ export default function ProductPage() {
         <img
           src={product.thumbnailUrl}
           alt={product.name}
-          className="w-full h-32 object-cover mb-2 rounded-2xl"
+          className="w-full h-32 object-contain mb-2 rounded-2xl"
         />
         <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
         <div className="flex py-4">
