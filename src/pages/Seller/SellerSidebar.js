@@ -50,13 +50,6 @@ const SellerSidebar = () => {
         <SubMenu key="finance" icon={<DollarOutlined />} title="Tài chính">
           <Menu.Item key="revenue">Doanh thu</Menu.Item>
         </SubMenu>
-
-        {/* Quản lý Shop */}
-        <SubMenu key="shop" icon={<ShopOutlined />} title="Quản lý Shop">
-          <Menu.Item key="shopReviews">Đánh giá shop</Menu.Item>
-          <Menu.Item key="shopProfile">Hồ sơ shop</Menu.Item>
-          <Menu.Item key="shopCategories">Danh mục shop</Menu.Item>
-        </SubMenu>
       </Menu>
     </Sider>
   );

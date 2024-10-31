@@ -89,6 +89,7 @@ const AuthProvider = ({ children }) => {
 				localStorage.setItem('token', res.data.token);
 				localStorage.setItem('refreshToken', res.data.refreshToken);
 				let resData;
+				
 
 				try {
 					resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {
@@ -113,7 +114,6 @@ const AuthProvider = ({ children }) => {
 						setUser(resData.data);
 						setAuthenticated(true);
 						setError(null);
-
 						console.log("Login successful, navigating to home...", resData);
 						if (clientRole === "Manager") {
 							navigate("/dashboard");
@@ -147,6 +147,8 @@ const AuthProvider = ({ children }) => {
 		}
 		setIsLoading(false);
 	};
+
+  
 
 	const googleLogin = async (googleToken) => {
 		setIsLoading(true);
