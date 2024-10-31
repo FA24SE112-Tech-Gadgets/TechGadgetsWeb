@@ -8,6 +8,7 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { Breadcrumb, Button } from 'antd';
 import slugify from '~/ultis/config';
 import Filter from './Filter/Filter';
+import { FilterOutlined } from '@ant-design/icons';
 
 function CategoryGadgetPage() {
     const location = useLocation();
@@ -19,6 +20,8 @@ function CategoryGadgetPage() {
     const [loading, setLoading] = useState(true);
     const [isFilterModalVisible, setFilterModalVisible] = useState(false);
     const [appliedFilters, setAppliedFilters] = useState({});
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
     const apiBaseUrl = process.env.NODE_ENV === "development"
         ? process.env.REACT_APP_DEV_API
         : process.env.REACT_APP_PRO_API;
@@ -28,29 +31,29 @@ function CategoryGadgetPage() {
             setLoading(true);
             const apiClient = isAuthenticated ? AxiosInterceptor : axios;
 
-            // Chuẩn bị các GadgetFilters dưới dạng query string
             const gadgetFilters = appliedFilters.GadgetFilters
                 ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
                 : '';
-
-            // Thêm MinPrice và MaxPrice vào query nếu có trong appliedFilters
             const minPrice = appliedFilters.MinPrice ? `MinPrice=${appliedFilters.MinPrice}` : '';
             const maxPrice = appliedFilters.MaxPrice ? `MaxPrice=${appliedFilters.MaxPrice}` : '';
 
-            // Kết hợp tất cả các tham số query
             const queryString = [
                 gadgetFilters,
                 minPrice,
                 maxPrice
-            ].filter(Boolean).join('&'); // filter(Boolean) để loại bỏ các chuỗi rỗng
+            ].filter(Boolean).join('&');
 
-            const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}&Page=1&PageSize=100`;
-
-            console.log("API URL:", apiUrl); // Kiểm tra URL để đảm bảo đúng định dạng
+            const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}&Page=${page}&PageSize=20`;
 
             try {
                 const response = await apiClient.get(apiUrl);
-                setProducts(response.data.items);
+                const newProducts = response.data.items;
+
+                // Filter out products with seller status "Inactive"
+                const activeProducts = newProducts.filter(product => product.sellerStatus === 'Active');
+
+                setProducts((prevProducts) => page === 1 ? activeProducts : [...prevProducts, ...activeProducts]);
+                setHasMore(activeProducts.length === 20); // Check if there are more products to load
             } catch (error) {
                 console.error("Error fetching brand products:", error);
             } finally {
@@ -58,7 +61,7 @@ function CategoryGadgetPage() {
             }
         };
         fetchBrandProducts();
-    }, [category, brandId, categoryId, apiBaseUrl, appliedFilters, isAuthenticated]);
+    }, [category, brandId, categoryId, apiBaseUrl, appliedFilters, isAuthenticated, page]);
 
     const toggleFavorite = async (gadgetId, isFavorite) => {
         if (!isAuthenticated) {
@@ -78,34 +81,16 @@ function CategoryGadgetPage() {
         }
     };
 
-
-
-    const FavoriteIcon = ({ isFavorite, onClick }) => (
-        <span onClick={onClick} className="cursor-pointer flex items-center">
-            {isFavorite ? (
-                <svg
-                    className="h-8 w-5 text-red-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                >
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-            ) : (
-                <CiHeart className="h-8 w-5 text-gray-500" />
-            )}
-        </span>
-    );
-
     const toggleFilterModal = () => {
         setFilterModalVisible((prev) => !prev);
     };
 
     const handleApplyFilters = (filters) => {
-        console.log("Applied Filters: ", filters);
         setAppliedFilters(filters);
-        setFilterModalVisible(false); // Close modal after applying filters
+        setFilterModalVisible(false);
+        setPage(1); // Reset page when filters are applied
     };
+
     return (
         <div className="bg-white dark:bg-gray-900 dark:text-white">
             <ToastContainer />
@@ -125,7 +110,9 @@ function CategoryGadgetPage() {
                     </Breadcrumb.Item>
                 </Breadcrumb>
 
-                <Button onClick={toggleFilterModal} className="mt-4 px-4">Filter</Button>
+                <Button onClick={toggleFilterModal} className="mt-4 px-4">
+                    <FilterOutlined />
+                </Button>
 
                 <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8">
                     {products.length === 0 && !loading ? (
@@ -174,21 +161,44 @@ function CategoryGadgetPage() {
                                             </div>
                                         )}
                                     </div>
-
                                 </div>
                                 <div className="p-2">
-                                    <div className="w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500">
+                                    <div className='w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500'>
                                         <span className="mr-2">Yêu thích</span>
-                                        <FavoriteIcon
-                                            isFavorite={product.isFavorite}
-                                            onClick={() => toggleFavorite(product.id, product.isFavorite)}
-                                        />
+                                        <span
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleFavorite(product.id, product.isFavorite);
+                                            }}
+                                            className="cursor-pointer flex items-center"
+                                        >
+                                            {product.isFavorite ? (
+                                                <svg
+                                                    className="h-8 w-5 text-red-500"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24"
+                                                    fill="currentColor"
+                                                >
+                                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                                </svg>
+                                            ) : (
+                                                <CiHeart className="h-8 w-5 text-gray-500" />
+                                            )}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         ))
                     )}
                 </div>
+
+                {hasMore && !loading && (
+                    <div className="text-center mt-4">
+                        <Button onClick={() => setPage((prevPage) => prevPage + 1)}>
+                            Xem thêm 20 sản phẩm 
+                        </Button>
+                    </div>
+                )}
             </div>
             <Filter
                 isVisible={isFilterModalVisible}

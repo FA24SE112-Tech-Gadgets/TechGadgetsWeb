@@ -27,7 +27,7 @@ const apiBase = process.env.NODE_ENV === "development"
   : process.env.REACT_APP_PRO_API + "/";
 
 const categoryPaths = Object.fromEntries(
-  Object.entries(categoryIds).map(([key, id]) => [key, `${apiBase}api/gadgets/category/${id}?Page=1&PageSize=10`])
+  Object.entries(categoryIds).map(([key, id]) => [key, `${apiBase}api/gadgets/category/${id}?Page=1&PageSize=100`])
 );
 
 export default function ProductPage() {
@@ -63,12 +63,12 @@ export default function ProductPage() {
       const api = isAuthenticated ? AxiosInterceptor : axios;
       try {
         const productResponse = await api.get(categoryPaths[category]);
-        setProducts((prev) => ({ ...prev, [category]: productResponse.data.items }));
-        console.log("data ne", productResponse.data.items);
-
+        const activeProducts = productResponse.data.items.filter(product => product.sellerStatus === 'Active');
+        setProducts((prev) => ({ ...prev, [category]: activeProducts }));
+        console.log("Filtered active products:", activeProducts);
+  
         const brandResponse = await axios.get(`${apiBase}api/brands/categories/${categoryIds[category]}`);
         setBrands((prev) => ({ ...prev, [category]: brandResponse.data.items }));
-
       } catch (error) {
         console.error(`Error fetching ${category} data:`, error);
         toast.error(`Có lỗi xảy ra khi lấy dữ liệu ${category}.`);
@@ -76,9 +76,10 @@ export default function ProductPage() {
         setLoading(false);
       }
     };
-
+  
     Object.keys(categoryIds).forEach(fetchCategoryData);
   }, [isAuthenticated]);
+  
 
   const toggleFavorite = async (gadgetId, isFavorite, setCategory) => {
     if (!isAuthenticated) {
@@ -92,7 +93,9 @@ export default function ProductPage() {
         [setCategory]: prev[setCategory].map(product =>
           product.id === gadgetId ? { ...product, isFavorite: !isFavorite } : product
         )
+        
       }));
+      // toast.success("Thêm vào yêu thích thành công");
     } catch (error) {
       console.error("Error toggling favorite status:", error);
       toast.error("Có lỗi xảy ra, vui lòng thử lại.");
@@ -147,7 +150,10 @@ export default function ProductPage() {
         <div className='w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500'>
           <span className="mr-2">Yêu thích</span>
           <span
-            onClick={() => toggleFavorite(product.id, product.isFavorite, setCategory)}
+            onClick={(e) => {
+              e.stopPropagation(); 
+              toggleFavorite(product.id, product.isFavorite, setCategory);
+            }}
             className="cursor-pointer flex items-center"
           >
             {product.isFavorite ? (
@@ -223,7 +229,7 @@ export default function ProductPage() {
           }}
           className="relative"
         >
-          {products[category].reduce((slides, product, index) => {
+          {products[category]?.reduce((slides, product, index) => {
             if (index % 10 === 0) slides.push([]);
             slides[slides.length - 1].push(product);
             return slides;

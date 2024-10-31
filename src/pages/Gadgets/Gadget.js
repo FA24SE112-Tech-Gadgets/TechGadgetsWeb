@@ -8,6 +8,7 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { Breadcrumb, Button } from 'antd';
 import slugify from '~/ultis/config';
 import Filter from './Filter/Filter';
+import { FilterOutlined } from '@ant-design/icons';
 
 function BrandGadgetPage() {
   const location = useLocation();
@@ -24,39 +25,36 @@ function BrandGadgetPage() {
     : process.env.REACT_APP_PRO_API;
 
   // Fetch products based on brand, category, and applied filters
-  const fetchBrandProducts = async () => {
-    setLoading(true);
-    const apiClient = isAuthenticated ? AxiosInterceptor : axios;
+const fetchBrandProducts = async () => {
+  setLoading(true);
+  const apiClient = isAuthenticated ? AxiosInterceptor : axios;
 
-    // Chuẩn bị các GadgetFilters dưới dạng query string
-    const gadgetFilters = appliedFilters.GadgetFilters
-      ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
-      : '';
+  // Prepare GadgetFilters as a query string
+  const gadgetFilters = appliedFilters.GadgetFilters
+    ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
+    : '';
 
-    // Thêm MinPrice và MaxPrice vào query nếu có trong appliedFilters
-    const minPrice = appliedFilters.MinPrice ? `MinPrice=${appliedFilters.MinPrice}` : '';
-    const maxPrice = appliedFilters.MaxPrice ? `MaxPrice=${appliedFilters.MaxPrice}` : '';
+  // Add MinPrice and MaxPrice to the query if they exist in appliedFilters
+  const minPrice = appliedFilters.MinPrice ? `MinPrice=${appliedFilters.MinPrice}` : '';
+  const maxPrice = appliedFilters.MaxPrice ? `MaxPrice=${appliedFilters.MaxPrice}` : '';
 
-    // Kết hợp tất cả các tham số query
-    const queryString = [
-      gadgetFilters,
-      minPrice,
-      maxPrice
-    ].filter(Boolean).join('&'); // filter(Boolean) để loại bỏ các chuỗi rỗng
+  // Combine all query parameters
+  const queryString = [gadgetFilters, minPrice, maxPrice].filter(Boolean).join('&');
 
-    const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}&Page=1&PageSize=100`;
+  const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}&Page=1&PageSize=100`;
 
-    console.log("API URL:", apiUrl); // Kiểm tra URL để đảm bảo đúng định dạng
+  console.log("API URL:", apiUrl);
 
-    try {
-      const response = await apiClient.get(apiUrl);
-      setProducts(response.data.items);
-    } catch (error) {
-      console.error("Error fetching brand products:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await apiClient.get(apiUrl);
+    const activeProducts = response.data.items.filter(product => product.sellerStatus === "Active");
+    setProducts(activeProducts);
+  } catch (error) {
+    console.error("Error fetching brand products:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchBrandProducts();
@@ -78,6 +76,7 @@ function BrandGadgetPage() {
           product.id === gadgetId ? { ...product, isFavorite: !isFavorite } : product
         )
       );
+      // toast.success("Thêm vào yêu thích thành công");
     } catch (error) {
       console.error("Error toggling favorite status:", error);
       toast.error("An error occurred, please try again.");
@@ -118,12 +117,14 @@ function BrandGadgetPage() {
             <p>{brand}</p>
           </Breadcrumb.Item>
         </Breadcrumb>
-        <Button onClick={toggleFilterModal} className="mt-4">Filter</Button>
+        <Button onClick={toggleFilterModal} className="mt-4 px-4">
+          <FilterOutlined />
+        </Button>
 
 
         <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8 ">
           {products.length === 0 && !loading ? (
-            <div className="text-center py-4 text-gray-500">No products available</div>
+            <div className="text-center py-4 text-gray-500">Không có sản phẩm</div>
           ) : (
             products.map((product) => (
               <div
@@ -170,12 +171,28 @@ function BrandGadgetPage() {
                   </div>
                 </div>
                 <div className="p-2">
-                  <div className="w-full text-sm flex items-center justify-end">
-                    <button onClick={() => toggleFavorite(product.id, product.isFavorite)}>
-                      <CiHeart
-                        className={`h-6 w-6 ${product.isFavorite ? 'text-red-500' : 'text-gray-400'}`}
-                      />
-                    </button>
+                  <div className='w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500'>
+                    <span className="mr-2">Yêu thích</span>
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(product.id, product.isFavorite);
+                      }}
+                      className="cursor-pointer flex items-center"
+                    >
+                      {product.isFavorite ? (
+                        <svg
+                          className="h-8 w-5 text-red-500"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                      ) : (
+                        <CiHeart className="h-8 w-5 text-gray-500" />
+                      )}
+                    </span>
                   </div>
                 </div>
               </div>

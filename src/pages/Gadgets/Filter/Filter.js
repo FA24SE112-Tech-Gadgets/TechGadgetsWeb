@@ -79,6 +79,17 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
                     filterOption.gadgetFilterId,
                     filterOption.value
                   )}
+                  style={{
+                    '--ant-primary-color': '#FFA500',
+                    '--ant-primary-5': '#FFA500',
+                    '--ant-checkbox-color': '#FFA500'
+                  }}
+                  className={`
+                  
+                    [&_.ant-checkbox-checked_.ant-checkbox-inner]:bg-[#FFA500]
+                    [&_.ant-checkbox-checked_.ant-checkbox-inner]:border-[#FFA500]
+                    
+                  `}
                 >
                   <span className="text-sm">{filterOption.value}</span>
                 </Checkbox>
@@ -94,20 +105,23 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
     <div className="bg-gray-50 p-4 rounded-lg mb-4">
       <h4 className="text-sm font-semibold mb-2 text-gray-700">Đã chọn: </h4>
       <div className="flex flex-wrap gap-2">
-        {Object.entries(selectedFilters).flatMap(([specKeyName, filters]) =>
-          Object.entries(filters).filter(([, value]) => value).map(([filterId, value]) => (
-            <Tag
-              closable
-              onClose={() => removeSelectedFilter(specKeyName, filterId)}
-              key={`${specKeyName}-${filterId}`}
-            >
-              {specKeyName}: {value}
-            </Tag>
-          ))
+        {Object.entries(selectedFilters || {}).flatMap(([specKeyName, filters]) =>
+          Object.entries(filters || {})
+            .filter(([, value]) => value)
+            .map(([filterId, value]) => (
+              <Tag
+                closable
+                onClose={() => removeSelectedFilter(specKeyName, filterId)}
+                key={`${specKeyName}-${filterId}`}
+              >
+                {specKeyName}: {value}
+              </Tag>
+            ))
         )}
       </div>
     </div>
   );
+
 
   return (
     <Modal
@@ -118,30 +132,58 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
         <Button key="cancel" onClick={onClose}>
           Hủy
         </Button>,
-        <Button key="apply" type="primary" onClick={applyFilters}>
+        <Button
+          key="apply"
+          type="primary"
+          onClick={applyFilters}
+          style={{
+            backgroundColor: '#FFA500',
+            borderColor: '#FFA500',
+          }}>
           Xác nhận
         </Button>,
 
       ]}
     >
-   
-        {renderSelectedFilters()}
-        {renderFilterGroup()}
-        <div className="price-filter max-w-md w-full">
-          <h4 className="text-lg font-semibold mb-2">Giá</h4>
-          <Slider
-            range
-            min={0}
-            max={200000000}
-            defaultValue={priceRange}
-            onChange={(value) => setPriceRange(value)}
-          />
-          <div className="flex justify-between mt-2 text-sm">
-            <span>Giá cao nhất: {priceRange[0].toLocaleString()} VND</span>
-            <span>Giá thấp nhất: {priceRange[1].toLocaleString()} VND</span>
-          </div>
+
+      {renderSelectedFilters()}
+      {renderFilterGroup()}
+      <div className="price-filter max-w-md w-full">
+        <h4 className="text-lg font-semibold mb-2">Giá</h4>
+        <Slider
+          range
+          min={0}
+          max={200000000}
+          defaultValue={priceRange}
+          onChange={(value) => setPriceRange(value)}
+          trackStyle={{
+            backgroundColor: '#FFA500'
+          }}
+          handleStyle={[
+            {
+              borderColor: '#FFA500',
+              backgroundColor: '#FFA500',
+              opacity: 1,
+              boxShadow: '0 0 0 2px rgba(255, 165, 0, 0.2)'
+            },
+            {
+              borderColor: '#FFA500',
+              backgroundColor: '#FFA500',
+              opacity: 1,
+              boxShadow: '0 0 0 2px rgba(255, 165, 0, 0.2)'
+            }
+          ]}
+          railStyle={{
+            backgroundColor: '#f5f5f5'
+          }}
+          className="hover:cursor-pointer"
+        />
+        <div className="flex justify-between mt-2 text-sm">
+          <span>Giá cao nhất: {priceRange[0].toLocaleString()} VND</span>
+          <span>Giá thấp nhất: {priceRange[1].toLocaleString()} VND</span>
         </div>
-     
+      </div>
+
     </Modal>
   );
 }

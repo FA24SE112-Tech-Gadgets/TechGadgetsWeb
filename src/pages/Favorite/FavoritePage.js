@@ -3,6 +3,9 @@ import { Menu, MenuItem, IconButton } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
+import { useNavigate } from 'react-router-dom';
+import slugify from '~/ultis/config';
+import { toast, ToastContainer } from 'react-toastify';
 
 function FavoritePage() {
     const [groupedFavorites, setGroupedFavorites] = useState([]);
@@ -10,6 +13,7 @@ function FavoritePage() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [scrollPositions, setScrollPositions] = useState({});
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchFavorites = async () => {
             try {
@@ -27,6 +31,8 @@ function FavoritePage() {
                 }, {});
                 setLoading(true);
                 setGroupedFavorites(Object.values(grouped));
+                console.log("data yêu thích", grouped);
+
             } catch (error) {
                 console.error("Failed to fetch favorites:", error);
                 setLoading(false);
@@ -110,7 +116,7 @@ function FavoritePage() {
                     ...group,
                     products: group.products.filter(product => product.id !== gadgetId)
                 })).filter(group => group.products.length > 0);
-
+                toast.success("Xóa khỏi yêu thích thành công");
                 return newGroups;
             });
         } catch (error) {
@@ -131,13 +137,13 @@ function FavoritePage() {
 
     return (
         <div className="min-h-screen  dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-           
+            <ToastContainer />
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
                     Danh sách yêu thích
                 </h1>
                 {groupedFavorites.length === 0 ? (
-                    
+
                     <div className="text-center text-gray-500 dark:text-gray-300">
                         Danh sách này trống
                     </div>
@@ -150,16 +156,6 @@ function FavoritePage() {
                                     <p className="text-sm text-indigo-900 dark:text-white">{shop.shopInfo.shopAddress}</p>
                                 </div>
                                 <div className="relative">
-                                    {/* Nút scroll trái */}
-                                    {scrollPositions[shop.shopInfo.shopName]?.canScrollLeft && (
-                                        <button
-                                            onClick={() => handleScroll('left', shop.shopInfo.shopName)}
-                                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10text-indigo-900 dark:text-white p-2 rounded-r shadow-md hover:bg-white dark:hover:bg-gray-800 transition-colors"
-                                        >
-                                            <ChevronLeft className="w-6 h-6" />
-                                        </button>
-                                    )}
-
                                     {/* Container sản phẩm có thể scroll */}
                                     <div
                                         id={`shop-container-${shop.shopInfo.shopName}`}
@@ -173,8 +169,18 @@ function FavoritePage() {
                                             {shop.products.map((product) => (
                                                 <div
                                                     key={product.id}
+                                                    onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
+                                                        state: {
+                                                            productId: product.id,
+                                                        }
+                                                    })}
                                                     className="border rounded-lg shadow-sm flex-none w-[200px] flex flex-col justify-between relative bg-40"
                                                 >
+                                                    {product.discountPercentage > 0 && (
+                                                        <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md">
+                                                            Giảm {`${product.discountPercentage}%`}
+                                                        </div>
+                                                    )}
                                                     {!product.isForSale && (
                                                         <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
                                                             Ngừng kinh doanh
@@ -189,7 +195,10 @@ function FavoritePage() {
                                                         <div className="flex justify-between items-center mb-2 text-indigo-900 dark:text-white">
                                                             <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
                                                             <IconButton
-                                                                onClick={(e) => handleClick(e, product)}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation(); // Stop the click event from bubbling up
+                                                                    handleClick(e, product);
+                                                                }}
                                                                 size="small"
                                                                 className="text-gray-500"
                                                             >
@@ -213,7 +222,11 @@ function FavoritePage() {
                                                             horizontal: "right",
                                                         }}
                                                     >
-                                                        <MenuItem onClick={() => handleRemoveProduct(product.id)}>
+                                                        <MenuItem
+                                                            onClick={(e) => {
+                                                                e.stopPropagation(); // Stop the click event from bubbling up
+                                                                handleRemoveProduct(product.id);
+                                                            }}>
                                                             Xóa khỏi yêu thích
                                                         </MenuItem>
                                                     </Menu>
@@ -230,6 +243,16 @@ function FavoritePage() {
                                         >
                                             <ChevronRight className="w-6 h-6" />
                                         </button>
+
+                                    )}
+                                    {scrollPositions[shop.shopInfo.shopName]?.canScrollLeft && (
+                                        <button
+                                            onClick={() => handleScroll('left', shop.shopInfo.shopName)}
+                                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 text-indigo-900 dark:text-white p-2 rounded-r shadow-md hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                                        >
+                                            <ChevronLeft className="w-6 h-6" />
+                                        </button>
+
                                     )}
                                 </div>
                             </div>
