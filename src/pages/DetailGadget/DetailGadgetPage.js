@@ -55,7 +55,7 @@ const DetailGadgetPage = () => {
         setQuantity(prev => type === 'increment' ? prev + 1 : Math.max(1, prev - 1));
     };
 
-    const handleBuyNow = async () => {
+    const handleAddToCart = async () => {
         const totalPrice = price * quantity;
         console.log("giá", price);
         console.log("số lượng", quantity)
@@ -77,6 +77,30 @@ const DetailGadgetPage = () => {
         } catch (error) {
             console.error("Error adding product to cart:", error);
             toast.error("Thêm sản phẩm thất bại");
+        }
+    };
+    const handleBuyNow = async () => {
+        const totalPrice = price * quantity;
+        console.log("giá", price);
+        console.log("số lượng", quantity)
+
+        try {
+            const response = await AxiosInterceptor.post("/api/order/now", {
+                gadgetId: productId,
+                quantity,
+            });
+
+
+            console.log("Total Price before saving:", totalPrice);
+            localStorage.setItem(`cartItem_${productId}`, JSON.stringify({
+                totalPrice: totalPrice,
+            }));
+
+            console.log("Buy success", response);
+            toast.success("Mua sản phẩm thành công");
+        } catch (error) {
+            console.error("Error adding product to cart:", error);
+            toast.error("Mua sản phẩm  thất bại");
         }
     };
 
@@ -230,11 +254,13 @@ const DetailGadgetPage = () => {
 
                             <button
                                 className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition duration-200"
-                                onClick={handleBuyNow}
+                                onClick={handleAddToCart}
                             >
                                 Thêm vào giỏ hàng
                             </button>
-                            <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200">
+                            <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
+                                onClick={handleBuyNow}
+                            >
                                 Mua ngay
                             </button>
                         </div>
