@@ -223,15 +223,18 @@ const DetailGadgetPage = () => {
                             {product.discountPercentage > 0 ? (
                                 <>
                                     <div className="mr-2 text-3xl font-bold text-red-600">
-                                        ₫{product.discountPrice.toLocaleString()}
+                                        {product.discountPrice.toLocaleString()}₫
                                     </div>
                                     <span className="line-through text-gray-500">
-                                        {product.price.toLocaleString()}đ
+                                        {product.price.toLocaleString()}₫
                                     </span>
+                                    <div className='mr-2 text-xl font-bold text-red-600'>
+                                        {`${product.discountPercentage}%`}
+                                    </div>
                                 </>
                             ) : (
                                 <div className="text-gray-800 font-semibold text-3xl">
-                                    ₫{product.price.toLocaleString()}
+                                    {product.price.toLocaleString()}₫
                                 </div>
                             )}
                         </div>
@@ -271,10 +274,10 @@ const DetailGadgetPage = () => {
                         <p>{product.seller?.shopAddress}</p>
                         <div className="flex">
 
-                        <h2 className="text-lg font-semibold mt-4 ">Brand</h2>
-                        {product.brand?.logoUrl && (
-                            <img src={product.brand.logoUrl} alt={product.brand.name || 'Brand Logo'}   className="object-contain w-16 h-16 max-h-20 ml-5"  />
-                        )}
+                            <h2 className="text-lg font-semibold mt-4 ">Brand</h2>
+                            {product.brand?.logoUrl && (
+                                <img src={product.brand.logoUrl} alt={product.brand.name || 'Brand Logo'} className="object-contain w-16 h-16 max-h-20 ml-5" />
+                            )}
                         </div>
 
                     </div>

@@ -37,6 +37,7 @@ import CategoryGadgetPage from "./pages/Gadgets/GadgetPage";
 import SellerHeader from "./pages/Seller/SellerHeader";
 import SellerProfilePage from "./pages/Seller/SellerProfile";
 import CartPage from "./pages/Cart/cart";
+import OrderHistory from "./pages/Order/Order";
 
 
 function App() {
@@ -63,7 +64,14 @@ function App() {
           </AuthRoute>
 
         } />
+        <Route path='/orderHistory' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
+              <OrderHistory />
+            </RoleBaseRoute>
+          </AuthRoute>
 
+        } />
         <Route path='/cart' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>

@@ -149,15 +149,15 @@ function CategoryGadgetPage() {
                                         {product.discountPercentage > 0 ? (
                                             <>
                                                 <div className="text-red-500 font-semibold text-sm mr-2">
-                                                    ₫{product.discountPrice.toLocaleString()}
+                                                    {product.discountPrice.toLocaleString()}₫
                                                 </div>
                                                 <span className="line-through text-gray-500">
-                                                    {product.price.toLocaleString()}đ
+                                                    {product.price.toLocaleString()}₫
                                                 </span>
                                             </>
                                         ) : (
                                             <div className="text-gray-800 font-semibold text-sm">
-                                                ₫{product.price.toLocaleString()}
+                                                {product.price.toLocaleString()}₫
                                             </div>
                                         )}
                                     </div>
