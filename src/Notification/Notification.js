@@ -39,6 +39,7 @@ const Notifications = () => {
                         setMessage(`${message}`);
                     });
                     
+                    
                     // Personal message listener
                     newConnection.on('PersonalMethod', (message) => {
                         setMessage2(`${message}`);
