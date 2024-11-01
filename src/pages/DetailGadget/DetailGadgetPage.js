@@ -1,10 +1,133 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import useAuth from '~/context/auth/useAuth';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from 'react-toastify';
 import { Breadcrumb } from 'antd';
+import { CheckCircleOutlined, LoadingOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+
+
+const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [orderSuccess, setOrderSuccess] = useState(false);
+    const navigate = useNavigate();
+    const popupRef = useRef(null);
+
+    const handleClickOutside = (event) => {
+        if (popupRef.current && !popupRef.current.contains(event.target)) {
+            // If the click is outside the popup, call onCancel
+            onCancel();
+        }
+    };
+
+    useEffect(() => {
+        // Add event listener for clicks
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            // Clean up the event listener
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleConfirmOrder = async () => {
+        setIsProcessing(true);
+        try {
+            const response = await AxiosInterceptor.post("/api/order/now", {
+                gadgetId: product.id,
+                quantity,
+            });
+            setOrderSuccess(true);
+            console.log("Buy success", response);
+            // toast.success("Mua sản phẩm thành công");
+        } catch (error) {
+            console.error("Error placing order:", error);
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
+    
+                // Display the message from the first reason
+                if (reasons.length > 0) {
+                    const reasonMessage = reasons[0].message;
+                    toast.error(reasonMessage); 
+                } else {
+                    toast.error("Đặt hàng thất bại. Vui lòng thử lại.");
+                }
+            } 
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    if (orderSuccess) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
+                <div ref={popupRef} className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+                    <CheckCircleOutlined className="text-green-500 text-8xl mb-6" />
+                    <h2 className="text-3xl font-bold mb-6 text-gray-800">Đặt hàng thành công!</h2>
+                    <p className="text-gray-600 mb-8">Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đang được xử lý.</p>
+                    <div className="flex flex-col space-y-4">
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full px-6 py-3 bg-primary/80 hover:bg-secondary/90 text-white rounded-lg transition duration-200 font-semibold"
+                        >
+                            Về trang Chủ
+                        </button>
+                        <button
+                            onClick={() => navigate('/payment-history')}
+                            className="w-full px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold"
+                        >
+                            Xem Lịch Sử Đơn hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
+            <div className="bg-white rounded-lg shadow-xl p-8 max-w-xl w-full">
+                <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+                    <ShoppingCartOutlined className="text-5xl text-primary" /> Xác nhận đơn hàng
+                </h2>
+
+                <div className="mb-6 border-b pb-4">
+                    <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center flex-grow mr-4">
+                            <img src={product.thumbnailUrl} alt={product.name} className="w-12 h-12 object-contain mr-2" />
+                            <span className="text-gray-600">{product.name} x {quantity}</span>
+                        </div>
+                        <span className="font-medium text-gray-800 ml-4">
+                            {totalPrice.toLocaleString()}₫
+                        </span>
+                    </div>
+                </div>
+
+                <div className="flex justify-between items-center text-xl font-bold mb-6">
+                    <span>Tổng cộng:</span>
+                    <span className="text-red-600">{totalPrice.toLocaleString()}₫</span>
+                </div>
+
+                <div className="flex justify-end space-x-4">
+                    <button
+                        onClick={onCancel}
+                        className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200"
+                    >
+                        Hủy
+                    </button>
+                    <button
+                        onClick={handleConfirmOrder}
+                        disabled={isProcessing}
+                        className={`px-6 py-2 bg-primary/80 hover:bg-secondary/90 text-white rounded-lg transition duration-200 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        {isProcessing ? <LoadingOutlined /> : 'Thanh toán'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const DetailGadgetPage = () => {
     const { isAuthenticated } = useAuth();
@@ -20,6 +143,7 @@ const DetailGadgetPage = () => {
 
     const [quantity, setQuantity] = useState(1);
     const [price, setPrice] = useState(0);
+    const [showConfirmation, setShowConfirmation] = useState(false);
     useEffect(() => {
         const apiClient = isAuthenticated ? AxiosInterceptor : axios;
         const fetchProduct = async () => {
@@ -67,10 +191,7 @@ const DetailGadgetPage = () => {
             });
 
 
-            console.log("Total Price before saving:", totalPrice);
-            localStorage.setItem(`cartItem_${productId}`, JSON.stringify({
-                totalPrice: totalPrice,
-            }));
+        
 
             console.log("Product added to cart", response);
             toast.success("Thêm sản phẩm thành công");
@@ -79,30 +200,16 @@ const DetailGadgetPage = () => {
             toast.error("Thêm sản phẩm thất bại");
         }
     };
-    const handleBuyNow = async () => {
-        const totalPrice = price * quantity;
-        console.log("giá", price);
-        console.log("số lượng", quantity)
 
-        try {
-            const response = await AxiosInterceptor.post("/api/order/now", {
-                gadgetId: productId,
-                quantity,
-            });
-
-
-            console.log("Total Price before saving:", totalPrice);
-            localStorage.setItem(`cartItem_${productId}`, JSON.stringify({
-                totalPrice: totalPrice,
-            }));
-
-            console.log("Buy success", response);
-            toast.success("Mua sản phẩm thành công");
-        } catch (error) {
-            console.error("Error adding product to cart:", error);
-            toast.error("Mua sản phẩm  thất bại");
-        }
+    const handleBuyNow = () => {
+        setShowConfirmation(true);
     };
+
+    const handleCancelOrder = () => {
+        setShowConfirmation(false);
+    };
+
+    const totalPrice = product.price * quantity;
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -275,6 +382,14 @@ const DetailGadgetPage = () => {
                     </div>
                 </div>
             </div>
+            {showConfirmation && (
+                <OrderConfirmation
+                    product={product}
+                    quantity={quantity}
+                    totalPrice={totalPrice}
+                    onCancel={handleCancelOrder}
+                />
+            )}
         </div>
     );
 };
