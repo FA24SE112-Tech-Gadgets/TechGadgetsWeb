@@ -219,15 +219,15 @@ export default function DepositHistory() {
 
       {/* Thêm dropdown để sắp xếp */}
       <div className="mb-4">
-        <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700">Sắp xếp theo ngày</label>
+        <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-3">Sắp xếp theo ngày</label>
         <select
           id="sort-by-date"
           value={sortByDate}
           onChange={(e) => {
             setSortByDate(e.target.value);
-            setCurrentPage(1); // Reset về trang 1 khi thay đổi sắp xếp
+            setCurrentPage(1); 
           }}
-          className="w-full sm:w-[180px] px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
+          className="w-full sm:w-[180px] px-1 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
         >
           <option value="DESC">Mới nhất</option>
           <option value="ASC">Cũ nhất</option>
