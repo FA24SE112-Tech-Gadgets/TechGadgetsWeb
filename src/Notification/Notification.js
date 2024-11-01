@@ -1,117 +1,63 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Client } from '@stomp/stompjs';
-import 'text-encoding';
-import { FaBell } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import * as signalR from "@microsoft/signalr";
 
-const routingKey = "getAllNoti";
-const exchangeName = "test-exchange";
-const webSocketPort = "15674";
-const domainName = "kietpt.online";
-
-const Notifications = ({ onNewNotification }) => {
-    const [notifications, setNotifications] = useState([]);
-    const [isDropdownOpen, setDropdownOpen] = useState(false);
-    const clientRef = useRef(null);
+const Notifications = () => {
+    const [connection, setConnection] = useState(null);
+    const [message, setMessage] = useState('');
+    const [message2, setMessage2] = useState('');
 
     useEffect(() => {
-        const headers = {
-            login: 'myadmin', 
-            passcode: 'mypassword'
-        };
+        // Lấy accessToken từ localStorage
+        const accessToken = localStorage.getItem("accessToken");
 
-        const client = new Client({
-            brokerURL: `ws://${domainName}:${webSocketPort}/ws`,
-            connectHeaders: headers,
-            onConnect: () => {
-                console.log('Connected to RabbitMQ');
-                client.subscribe(`/exchange/${exchangeName}/${routingKey}`, message => {
-                    console.log(`Received: ${message.body}`);
+        if (accessToken) {
+            // Create the SignalR connection
+            const newConnection = new signalR.HubConnectionBuilder()
+                .withUrl(`https://tech-gadgets-dev.xyz/notification/hub?access_token=${accessToken}`, {
+                    withCredentials: false
+                })
+                .withAutomaticReconnect()
+                .build();
 
-                    // Update notifications and notify parent component
-                    setNotifications(prevNotifications => {
-                        const newNotifications = [...prevNotifications, message.body];
-                        onNewNotification(newNotifications.length, newNotifications);
-                        return newNotifications;
+            // Start the connection
+            newConnection.start()
+                .then(() => {
+                    console.log('SignalR Connected!');
+                    // Call the restricted method "SendMessage"
+                    newConnection.invoke("JoinGroup", "CustomerGroup")
+                        .then(() => console.log("JoinGroup method invoked successfully"))
+                        .catch(err => console.error("Error invoking JoinGroup method:", err));
+                    
+                    // Group message listener
+                    newConnection.on('GroupMethod', (user, receivedMessage) => {
+                        setMessage(`${user}: ${receivedMessage}`);
                     });
-                });
-            },
-            onStompError: (frame) => {
-                const readableString = new TextDecoder().decode(frame.binaryBody);
-                console.log('STOMP error', readableString);
-            },
-            appendMissingNULLonIncoming: true,
-            forceBinaryWSFrames: true
-        });
+                    
+                    // Personal message listener
+                    newConnection.on('PersonalMethod', (user, receivedMessage) => {
+                        setMessage2(`${user}: ${receivedMessage}`);
+                    });
+                })
+                .catch(err => console.log('SignalR Connection Error: ', err));
 
-        clientRef.current = client;
-        client.activate();
+            setConnection(newConnection);
+        } else {
+            console.warn("Access token not found in localStorage.");
+        }
 
+        // Cleanup the connection when component unmounts
         return () => {
-            if (clientRef.current) {
-                console.log("Disconnecting from RabbitMQ");
-                clientRef.current.deactivate();
+            if (connection) {
+                connection.stop();
             }
         };
-    }, [onNewNotification]);
-
-    const toggleDropdown = () => {
-        // Toggle the dropdown state
-        setDropdownOpen(prev => {
-            const newIsDropdownOpen = !prev;
-            console.log(`Dropdown state: ${newIsDropdownOpen}`);
-            // Reset notifications only if dropdown is opening
-            if (newIsDropdownOpen) {
-                console.log('Resetting notifications');
-                onNewNotification(0, []);
-            }
-    
-            return newIsDropdownOpen;
-        });
-    };
-    
-
-    const handleNotificationClick = (index) => {
-        // Optionally handle specific notification click here
-        // For example, you might want to log or process the notification
-        console.log(`Notification ${index} clicked: ${notifications[index]}`);
-        
-        // Reset notification count to 0 after clicking any notification
-        setNotifications([]);
-        onNewNotification(0, []);
-    };
+    }, [connection]);
 
     return (
-        <div className="relative">
-            {/* Notification bell icon */}
-            <div onClick={toggleDropdown} className="cursor-pointer relative">
-                <FaBell className="text-xl text-white" />
-                {notifications.length > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">
-                        {notifications.length}
-                    </span>
-                )}
-            </div>
-
-            {/* Notification Dropdown */}
-            {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg rounded-lg z-50">
-                    <ul className="py-2">
-                        {notifications.length === 0 ? (
-                            <li className="text-gray-500 text-center py-2">No notifications</li>
-                        ) : (
-                            notifications.map((notification, index) => (
-                                <li
-                                    key={index}
-                                    className="p-3 border-b border-gray-300 dark:border-gray-600 text-sm dark:text-gray-200 cursor-pointer"
-                                    onClick={() => handleNotificationClick(index)}
-                                >
-                                    {notification}
-                                </li>
-                            ))
-                        )}
-                    </ul>
-                </div>
-            )}
+        <div>
+            <h1>SignalR Messages</h1>
+            <p>Group: {message}</p>
+            <p>Personal: {message2}</p>
         </div>
     );
 };

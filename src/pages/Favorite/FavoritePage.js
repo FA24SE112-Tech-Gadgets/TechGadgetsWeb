@@ -1,61 +1,127 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Menu, MenuItem, IconButton } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import { Navigation } from 'swiper/modules';
-import { MdNavigateNext } from "react-icons/md";
-import { GrFormPrevious } from "react-icons/gr";
-
-const initialShops = [
-    {
-      name: "Cửa hàng điện thoại",
-      products: [
-        { id: 1, name: "iPhone 16 Pro Max", image: "https://s.net.vn/0hT0", description: "Chiếc iPhone mới nhất với các tính năng tiên tiến" },
-        { id: 2, name: "iPhone 15 Pro", image: "https://s.net.vn/gsjW", description: "iPhone mạnh mẽ với hệ thống camera chuyên nghiệp" },
-        { id: 3, name: "Samsung Galaxy S22", image: "https://s.net.vn/ry0D", description: "Điện thoại Android hàng đầu với camera tuyệt vời" },
-        { id: 4, name: "Google Pixel 7", image: "https://s.net.vn/Nb72", description: "Trải nghiệm Android thuần túy với AI mạnh mẽ" },
-        { id: 5, name: "OnePlus 10 Pro", image: "https://s.net.vn/FBc4", description: "Sạc nhanh và hiệu suất mượt mà" },
-        { id: 6, name: "Xiaomi Mi 12", image: "https://s.net.vn/uwCW", description: "Cấu hình cao cấp với giá cạnh tranh" },
-      ]
-    },
-    {
-      name: "Cửa hàng Hadao",
-      products: [
-        { id: 7, name: "Xiaomi ROG", image: "https://th.bing.com/th/id/OIP.HHWMvnBQbhpuSvnP9QcCsgHaFo?rs=1&pid=ImgDetMain", description: "Điện thoại chơi game với hiệu năng cao" },
-        { id: 8, name: "Laptop ASUS", image: "https://th.bing.com/th/id/OIP.q6YmIA-h_zO2RPSgmopKHgAAAA?rs=1&pid=ImgDetMain", description: "Laptop mạnh mẽ cho công việc và chơi game" },
-        { id: 9, name: "Bàn phím cơ", image: "https://baochau.vn/media/product/1952_ek387.jpg", description: "Trải nghiệm gõ phím tốt cho người đam mê" },
-        { id: 10, name: "Chuột gaming", image: "https://th.bing.com/th/id/R.9631fcabcabbd9cce93e727b475acf01?rik=IdEQJTl0FnC%2b1g&pid=ImgRaw&r=0", description: "Chuột chính xác cao cho game thủ chuyên nghiệp" },
-      ]
-    },
-  ];
-  
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import AxiosInterceptor from '~/components/api/AxiosInterceptor';
+import { useNavigate } from 'react-router-dom';
+import slugify from '~/ultis/config';
+import { toast, ToastContainer } from 'react-toastify';
 
 function FavoritePage() {
-    const [favorites, setFavorites] = useState(initialShops);
+    const [groupedFavorites, setGroupedFavorites] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [currentIndices, setCurrentIndices] = useState(favorites.map(() => 0));
-    const prevRefs = useRef([]);
-    const nextRefs = useRef([]);
-    const swiperRefs = useRef([]);
-
+    const [scrollPositions, setScrollPositions] = useState({});
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
     useEffect(() => {
-        prevRefs.current = prevRefs.current.slice(0, favorites.length);
-        nextRefs.current = nextRefs.current.slice(0, favorites.length);
-        swiperRefs.current = swiperRefs.current.slice(0, favorites.length);
-    }, [favorites]);
+        const fetchFavorites = async () => {
+            try {
+                const response = await AxiosInterceptor.get("api/favorite-gadgets?Page=1&PageSize=100");
+                const grouped = response.data.items.reduce((groups, item) => {
+                    const shopName = item.gadget.seller.shopName;
+                    if (!groups[shopName]) {
+                        groups[shopName] = {
+                            shopInfo: item.gadget.seller,
+                            products: []
+                        };
+                    }
+                    groups[shopName].products.push(item.gadget);
+                    return groups;
+                }, {});
+                setLoading(true);
+                setGroupedFavorites(Object.values(grouped));
+                console.log("data yêu thích", grouped);
 
-    const removeProduct = (shopIndex, productId) => {
-        setFavorites(prevFavorites => {
-            const newFavorites = [...prevFavorites];
-            newFavorites[shopIndex] = {
-                ...newFavorites[shopIndex],
-                products: newFavorites[shopIndex].products.filter(product => product.id !== productId),
-            };
-            return newFavorites.filter(shop => shop.products.length > 0);
+            } catch (error) {
+                console.error("Failed to fetch favorites:", error);
+                setLoading(false);
+            }
+        };
+
+        fetchFavorites();
+    }, []);
+
+    const handleScroll = (direction, shopName) => {
+        const container = document.getElementById(`shop-container-${shopName}`);
+        if (!container) return;
+
+        const scrollAmount = 300; // Điều chỉnh khoảng cách scroll
+        const newScrollLeft = direction === 'left'
+            ? container.scrollLeft - scrollAmount
+            : container.scrollLeft + scrollAmount;
+
+        container.scrollTo({
+            left: newScrollLeft,
+            behavior: 'smooth'
         });
+
+        // Cập nhật trạng thái scroll cho shop cụ thể
+        setScrollPositions(prev => ({
+            ...prev,
+            [shopName]: newScrollLeft
+        }));
+    };
+
+    // Kiểm tra xem có thể scroll không
+    const checkScrollable = (shopName) => {
+        const container = document.getElementById(`shop-container-${shopName}`);
+        if (!container) return { canScrollLeft: false, canScrollRight: false };
+
+        const canScrollLeft = container.scrollLeft > 0;
+        const canScrollRight = container.scrollLeft < (container.scrollWidth - container.clientWidth);
+
+        return { canScrollLeft, canScrollRight };
+    };
+
+    // Theo dõi scroll event của mỗi container
+    useEffect(() => {
+        const handleContainerScroll = (shopName) => {
+            const { canScrollLeft, canScrollRight } = checkScrollable(shopName);
+            setScrollPositions(prev => ({
+                ...prev,
+                [shopName]: {
+                    canScrollLeft,
+                    canScrollRight
+                }
+            }));
+        };
+
+        // Thêm scroll listener cho mỗi container
+        groupedFavorites.forEach(shop => {
+            const container = document.getElementById(`shop-container-${shop.shopInfo.shopName}`);
+            if (container) {
+                container.addEventListener('scroll', () => handleContainerScroll(shop.shopInfo.shopName));
+                // Kiểm tra ban đầu
+                handleContainerScroll(shop.shopInfo.shopName);
+            }
+        });
+
+        // Cleanup
+        return () => {
+            groupedFavorites.forEach(shop => {
+                const container = document.getElementById(`shop-container-${shop.shopInfo.shopName}`);
+                if (container) {
+                    container.removeEventListener('scroll', () => handleContainerScroll(shop.shopInfo.shopName));
+                }
+            });
+        };
+    }, [groupedFavorites]);
+
+    const handleRemoveProduct = async (gadgetId) => {
+        try {
+            await AxiosInterceptor.post(`/api/favorite-gadgets/${gadgetId}`);
+            setGroupedFavorites(prevGroups => {
+                const newGroups = prevGroups.map(group => ({
+                    ...group,
+                    products: group.products.filter(product => product.id !== gadgetId)
+                })).filter(group => group.products.length > 0);
+                toast.success("Xóa khỏi yêu thích thành công");
+                return newGroups;
+            });
+        } catch (error) {
+            console.error("Error removing product:", error);
+        }
         handleClose();
     };
 
@@ -69,111 +135,131 @@ function FavoritePage() {
         setSelectedProduct(null);
     };
 
-    const nextSlide = (shopIndex) => {
-        setCurrentIndices(prevIndices => {
-            const newIndices = [...prevIndices];
-            const maxIndex = Math.max(0, favorites[shopIndex].products.length - 3);
-            newIndices[shopIndex] = Math.min(newIndices[shopIndex] + 1, maxIndex);
-            return newIndices;
-        });
-        swiperRefs.current[shopIndex].slideNext();
-    };
-
-    const prevSlide = (shopIndex) => {
-        setCurrentIndices(prevIndices => {
-            const newIndices = [...prevIndices];
-            newIndices[shopIndex] = Math.max(0, newIndices[shopIndex] - 1);
-            return newIndices;
-        });
-        swiperRefs.current[shopIndex].slidePrev();
-    };
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-100 to-indigo-100 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen  dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+            <ToastContainer />
             <div className="max-w-7xl mx-auto">
-                <div className="flex justify-between items-center mb-12">
-                    <h1 className="text-4xl font-extrabold text-center text-indigo-900 dark:text-white">Danh sách yêu thích</h1>
-                </div>
-                {favorites.map((shop, shopIndex) => (
-                    <div key={shop.name} className="mb-16">
-                        <div className="rounded-xl shadow-lg overflow-hidden bg-white dark:bg-gray-800">
-                            <div className="py-4 px-6 bg-gradient-to-r from-indigo-500 to-purple-600 dark:bg-gray-700">
-                                <h2 className="text-2xl font-bold text-white">{shop.name}</h2>
-                            </div>
-                            <div className="p-6 relative" key={shopIndex}>
-                                <Swiper
-                                    spaceBetween={30}
-                                    slidesPerView={3}
-                                    navigation={{
-                                        nextEl: nextRefs.current[shopIndex],
-                                        prevEl: prevRefs.current[shopIndex],
-                                    }}
-                                    modules={[Navigation]}
-                                    onInit={(swiper) => {
-                                        swiperRefs.current[shopIndex] = swiper;
-                                        swiper.params.navigation.prevEl = prevRefs.current[shopIndex];
-                                        swiper.params.navigation.nextEl = nextRefs.current[shopIndex];
-                                        swiper.navigation.init();
-                                        swiper.navigation.update();
-                                    }}
-                                    className="custom-swiper"
-                                >
-                                    {shop.products.map(product => (
-                                        <SwiperSlide key={product.id}>
-                                            <div className="rounded-lg shadow-md overflow-hidden transition-transform duration-300 ease-in-out hover:scale-105 bg-gray-50 dark:bg-gray-700">
-                                                <img src={product.image} alt={product.name} className="w-full h-48 object-cover" />
-                                                <div className="p-4">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <h3 className="text-lg font-semibold text-indigo-900 dark:text-white">{product.name}</h3>
-                                                        <IconButton onClick={(e) => handleClick(e, product)} size="small">
-                                                            <MoreVert />
-                                                        </IconButton>
-                                                        <Menu
-                                                            anchorEl={anchorEl}
-                                                            open={Boolean(anchorEl) && selectedProduct?.id === product.id}
-                                                            onClose={handleClose}
-                                                            anchorOrigin={{
-                                                                vertical: 'bottom',
-                                                                horizontal: 'right',
-                                                            }}
-                                                            transformOrigin={{
-                                                                vertical: 'top',
-                                                                horizontal: 'right',
-                                                            }}
-                                                        >
-                                                            <MenuItem onClick={() => removeProduct(shopIndex, product.id)}>Remove</MenuItem>
-                                                        </Menu>
+                <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
+                    Danh sách yêu thích
+                </h1>
+                {groupedFavorites.length === 0 ? (
+
+                    <div className="text-center text-gray-500 dark:text-gray-300">
+                        Danh sách này trống
+                    </div>
+                ) : (
+                    groupedFavorites.map((shop) => (
+                        <div key={shop.shopInfo.shopName} className="mb-10">
+                            <div className="bg-40 rounded-lg shadow-md">
+                                <div className="p-3 bg-primary/40 dark:bg-gray-700 rounded-t-lg">
+                                    <h2 className="text-lg font-semiboldtext-indigo-900 dark:text-white">{shop.shopInfo.shopName}</h2>
+                                    <p className="text-sm text-indigo-900 dark:text-white">{shop.shopInfo.shopAddress}</p>
+                                </div>
+                                <div className="relative">
+                                    {/* Container sản phẩm có thể scroll */}
+                                    <div
+                                        id={`shop-container-${shop.shopInfo.shopName}`}
+                                        className="overflow-x-auto scrollbar-hide"
+                                        style={{
+                                            scrollbarWidth: 'none',
+                                            msOverflowStyle: 'none'
+                                        }}
+                                    >
+                                        <div className="p-4 flex gap-4 min-w-min">
+                                            {shop.products.map((product) => (
+                                                <div
+                                                    key={product.id}
+                                                    onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
+                                                        state: {
+                                                            productId: product.id,
+                                                        }
+                                                    })}
+                                                    className="border rounded-lg shadow-sm flex-none w-[200px] flex flex-col justify-between relative bg-40"
+                                                >
+                                                    {product.discountPercentage > 0 && (
+                                                        <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md">
+                                                            Giảm {`${product.discountPercentage}%`}
+                                                        </div>
+                                                    )}
+                                                    {!product.isForSale && (
+                                                        <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
+                                                            Ngừng kinh doanh
+                                                        </div>
+                                                    )}
+                                                    <div className="p-2">
+                                                        <img
+                                                            src={product.thumbnailUrl}
+                                                            alt={product.name}
+                                                            className="w-full h-32 object-cover mb-2 rounded"
+                                                        />
+                                                        <div className="flex justify-between items-center mb-2 text-indigo-900 dark:text-white">
+                                                            <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
+                                                            <IconButton
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation(); // Stop the click event from bubbling up
+                                                                    handleClick(e, product);
+                                                                }}
+                                                                size="small"
+                                                                className="text-gray-500"
+                                                            >
+                                                                <MoreVert />
+                                                            </IconButton>
+                                                        </div>
+                                                        <div className="text-red-500 font-semibold text-sm">
+                                                            {product.price.toLocaleString()}đ
+                                                        </div>
                                                     </div>
-                                                    <p className="text-gray-600 dark:text-gray-300 mb-4">{product.description}</p>
+                                                    <Menu
+                                                        anchorEl={anchorEl}
+                                                        open={Boolean(anchorEl) && selectedProduct?.id === product.id}
+                                                        onClose={handleClose}
+                                                        anchorOrigin={{
+                                                            vertical: "bottom",
+                                                            horizontal: "right",
+                                                        }}
+                                                        transformOrigin={{
+                                                            vertical: "top",
+                                                            horizontal: "right",
+                                                        }}
+                                                    >
+                                                        <MenuItem
+                                                            onClick={(e) => {
+                                                                e.stopPropagation(); // Stop the click event from bubbling up
+                                                                handleRemoveProduct(product.id);
+                                                            }}>
+                                                            Xóa khỏi yêu thích
+                                                        </MenuItem>
+                                                    </Menu>
                                                 </div>
-                                            </div>
-                                        </SwiperSlide>
-                                    ))}
-                                </Swiper>
-                                {currentIndices[shopIndex] > 0 && (
-                                    <div
-                                        ref={el => prevRefs.current[shopIndex] = el}
-                                        className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-gray-300 dark:bg-gray-100 dark:text-black rounded-full cursor-pointer shadow-md"
-                                        onClick={() => prevSlide(shopIndex)}
-                                    >
-                                        <GrFormPrevious size={24} />
+                                            ))}
+                                        </div>
                                     </div>
-                                )}
-                                {currentIndices[shopIndex] < favorites[shopIndex].products.length - 3 && (
-                                    <div
-                                        ref={el => nextRefs.current[shopIndex] = el}
-                                        className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-gray-300 dark:bg-gray-100 dark:text-black rounded-full cursor-pointer shadow-md"
-                                        onClick={() => nextSlide(shopIndex)}
-                                    >
-                                        <MdNavigateNext size={24} />
-                                    </div>
-                                )}
+
+                                    {/* Nút scroll phải */}
+                                    {scrollPositions[shop.shopInfo.shopName]?.canScrollRight && (
+                                        <button
+                                            onClick={() => handleScroll('right', shop.shopInfo.shopName)}
+                                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-gray-800/80 p-2 rounded-l shadow-md hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                                        >
+                                            <ChevronRight className="w-6 h-6" />
+                                        </button>
+
+                                    )}
+                                    {scrollPositions[shop.shopInfo.shopName]?.canScrollLeft && (
+                                        <button
+                                            onClick={() => handleScroll('left', shop.shopInfo.shopName)}
+                                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 text-indigo-900 dark:text-white p-2 rounded-r shadow-md hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                                        >
+                                            <ChevronLeft className="w-6 h-6" />
+                                        </button>
+
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
-            <div className="fixed bottom-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
         </div>
     );
 }
