@@ -123,9 +123,9 @@ const Header = () => {
             </button>
 
             {/* Notifications Icon */}
-            <div className="relative">
+            {/* <div className="relative">
               <Notifications onNewNotification={handleNewNotification} />
-            </div>
+            </div> */}
 
             {/* Darkmode Switch */}
             <DarkMode />
