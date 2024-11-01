@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import * as signalR from "@microsoft/signalr";
 
+const apiBase = process.env.NODE_ENV === "development"
+  ? process.env.REACT_APP_DEV_API + "/"
+  : process.env.REACT_APP_PRO_API + "/";
+
 const Notifications = () => {
     const [connection, setConnection] = useState(null);
     const [message, setMessage] = useState('');
@@ -8,12 +12,12 @@ const Notifications = () => {
 
     useEffect(() => {
         // Lấy accessToken từ localStorage
-        const accessToken = localStorage.getItem("accessToken");
+        const token = localStorage.getItem("token");
 
-        if (accessToken) {
+        if (token) {
             // Create the SignalR connection
             const newConnection = new signalR.HubConnectionBuilder()
-                .withUrl(`https://tech-gadgets-dev.xyz/notification/hub?access_token=${accessToken}`, {
+                .withUrl(`${apiBase}notification/hub?access_token=${token}`, {
                     withCredentials: false
                 })
                 .withAutomaticReconnect()
@@ -51,7 +55,7 @@ const Notifications = () => {
                 connection.stop();
             }
         };
-    }, [connection]);
+    }, []);
 
     return (
         <div>
