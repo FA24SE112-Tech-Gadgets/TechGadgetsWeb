@@ -56,6 +56,18 @@ export default function ProductPage() {
     speakers: { prev: useRef(null), next: useRef(null) },
     phones: { prev: useRef(null), next: useRef(null) }
   };
+  const [swiperInstances, setSwiperInstances] = useState({
+    laptop: null,
+    headphones: null,
+    speakers: null,
+    phones: null
+  });
+  const [swiperStates, setSwiperStates] = useState({
+    laptop: { isBeginning: true, isEnd: false },
+    headphones: { isBeginning: true, isEnd: false },
+    speakers: { isBeginning: true, isEnd: false },
+    phones: { isBeginning: true, isEnd: false },
+  });
 
   useEffect(() => {
     const fetchCategoryData = async (category) => {
@@ -79,7 +91,7 @@ export default function ProductPage() {
   
     Object.keys(categoryIds).forEach(fetchCategoryData);
   }, [isAuthenticated]);
-  
+
 
   const toggleFavorite = async (gadgetId, isFavorite, setCategory) => {
     if (!isAuthenticated) {
@@ -173,7 +185,34 @@ export default function ProductPage() {
       </div>
     </div>
   );
+  
+const handleReachBeginning = (category) => {
+    setSwiperStates((prev) => ({
+      ...prev,
+      [category]: { ...prev[category], isBeginning: true }
+    }));
+  };
 
+  const handleReachEnd = (category) => {
+    setSwiperStates((prev) => ({
+      ...prev,
+      [category]: { ...prev[category], isEnd: true }
+    }));
+  };
+
+  const handleFromBeginning = (category) => {
+    setSwiperStates((prev) => ({
+      ...prev,
+      [category]: { ...prev[category], isBeginning: false }
+    }));
+  };
+
+  const handleFromEnd = (category) => {
+    setSwiperStates((prev) => ({
+      ...prev,
+      [category]: { ...prev[category], isEnd: false }
+    }));
+  };
   const renderCategory = (category, title) => (
     <div data-aos="fade-up" className="mb-10">
       <div className="flex items-center justify-between py-4">
@@ -216,16 +255,18 @@ export default function ProductPage() {
         <Swiper
           slidesPerView={1}
           spaceBetween={20}
-          navigation={{
-            nextEl: navigationRefs[category].next.current,
-            prevEl: navigationRefs[category].prev.current,
-          }}
           modules={[Navigation]}
-          onInit={(swiper) => {
-            swiper.params.navigation.prevEl = navigationRefs[category].prev.current;
-            swiper.params.navigation.nextEl = navigationRefs[category].next.current;
-            swiper.navigation.init();
-            swiper.navigation.update();
+          onSwiper={(swiper) => {
+            setSwiperInstances(prev => ({
+              ...prev,
+              [category]: swiper
+            }));
+          }}
+          onReachBeginning={() => handleReachBeginning(category)}
+          onReachEnd={() => handleReachEnd(category)}
+          onFromEdge={() => {
+            handleFromBeginning(category);
+            handleFromEnd(category);
           }}
           className="relative"
         >
@@ -241,18 +282,23 @@ export default function ProductPage() {
             </SwiperSlide>
           ))}
         </Swiper>
-        <button
-          ref={navigationRefs[category].prev}
-          className="absolute top-1/2 left-0 transform -translate-y-1/2 z-10 bg-gray-300 rounded-full p-2"
-        >
-          <ChevronLeft />
-        </button>
-        <button
-          ref={navigationRefs[category].next}
-          className="absolute top-1/2 right-0 transform -translate-y-1/2 z-10 bg-gray-300 rounded-full p-2"
-        >
-          <ChevronRight />
-        </button>
+        {!swiperStates[category].isBeginning && (
+          <button
+            onClick={() => swiperInstances[category]?.slidePrev()}
+            className="absolute left-0 z-10 top-1/2 transform -translate-y-1/2 cursor-pointer hidden group-hover:flex"
+          >
+            <ChevronLeft className="h-8 w-8 text-gray-500" />
+          </button>
+        )}
+        
+        {!swiperStates[category].isEnd && (
+          <button
+            onClick={() => swiperInstances[category]?.slideNext()}
+            className="absolute right-0 z-10 top-1/2 transform -translate-y-1/2 cursor-pointer hidden group-hover:flex"
+          >
+            <ChevronRight className="h-8 w-8 text-gray-500" />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -266,12 +266,17 @@ const DetailGadgetPage = () => {
                             </button>
                         </div>
 
-                        <h2 className="text-lg font-semibold">Seller Information</h2>
+                        <h2 className="text-lg font-semibold">Thông tin người bán</h2>
                         <p>{product.seller?.shopName}</p>
                         <p>{product.seller?.shopAddress}</p>
+                        <div className="flex">
 
-                        <h2 className="text-lg font-semibold mt-4">Brand</h2>
-                        <p>{product.brand?.name}</p>
+                        <h2 className="text-lg font-semibold mt-4 ">Brand</h2>
+                        {product.brand?.logoUrl && (
+                            <img src={product.brand.logoUrl} alt={product.brand.name || 'Brand Logo'}   className="object-contain w-16 h-16 max-h-20 ml-5"  />
+                        )}
+                        </div>
+
                     </div>
                 </div>
             </div>
