@@ -34,6 +34,7 @@ const Notifications = () => {
                         .then(() => console.log("JoinGroup method invoked successfully"))
                         .catch(err => console.error("Error invoking JoinGroup method:", err));
                     
+                        
                     // Group message listener
                     newConnection.on('GroupMethod', (message) => {
                         setMessage(`${message}`);
