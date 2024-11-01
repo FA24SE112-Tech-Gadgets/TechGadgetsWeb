@@ -29,19 +29,19 @@ const Notifications = () => {
             newConnection.start()
                 .then(() => {
                     console.log('SignalR Connected!');
-                    // Call the restricted method "SendMessage"
+                    // Call the restricted method "GroupMethod"
                     newConnection.invoke("JoinGroup", user?.role == "Customer" ? "CustomerGroup" : "SellerGroup")
                         .then(() => console.log("JoinGroup method invoked successfully"))
                         .catch(err => console.error("Error invoking JoinGroup method:", err));
                     
                     // Group message listener
-                    newConnection.on('GroupMethod', (user, receivedMessage) => {
-                        setMessage(`${user}: ${receivedMessage}`);
+                    newConnection.on('GroupMethod', (message) => {
+                        setMessage(`${message}`);
                     });
                     
                     // Personal message listener
-                    newConnection.on('PersonalMethod', (user, receivedMessage) => {
-                        setMessage2(`${user}: ${receivedMessage}`);
+                    newConnection.on('PersonalMethod', (message) => {
+                        setMessage2(`${message}`);
                     });
                 })
                 .catch(err => console.log('SignalR Connection Error: ', err));
