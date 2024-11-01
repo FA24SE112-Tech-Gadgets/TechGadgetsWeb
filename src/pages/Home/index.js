@@ -9,6 +9,7 @@ import Subscribe from "./Subscribe";
 import Testimonials from "./Testimonials";
 import Popup from "./Popup";
 import Footer from "~/components/layout/Footer";
+import Notifications from "~/Notification/Notification";
 
 function Home() {
   const [orderPopup, setOrderPopup] = React.useState(false);

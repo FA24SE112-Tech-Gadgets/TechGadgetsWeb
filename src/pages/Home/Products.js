@@ -179,8 +179,9 @@ export default function ProductPage() {
       <div className="flex items-center justify-between py-4">
         <h2 className="text-2xl font-bold">{title}</h2>
         <div className="flex flex-wrap space-x-2">
-          {brands[category].map((brand) => (
+          {brands[category].map((brand, index) => (
             <button className="bg-gray-200 dark:bg-gray-500 dark:text-white hover:bg-gray-300 px-4 py-2 rounded-lg"
+              key={index}
               onClick={() => {
                 navigate(`/gadgets/${title}/${slugify(brand.name)}`, {
 
