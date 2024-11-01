@@ -4,6 +4,7 @@ import { BellOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import icon from "~/assets/icon.ico"; 
 import useAuth from '~/context/auth/useAuth';
 import { useNavigate } from 'react-router-dom';
+import Notifications from '~/Notification/Notification';
 const { Header } = Layout;
 
 const SellerHeader = () => {
@@ -38,6 +39,7 @@ const SellerHeader = () => {
         {/* Notification Bell */}
         <div style={{ marginRight: '20px', cursor: 'pointer' }}>
           <BellOutlined style={{ fontSize: '20px' }} />
+          <Notifications/>
         </div>
 
         {/* User Profile Dropdown */}

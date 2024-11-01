@@ -11,7 +11,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <GoogleOAuthProvider clientId="824701382865-ps8rbovgq01ag5uq47np94j27816oe5p.apps.googleusercontent.com">
+  <GoogleOAuthProvider clientId="918667179231-suhe212hae2usf0v7o8bcsdj5fd81cto.apps.googleusercontent.com">
     <BrowserRouter>
       <AuthProvider>
         <GlobalStyles>
