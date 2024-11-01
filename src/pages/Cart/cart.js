@@ -1,13 +1,122 @@
 import React, { useEffect, useState } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import { HomeOutlined, MinusOutlined, PhoneOutlined, PlusOutlined } from '@ant-design/icons';
+import { HomeOutlined, MinusOutlined, PhoneOutlined, PlusOutlined, CheckCircleOutlined, ShoppingCartOutlined ,LoadingOutlined } from '@ant-design/icons';
 import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
+
+const OrderConfirmation = ({ selectedItems, cartItemsBySeller, totalPrice, onCancel }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const navigate = useNavigate();
+
+  const handleConfirmOrder = async () => {
+    setIsProcessing(true);
+    try {
+        const listGadgetItems = Object.values(selectedItems).flat();
+        await AxiosInterceptor.post('/api/order', { listGadgetItems });
+        setOrderSuccess(true);
+    } catch (error) {
+        console.error("Error placing order:", error);
+        if (error.response && error.response.data && error.response.data.reasons) {
+            const reasons = error.response.data.reasons;
+
+            // Display the message from the first reason
+            if (reasons.length > 0) {
+                const reasonMessage = reasons[0].message;
+                toast.error(reasonMessage); 
+            } else {
+                toast.error("Đặt hàng thất bại. Vui lòng thử lại."); 
+            }
+        } 
+    } finally {
+        setIsProcessing(false);
+    }
+};
+
+
+  if (orderSuccess) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
+        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+          <CheckCircleOutlined className="text-green-500 text-8xl mb-6" />
+          <h2 className="text-3xl font-bold mb-6 text-gray-800">Đặt hàng thành công!</h2>
+          <p className="text-gray-600 mb-8">Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đang được xử lý.</p>
+          <div className="flex flex-col space-y-4">
+            <button
+              onClick={() => navigate('/')}
+              className="w-full px-6 py-3 bg-primary/80 hover:bg-secondary/90 text-white rounded-lg transition duration-200 font-semibold"
+            >
+              Về trang Chủ
+            </button>
+            <button
+              onClick={() => navigate('/payment-history')}
+              className="w-full px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold"
+            >
+              Xem Lịch Sử Đơn hàng
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">  <ShoppingCartOutlined className="text-5xl text-primary" /> Xác nhận đơn hàng</h2>
+      
+      {Object.entries(selectedItems).map(([sellerId, productIds]) => (
+        <div key={sellerId} className="mb-6 border-b pb-4">
+          <h3 className="text-lg font-semibold mb-3 text-gray-700">
+            {cartItemsBySeller[sellerId][0]?.seller?.shopName}
+          </h3>
+          {productIds.map(productId => {
+            const item = cartItemsBySeller[sellerId].find(item => item.gadget.id === productId);
+            return (
+              <div key={productId} className="flex justify-between items-center mb-2">
+                <div className="flex items-center flex-grow mr-4">
+                  <img src={item.gadget.thumbnailUrl} alt={item.gadget.name} className="w-12 h-12 object-contain mr-2" />
+                  <span className="text-gray-600">{item.gadget.name} x {item.quantity}</span>
+                </div>
+                <span className="font-medium text-gray-800 ml-4">
+                  {((item.gadget.discountPercentage > 0 ? item.gadget.discountPrice : item.gadget.price) * item.quantity).toLocaleString()}₫
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+      
+      <div className="flex justify-between items-center text-xl font-bold mb-6">
+        <span>Tổng cộng:</span>
+        <span className="text-red-600">{totalPrice.toLocaleString()}₫</span>
+      </div>
+      
+      <div className="flex justify-end space-x-4">
+        <button
+          onClick={onCancel}
+          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200"
+        >
+          Hủy
+        </button>
+        <button
+          onClick={handleConfirmOrder}
+          disabled={isProcessing}
+          className={`px-6 py-2 bg-primary/80 hover:bg-secondary/90 text-white rounded-lg transition duration-200 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {isProcessing ? <LoadingOutlined /> : 'Thanh toán'}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const CartPage = () => {
     const [sellers, setSellers] = useState([]);
     const [cartItemsBySeller, setCartItemsBySeller] = useState({});
     const [selectedItems, setSelectedItems] = useState({});
     const [totalPrice, setTotalPrice] = useState(0);
+    const [showConfirmation, setShowConfirmation] = useState(false);
 
     useEffect(() => {
         const fetchSellers = async () => {
@@ -35,33 +144,50 @@ const CartPage = () => {
         sellers.forEach(seller => fetchCartItemsForSeller(seller.id));
     }, [sellers]);
 
-    const handleQuantityChange = (sellerId, productId, change) => {
+    const handleQuantityChange = async (sellerId, productId, change) => {
         setCartItemsBySeller(prev => {
+           
             const updatedItems = prev[sellerId].map(item => {
                 if (item.gadget.id === productId) {
-                    // Lưu giá trị trước khi thay đổi vào localStorage
-                    const previousTotalPrice = item.gadget.price * item.quantity;
-                    localStorage.setItem(`previousTotalPrice_${productId}`, previousTotalPrice);
-
-                    // Cập nhật số lượng mới
                     const newQuantity = Math.max(1, item.quantity + change);
-                    const newTotalPrice = item.gadget.price * newQuantity;
-
-                    // Lưu giá trị mới sau khi thay đổi vào localStorage
-                    localStorage.setItem(`currentTotalPrice_${productId}`, newTotalPrice);
-
                     return { ...item, quantity: newQuantity };
                 }
                 return item;
             });
-
+    
             return {
                 ...prev,
                 [sellerId]: updatedItems,
             };
         });
+    
+        try {
+            const item = cartItemsBySeller[sellerId].find(item => item.gadget.id === productId);
+            const newQuantity = Math.max(1, item.quantity + change);
+            
+            await AxiosInterceptor.put(`/api/cart/old`, {
+                gadgetId: productId,
+                quantity: newQuantity
+            });
+        } catch (error) {
+            console.error("Error updating quantity:", error);
+            toast.error("Failed to update item quantity. Please try again.");
+    
+            
+            setCartItemsBySeller(prev => {
+                const revertedItems = prev[sellerId].map(item => {
+                    if (item.gadget.id === productId) {
+                        return { ...item, quantity: item.quantity - change }; 
+                    }
+                    return item;
+                });
+                return {
+                    ...prev,
+                    [sellerId]: revertedItems,
+                };
+            });
+        }
     };
-
 
     const handleRemoveItemsForSeller = async (sellerId) => {
         try {
@@ -78,6 +204,7 @@ const CartPage = () => {
             toast.error("Xóa tất cả sản phẩm khỏi giỏ hàng thất bại.");
         }
     };
+
     const handleSelectItem = (sellerId, productId) => {
         setSelectedItems(prev => {
             const newSelectedItems = { ...prev };
@@ -91,6 +218,7 @@ const CartPage = () => {
             return newSelectedItems;
         });
     };
+
     const handleSelectAllForSeller = (sellerId) => {
         setSelectedItems(prev => {
             const isSelected = selectedItems[sellerId]?.length === cartItemsBySeller[sellerId].length;
@@ -104,6 +232,7 @@ const CartPage = () => {
             return updatedSelectedItems;
         });
     };
+
     const handleSelectAll = () => {
         const allSelected = Object.keys(selectedItems).length === sellers.length &&
             sellers.every(seller => selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length);
@@ -118,6 +247,7 @@ const CartPage = () => {
             setSelectedItems(newSelectedItems);
         }
     };
+
     useEffect(() => {
         let total = 0;
         Object.entries(selectedItems).forEach(([sellerId, productIds]) => {
@@ -131,175 +261,170 @@ const CartPage = () => {
         setTotalPrice(total);
     }, [selectedItems, cartItemsBySeller]);
 
-    const handleCheckout = async () => {
-        const listGadgetItems = [];
-
-        Object.entries(selectedItems).forEach(([sellerId, productIds]) => {
-            productIds.forEach(productId => {
-                listGadgetItems.push(productId);
-            });
-        });
-
-        try {
-            await AxiosInterceptor.post('/api/order', { listGadgetItems });
-            toast.success("Đặt hàng thành công");
-        } catch (error) {
-            console.error("Error placing order:", error);
-            toast.error("Đặt hàng thất bại");
-        }
+    const handleCheckout = () => {
+        setShowConfirmation(true);
     };
+
+    const handleCancelOrder = () => {
+        setShowConfirmation(false);
+    };
+
     const selectedItemCount = Object.values(selectedItems).flat().length;
+
     return (
         <div className="max-w-7xl mx-auto p-4">
             <ToastContainer />
-            <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
-                Giỏ hàng của bạn
-            </h1>
-
-            {/* Kiểm tra nếu giỏ hàng trống */}
-            {sellers.length === 0 || Object.values(cartItemsBySeller).every(items => items.length === 0) ? (
-                <div className="text-center text-gray-500 text-lg font-semibold py-8">
-                    Giỏ hàng trống
-                </div>
-            ) : (
+            {!showConfirmation ? (
                 <>
-                    <div className="mb-4">
-                        <input
-                            type="checkbox"
-                            onChange={handleSelectAll}
-                            checked={Object.keys(selectedItems).length === sellers.length &&
-                                sellers.every(seller => selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length)}
-                        />
-                        <label className="ml-2">Sản phẩm</label>
-                    </div>
+                    <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
+                        Giỏ hàng của bạn
+                    </h1>
 
-                    {sellers.map(seller => (
-                        (cartItemsBySeller[seller.id]?.length > 0) && (
-                            <div key={seller.id} className="mb-8 p-4 border rounded-lg shadow-sm bg-white">
-                                <div className="mb-4">
-                                    <div className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            onChange={() => handleSelectAllForSeller(seller.id)}
-                                            checked={selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length}
-                                        />
-                                        <h2 className="text-lg font-semibold">{seller.shopName}</h2>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <HomeOutlined />
-                                        <p style={{ marginLeft: '8px' }}>{seller.shopAddress}</p>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <PhoneOutlined />
-                                        <p style={{ marginLeft: '8px' }}>SĐT: {seller.phoneNumber}</p>
-                                    </div>
+                    {sellers.length === 0 || Object.values(cartItemsBySeller).every(items => items.length === 0) ? (
+                        <div className="text-center text-gray-500 text-lg font-semibold py-8">
+                            Giỏ hàng trống
+                        </div>
+                    ) : (
+                        <>
+                            <div className="mb-4">
+                                <input
+                                    type="checkbox"
+                                    onChange={handleSelectAll}
+                                    checked={Object.keys(selectedItems).length === sellers.length &&
+                                        sellers.every(seller => selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length)}
+                                />
+                                <label className="ml-2">Sản phẩm</label>
+                            </div>
 
-
-                                    <div className='flex justify-end '>
-                                        <button
-                                            onClick={() => handleRemoveItemsForSeller(seller.id)}
-                                            className="text-red-500 hover:underline"
-                                        >
-                                            Xóa tất cả
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                                <div className="space-y-4">
-                                    {(cartItemsBySeller[seller.id] || []).map(item => (
-                                        <div key={item.gadget.id} className="flex items-start gap-4 p-4 border rounded-md shadow-sm bg-gray-100">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedItems[seller.id]?.includes(item.gadget.id) || false}
-                                                onChange={() => handleSelectItem(seller.id, item.gadget.id)}
-                                                className="mt-1"
-                                            />
-                                            <img src={item.gadget.thumbnailUrl}
-                                                alt={item.gadget.name}
-                                                className="w-20 h-20 object-contain rounded-md"
-                                            />
-                                            <div className="flex-grow flex flex-col space-y-2">
-                                                <h4 className="font-bold">{item.gadget.name}</h4>
-                                                <p>Hãng: {item.gadget.brand.name}</p>
-                                                <p>Loại sản phẩm: {item.gadget.category.name}</p>
-                                                <div className="flex items-center mt-2">
-                                                    <p>Đơn giá:   </p>
-                                                    {item.gadget.discountPercentage > 0 ? (
-                                                        <>
-                                                            <div className="text-red-500 font-semibold text-sm mr-2">
-                                                                ₫{item.gadget.discountPrice.toLocaleString()}
-                                                            </div>
-                                                            <span className="line-through text-gray-500">
-                                                                {item.gadget.price.toLocaleString()}đ
-                                                            </span>
-                                                        </>
-                                                    ) : (
-                                                        <div className="text-gray-800 font-semibold text-sm">
-                                                            ₫{item.gadget.price.toLocaleString()}
-                                                        </div>
-                                                    )}
-
-                                                </div>
-                                                <div className="flex items-center mt-2">
-                                                    <p>Thành tiền: </p>
-                                                    <span className="font-semibold text-red-500 mr-2">
-                                                        ₫{(
-                                                            (item.gadget.discountPercentage > 0
-                                                                ? item.gadget.discountPrice
-                                                                : item.gadget.price) * item.quantity
-                                                        ).toLocaleString()}
-                                                    </span>
-                                                </div>
+                            {sellers.map(seller => (
+                                (cartItemsBySeller[seller.id]?.length > 0) && (
+                                    <div key={seller.id} className="mb-8 p-4 border rounded-lg shadow-sm bg-white">
+                                        <div className="mb-4">
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    onChange={() => handleSelectAllForSeller(seller.id)}
+                                                    checked={selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length}
+                                                />
+                                                <h2 className="text-lg font-semibold ml-2">{seller.shopName}</h2>
                                             </div>
-
-
-                                            <div className="flex flex-col items-center gap-2">
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => handleQuantityChange(seller.id, item.gadget.id, -1)}
-                                                        disabled={item.quantity <= 1}
-                                                        className="p-2 bg-gray-200 rounded hover:bg-gray-300"
-                                                    >
-                                                        <MinusOutlined />
-                                                    </button>
-                                                    <span>{item.quantity}</span>
-                                                    <button
-                                                        onClick={() => handleQuantityChange(seller.id, item.gadget.id, 1)}
-                                                        className="p-2 bg-gray-200 rounded hover:bg-gray-300"
-                                                    >
-                                                        <PlusOutlined />
-                                                    </button>
-                                                </div>
-
+                                            <div className="flex items-center mt-2">
+                                                <HomeOutlined />
+                                                <p className="ml-2">{seller.shopAddress}</p>
+                                            </div>
+                                            <div className="flex items-center mt-2">
+                                                <PhoneOutlined />
+                                                <p className="ml-2">SĐT: {seller.phoneNumber}</p>
+                                            </div>
+                                            <div className='flex justify-end mt-2'>
+                                                <button
+                                                    onClick={() => handleRemoveItemsForSeller(seller.id)}
+                                                    className="text-red-500 hover:underline"
+                                                >
+                                                    Xóa tất cả
+                                                </button>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )
-                    ))}
 
-                    {totalPrice > 0 && (
-                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 py-3 shadow-2xl px-4 flex justify-between items-center">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
-                                <p className="text-lg font-semibold text-gray-700">Tổng tiền:</p>
-                                <p className="text-xl font-bold text-red-500">{totalPrice.toLocaleString()} VNĐ</p>
-                                <p className="text-lg font-semibold text-gray-700 sm:border-l sm:pl-4 sm:ml-4">Sản phẩm đã chọn:
-                                    <span className="text-blue-600 font-bold ml-2">{selectedItemCount}</span>
-                                </p>
-                            </div>
-                            <button
-                                onClick={handleCheckout}
-                                className="bg-red-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold transition duration-200"
-                            >
-                                Mua ngay
-                            </button>
-                        </div>
+                                        <div className="space-y-4">
+                                            {(cartItemsBySeller[seller.id] || []).map(item => (
+                                                <div key={item.gadget.id} className="flex items-start gap-4 p-4 border rounded-md shadow-sm bg-gray-100">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedItems[seller.id]?.includes(item.gadget.id) || false}
+                                                        onChange={() => handleSelectItem(seller.id, item.gadget.id)}
+                                                        className="mt-1"
+                                                    />
+                                                    <img src={item.gadget.thumbnailUrl}
+                                                        alt={item.gadget.name}
+                                                        className="w-20 h-20 object-contain rounded-md"
+                                                    />
+                                                    <div className="flex-grow flex flex-col space-y-2">
+                                                        <h4 className="font-bold">{item.gadget.name}</h4>
+                                                        <p>Hãng: {item.gadget.brand.name}</p>
+                                                        <p>Loại sản phẩm: {item.gadget.category.name}</p>
+                                                        <div className="flex items-center mt-2">
+                                                            <p>Đơn giá: </p>
+                                                            {item.gadget.discountPercentage > 0 ? (
+                                                                <>
+                                                                    <div className="text-red-500 font-semibold text-sm ml-2 mr-2">
+                                                                        {item.gadget.discountPrice.toLocaleString()}₫
+                                                                    </div>
+                                                                    <span className="line-through text-gray-500">
+                                                                        
+                                                                        {item.gadget.price.toLocaleString()}đ
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                <div className="text-gray-800 font-semibold text-sm ml-2">
+                                                                    {item.gadget.price.toLocaleString()}₫
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center mt-2">
+                                                            <p>Thành tiền: </p>
+                                                            <span className="font-semibold text-red-500 ml-2">
+                                                                {(
+                                                                    (item.gadget.discountPercentage > 0
+                                                                        ? item.gadget.discountPrice
+                                                                        : item.gadget.price) * item.quantity
+                                                                ).toLocaleString()}₫
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleQuantityChange(seller.id, item.gadget.id, -1)}
+                                                                disabled={item.quantity <= 1}
+                                                                className="p-2 bg-gray-200 rounded hover:bg-gray-300"
+                                                            >
+                                                                <MinusOutlined />
+                                                            </button>
+                                                            <span>{item.quantity}</span>
+                                                            <button
+                                                                onClick={() => handleQuantityChange(seller.id, item.gadget.id, 1)}
+                                                                className="p-2 bg-gray-200 rounded hover:bg-gray-300"
+                                                            >
+                                                                <PlusOutlined />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            ))}
+
+                            {totalPrice > 0 && (
+                                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 py-3 shadow-2xl px-4 flex justify-between items-center">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                                        <p className="text-lg font-semibold text-gray-700">Tổng tiền:</p>
+                                        <p className="text-xl font-bold text-red-500">{totalPrice.toLocaleString()}₫</p>
+                                        <p className="text-lg font-semibold text-gray-700 sm:border-l sm:pl-4 sm:ml-4">Sản phẩm đã chọn:
+                                            <span className="text-blue-600 font-bold ml-2">{selectedItemCount}</span>
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={handleCheckout}
+                                        className="bg-primary/80 hover:bg-secondary/90 text-white px-6 py-2 rounded-lg font-semibold transition duration-200"
+                                    >
+                                        Mua ngay
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     )}
                 </>
- )}
+            ) : (
+                <OrderConfirmation
+                    selectedItems={selectedItems}
+                    cartItemsBySeller={cartItemsBySeller}
+                    totalPrice={totalPrice}
+                    onCancel={handleCancelOrder}
+                />
+            )}
         </div>
     );
 };
