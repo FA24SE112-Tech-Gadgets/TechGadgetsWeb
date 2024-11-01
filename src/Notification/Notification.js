@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import * as signalR from "@microsoft/signalr";
+import useAuth from '~/context/auth/useAuth';
+
+const apiBase = process.env.NODE_ENV === "development"
+  ? process.env.REACT_APP_DEV_API + "/"
+  : process.env.REACT_APP_PRO_API + "/";
 
 const Notifications = () => {
+    const { user, isAuthenticated } = useAuth();
     const [connection, setConnection] = useState(null);
     const [message, setMessage] = useState('');
     const [message2, setMessage2] = useState('');
 
     useEffect(() => {
         // Lấy accessToken từ localStorage
-        const accessToken = localStorage.getItem("accessToken");
+        const token = localStorage.getItem("token");
 
-        if (accessToken) {
+        if (token && isAuthenticated) {
             // Create the SignalR connection
             const newConnection = new signalR.HubConnectionBuilder()
-                .withUrl(`https://tech-gadgets-dev.xyz/notification/hub?access_token=${accessToken}`, {
+                .withUrl(`${apiBase}notification/hub?access_token=${token}`, {
                     withCredentials: false
                 })
                 .withAutomaticReconnect()
@@ -24,7 +30,7 @@ const Notifications = () => {
                 .then(() => {
                     console.log('SignalR Connected!');
                     // Call the restricted method "SendMessage"
-                    newConnection.invoke("JoinGroup", "CustomerGroup")
+                    newConnection.invoke("JoinGroup", user?.role == "Customer" ? "CustomerGroup" : "SellerGroup")
                         .then(() => console.log("JoinGroup method invoked successfully"))
                         .catch(err => console.error("Error invoking JoinGroup method:", err));
                     
@@ -51,7 +57,7 @@ const Notifications = () => {
                 connection.stop();
             }
         };
-    }, [connection]);
+    }, []);
 
     return (
         <div>

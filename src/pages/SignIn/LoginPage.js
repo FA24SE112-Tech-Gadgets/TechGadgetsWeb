@@ -124,9 +124,9 @@ function LogIn() {
           <div className="mb-5 pt-5 flex justify-center">
             <button
               onClick={() => googleLoginHandler()}
-              class="w-full border border-gray-300 text-md p-2 rounded-lg mb-6 hover:bg-black hover:text-white"
+              className="w-full border border-gray-300 text-md p-2 rounded-lg mb-6 hover:bg-black hover:text-white"
             >
-              <img src={google} alt="img" class="w-6 h-6 inline mr-2 test-base" />
+              <img src={google} alt="img" className="w-6 h-6 inline mr-2 test-base" />
               Đăng nhập với Google
             </button>
           </div>
