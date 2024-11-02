@@ -51,7 +51,7 @@ const AuthProvider = ({ children }) => {
 						title: "Token Error",
 						message: "Phiên đăng nhập của bạn đã hết hạn, hãy đăng nhập lại."
 					});
-					
+
 					return;
 				}
 			}
@@ -67,7 +67,8 @@ const AuthProvider = ({ children }) => {
 			console.log("Sending login request...");
 			res = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/login") : (process.env.REACT_APP_PRO_API + "/api/auth/login"), {
 				email: userAccount.email,
-				password: userAccount.password
+				password: userAccount.password,
+				deviceToken: userAccount.deviceToken
 			}
 			);
 			console.log("Login response received:", res);
@@ -89,7 +90,7 @@ const AuthProvider = ({ children }) => {
 				localStorage.setItem('token', res.data.token);
 				localStorage.setItem('refreshToken', res.data.refreshToken);
 				let resData;
-				
+
 
 				try {
 					resData = await axios.get(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/users/current") : (process.env.REACT_APP_PRO_API + "/api/users/current"), {
@@ -106,7 +107,7 @@ const AuthProvider = ({ children }) => {
 						title: "Token Error",
 						message: "Lỗi xác thực, hãy thử lại."
 					});
-					
+
 					return;
 				}
 				if (resData.status === 200) {
@@ -142,15 +143,15 @@ const AuthProvider = ({ children }) => {
 					title: "Access Denied",
 					message: "Truy cập của bạn bị từ chối, hãy thử lại."
 				});
-				
+
 			}
 		}
 		setIsLoading(false);
 	};
 
-  
 
-	const googleLogin = async (googleToken) => {
+
+	const googleLogin = async (googleToken, deviceToken) => {
 		setIsLoading(true);
 		let res;
 		try {
@@ -158,7 +159,10 @@ const AuthProvider = ({ children }) => {
 			res = await axios.post(
 				process.env.NODE_ENV === "development"
 					? `${process.env.REACT_APP_DEV_API}/api/auth/google/${googleToken}`
-					: `${process.env.REACT_APP_PRO_API}/api/auth/google/${googleToken}`
+					: `${process.env.REACT_APP_PRO_API}/api/auth/google/${googleToken}`,
+				{
+					deviceToken: deviceToken
+				}
 			);
 			console.log("Google login response received:", res);
 
@@ -186,7 +190,7 @@ const AuthProvider = ({ children }) => {
 							title: "Token Error",
 							message: "Lỗi xác thực, hãy thử lại."
 						});
-						
+
 						return;
 					}
 
@@ -202,14 +206,14 @@ const AuthProvider = ({ children }) => {
 						title: "Access Denied",
 						message: "Your Email needs to verify, please Sign Up."
 					});
-					
+
 				}
 			} else {
 				setError({
 					title: "Google Login Failed",
 					message: "Đăng nhập Google không thành công, vui lòng thử lại."
 				});
-				
+
 			}
 		} catch (error) {
 
@@ -253,7 +257,8 @@ const AuthProvider = ({ children }) => {
 				fullName: userDetails.fullName,
 				password: userDetails.password,
 				email: userDetails.email,
-				role: userDetails.role
+				role: userDetails.role,
+				deviceToken: userDetails.deviceToken,
 			}
 			);
 			console.log("Register response received:", registerRes);
@@ -326,7 +331,7 @@ const AuthProvider = ({ children }) => {
 							title: "Token Error",
 							message: "Lỗi xác thực, hãy thử lại."
 						});
-						
+
 						return;
 					}
 				} else if (clientRole === "Customer") {
@@ -359,14 +364,14 @@ const AuthProvider = ({ children }) => {
 						title: "Access Denied",
 						message: "Truy cập của bạn bị từ chối, hãy thử lại."
 					});
-					
+
 				}
 			} else {
 				setError({
 					title: "Verification Failed",
 					message: "Mã xác thực không hợp lệ, hãy thử lại."
 				});
-				
+
 			}
 		} catch (error) {
 			// Check if the error is a 400 Bad Request
@@ -406,7 +411,7 @@ const AuthProvider = ({ children }) => {
 					title: "Resend Failed",
 					message: "Gửi thất bại, vui lòng thử lại ",
 				});
-				
+
 			}
 		} catch (error) {
 			// Handle specific error cases

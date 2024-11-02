@@ -9,6 +9,8 @@ import { AuthProvider } from './context/auth/AuthContext';
 import { BrowserRouter } from 'react-router-dom';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <GoogleOAuthProvider clientId="918667179231-suhe212hae2usf0v7o8bcsdj5fd81cto.apps.googleusercontent.com">

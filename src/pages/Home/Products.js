@@ -56,6 +56,18 @@ export default function ProductPage() {
     speakers: { prev: useRef(null), next: useRef(null) },
     phones: { prev: useRef(null), next: useRef(null) }
   };
+  const [swiperInstances, setSwiperInstances] = useState({
+    laptop: null,
+    headphones: null,
+    speakers: null,
+    phones: null
+  });
+  const [swiperStates, setSwiperStates] = useState({
+    laptop: { isBeginning: true, isEnd: false },
+    headphones: { isBeginning: true, isEnd: false },
+    speakers: { isBeginning: true, isEnd: false },
+    phones: { isBeginning: true, isEnd: false },
+  });
 
   useEffect(() => {
     const fetchCategoryData = async (category) => {
@@ -65,8 +77,8 @@ export default function ProductPage() {
         const productResponse = await api.get(categoryPaths[category]);
         const activeProducts = productResponse.data.items.filter(product => product.sellerStatus === 'Active');
         setProducts((prev) => ({ ...prev, [category]: activeProducts }));
-       
-  
+
+
         const brandResponse = await axios.get(`${apiBase}api/brands/categories/${categoryIds[category]}`);
         setBrands((prev) => ({ ...prev, [category]: brandResponse.data.items }));
       } catch (error) {
@@ -76,10 +88,10 @@ export default function ProductPage() {
         setLoading(false);
       }
     };
-  
+
     Object.keys(categoryIds).forEach(fetchCategoryData);
   }, [isAuthenticated]);
-  
+
 
   const toggleFavorite = async (gadgetId, isFavorite, setCategory) => {
     if (!isAuthenticated) {
@@ -93,7 +105,7 @@ export default function ProductPage() {
         [setCategory]: prev[setCategory].map(product =>
           product.id === gadgetId ? { ...product, isFavorite: !isFavorite } : product
         )
-        
+
       }));
       // toast.success("Thêm vào yêu thích thành công");
     } catch (error) {
@@ -103,85 +115,116 @@ export default function ProductPage() {
   };
 
   const renderProduct = (product, setCategory) => (
-    <div
-      key={product.id}
-      className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105  hover:border-primary/50"
-      onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
-        state: {
-          productId: product.id,
-        }
-      })}
-    >
-      {product.discountPercentage > 0 && (
-        <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md">
-          Giảm {`${product.discountPercentage}%`}
-        </div>
-      )}
-      {product.isForSale === false && (
-        <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
-          Ngừng kinh doanh
-        </div>
-      )}
-      <div className="p-2">
-        <img
-          src={product.thumbnailUrl}
-          alt={product.name}
-          className="w-full h-32 object-contain mb-2 rounded-2xl"
-        />
-        <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
-        <div className="flex py-4">
-          {product.discountPercentage > 0 ? (
-            <>
-              <div className="text-red-500 font-semibold text-sm mr-2">
-                ₫{product.discountPrice.toLocaleString()}
-              </div>
-              <span className="line-through text-gray-500">
-                {product.price.toLocaleString()}đ
-              </span>
-            </>
-          ) : (
-            <div className="text-gray-800 font-semibold text-sm">
-              ₫{product.price.toLocaleString()}
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="p-2">
-        <div className='w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500'>
-          <span className="mr-2">Yêu thích</span>
-          <span
-            onClick={(e) => {
-              e.stopPropagation(); 
-              toggleFavorite(product.id, product.isFavorite, setCategory);
-            }}
-            className="cursor-pointer flex items-center"
-          >
-            {product.isFavorite ? (
-              <svg
-                className="h-8 w-5 text-red-500"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
+    <div className="parent-container overflow-hidden p-2">
+      <div
+        key={product.id}
+        className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105  hover:border-primary/50"
+        onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
+          state: {
+            productId: product.id,
+          }
+        })}
+      >
+        {product.discountPercentage > 0 && (
+          <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md">
+            Giảm {`${product.discountPercentage}%`}
+          </div>
+        )}
+        {product.isForSale === false && (
+          <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
+            Ngừng kinh doanh
+          </div>
+        )}
+        <div className="p-2 flex-grow">
+          <img
+            src={product.thumbnailUrl}
+            alt={product.name}
+            className="w-full h-32 object-contain mb-2 rounded-2xl"
+          />
+          <h3 className="font-semibold text-xs overflow-hidden overflow-ellipsis whitespace-nowrap" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>
+            {product.name}
+          </h3>
+          <div className="flex py-4">
+            {product.discountPercentage > 0 ? (
+              <>
+                <div className="text-red-500 font-semibold text-sm mr-2">
+                  {product.discountPrice.toLocaleString()}₫
+                </div>
+                <span className="line-through text-gray-500">
+                  {product.price.toLocaleString()}₫
+                </span>
+              </>
             ) : (
-              <CiHeart className="h-8 w-5 text-gray-500" />
+              <div className="text-gray-800 font-semibold text-sm">
+                {product.price.toLocaleString()}₫
+              </div>
             )}
-          </span>
+          </div>
+        </div>
+        <div className="p-2">
+          <div className='w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500'>
+            <span className="mr-2">Yêu thích</span>
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(product.id, product.isFavorite, setCategory);
+              }}
+              className="cursor-pointer flex items-center"
+            >
+              {product.isFavorite ? (
+                <svg
+                  className="h-8 w-5 text-red-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+              ) : (
+                <CiHeart className="h-8 w-5 text-gray-500" />
+              )}
+            </span>
+          </div>
         </div>
       </div>
     </div>
   );
 
+  const handleReachBeginning = (category) => {
+    setSwiperStates((prev) => ({
+      ...prev,
+      [category]: { ...prev[category], isBeginning: true }
+    }));
+  };
+
+  const handleReachEnd = (category) => {
+    setSwiperStates((prev) => ({
+      ...prev,
+      [category]: { ...prev[category], isEnd: true }
+    }));
+  };
+
+  const handleFromBeginning = (category) => {
+    setSwiperStates((prev) => ({
+      ...prev,
+      [category]: { ...prev[category], isBeginning: false }
+    }));
+  };
+
+  const handleFromEnd = (category) => {
+    setSwiperStates((prev) => ({
+      ...prev,
+      [category]: { ...prev[category], isEnd: false }
+    }));
+  };
   const renderCategory = (category, title) => (
     <div data-aos="fade-up" className="mb-10">
       <div className="flex items-center justify-between py-4">
         <h2 className="text-2xl font-bold">{title}</h2>
         <div className="flex flex-wrap space-x-2">
-          {brands[category].map((brand, index) => (
+          {brands[category].map((brand) => (
             <button className="bg-gray-200 dark:bg-gray-500 dark:text-white hover:bg-gray-300 px-4 py-2 rounded-lg"
-              key={index}
+              key={brand.id}
               onClick={() => {
                 navigate(`/gadgets/${title}/${slugify(brand.name)}`, {
 
@@ -217,16 +260,18 @@ export default function ProductPage() {
         <Swiper
           slidesPerView={1}
           spaceBetween={20}
-          navigation={{
-            nextEl: navigationRefs[category].next.current,
-            prevEl: navigationRefs[category].prev.current,
-          }}
           modules={[Navigation]}
-          onInit={(swiper) => {
-            swiper.params.navigation.prevEl = navigationRefs[category].prev.current;
-            swiper.params.navigation.nextEl = navigationRefs[category].next.current;
-            swiper.navigation.init();
-            swiper.navigation.update();
+          onSwiper={(swiper) => {
+            setSwiperInstances(prev => ({
+              ...prev,
+              [category]: swiper
+            }));
+          }}
+          onReachBeginning={() => handleReachBeginning(category)}
+          onReachEnd={() => handleReachEnd(category)}
+          onFromEdge={() => {
+            handleFromBeginning(category);
+            handleFromEnd(category);
           }}
           className="relative"
         >
@@ -242,18 +287,23 @@ export default function ProductPage() {
             </SwiperSlide>
           ))}
         </Swiper>
-        <button
-          ref={navigationRefs[category].prev}
-          className="absolute top-1/2 left-0 transform -translate-y-1/2 z-10 bg-gray-300 rounded-full p-2"
-        >
-          <ChevronLeft />
-        </button>
-        <button
-          ref={navigationRefs[category].next}
-          className="absolute top-1/2 right-0 transform -translate-y-1/2 z-10 bg-gray-300 rounded-full p-2"
-        >
-          <ChevronRight />
-        </button>
+        {!swiperStates[category].isBeginning && (
+          <button
+            onClick={() => swiperInstances[category]?.slidePrev()}
+            className="absolute left-0 z-10 top-1/2 transform -translate-y-1/2 cursor-pointer hidden group-hover:flex"
+          >
+            <ChevronLeft className="h-8 w-8 text-gray-500" />
+          </button>
+        )}
+
+        {!swiperStates[category].isEnd && (
+          <button
+            onClick={() => swiperInstances[category]?.slideNext()}
+            className="absolute right-0 z-10 top-1/2 transform -translate-y-1/2 cursor-pointer hidden group-hover:flex"
+          >
+            <ChevronRight className="h-8 w-8 text-gray-500" />
+          </button>
+        )}
       </div>
     </div>
   );
