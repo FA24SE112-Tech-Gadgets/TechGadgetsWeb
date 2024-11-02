@@ -74,6 +74,7 @@ const OrderConfirmation = ({ selectedItems, cartItemsBySeller, totalPrice, onCan
                     </h3>
                     {productIds.map(productId => {
                         const item = cartItemsBySeller[sellerId].find(item => item.gadget.id === productId);
+                        if (!item) return null;
                         return (
                             <div key={productId} className="flex justify-between items-center mb-2">
                                 <div className="flex items-center flex-grow mr-4">
@@ -208,15 +209,14 @@ const CartPage = () => {
     };
     const handleRemoveItem = async (gadgetId, quantity) => {
         try {
-            // Use AxiosInterceptor to delete the item by gadgetId and quantity
             await AxiosInterceptor.delete('/api/cart', {
                 data: {
                     gadgetId: gadgetId,
                     quantity: quantity
                 }
             });
-
-            // Update state to remove the specific item by gadgetId
+            
+            // Cập nhật cartItemsBySeller
             setCartItemsBySeller(prev => {
                 const updatedCart = {};
                 Object.keys(prev).forEach(sellerId => {
@@ -224,7 +224,19 @@ const CartPage = () => {
                 });
                 return updatedCart;
             });
-
+    
+            // Cập nhật selectedItems
+            setSelectedItems(prev => {
+                const updatedSelected = { ...prev };
+                Object.keys(updatedSelected).forEach(sellerId => {
+                    updatedSelected[sellerId] = updatedSelected[sellerId].filter(id => id !== gadgetId);
+                    if (updatedSelected[sellerId].length === 0) {
+                        delete updatedSelected[sellerId];
+                    }
+                });
+                return updatedSelected;
+            });
+    
             toast.success("Xóa sản phẩm khỏi giỏ hàng thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -238,7 +250,6 @@ const CartPage = () => {
             }
         }
     };
-
 
     const handleSelectItem = (sellerId, productId) => {
         setSelectedItems(prev => {
