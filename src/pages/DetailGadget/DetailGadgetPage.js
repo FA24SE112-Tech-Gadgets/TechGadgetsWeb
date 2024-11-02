@@ -44,15 +44,15 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
             console.error("Error placing order:", error);
             if (error.response && error.response.data && error.response.data.reasons) {
                 const reasons = error.response.data.reasons;
-    
+
                 // Display the message from the first reason
                 if (reasons.length > 0) {
                     const reasonMessage = reasons[0].message;
-                    toast.error(reasonMessage); 
+                    toast.error(reasonMessage);
                 } else {
                     toast.error("Đặt hàng thất bại. Vui lòng thử lại.");
                 }
-            } 
+            }
         } finally {
             setIsProcessing(false);
         }
@@ -191,7 +191,7 @@ const DetailGadgetPage = () => {
             });
 
 
-        
+
 
             console.log("Product added to cart", response);
             toast.success("Thêm sản phẩm thành công");
@@ -213,23 +213,21 @@ const DetailGadgetPage = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Breadcrumb className="w-full">
-                <Breadcrumb.Item>
-                    <p>
-                        {product.category?.name}
-                    </p>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>
-                    <p>
-                        {product.brand?.name}
-                    </p>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>
-                    <p>
-                        {product.name}
-                    </p>
-                </Breadcrumb.Item>
-            </Breadcrumb>
+            <Breadcrumb
+                className="w-full"
+                items={[
+                    {
+                        title: <p>{product.category?.name}</p>,
+                    },
+                    {
+                        title: <p>{product.brand?.name}</p>,
+                    },
+                    {
+                        title: <p>{product.name}</p>,
+                    },
+                ]}
+            />
+
             <ToastContainer />
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Left column */}

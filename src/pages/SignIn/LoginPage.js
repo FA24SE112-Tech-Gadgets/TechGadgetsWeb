@@ -1,21 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import signin from '~/assets/signin.jpg';
-import google from '~/assets/google.svg'
+import google from '~/assets/google.svg';
 import useAuth from '~/context/auth/useAuth';
 import { useGoogleLogin } from '@react-oauth/google';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { requestForToken } from '~/ultis/firebase';
 
 function LogIn() {
   const { login, error } = useAuth();
   const { googleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deviceToken, setDeviceToken] = useState("");
   const [user, setUser] = useState({
     email: "",
-    password: ""
+    password: "",
+    deviceToken: ""
   });
+
+  useEffect(() => {
+    requestForToken()
+    .then((token) => {
+      if (token) {
+        setDeviceToken(token);
+        setUser((prevUser) => ({ ...prevUser, deviceToken: token }));
+      }
+      console.log("device Token", token);
+    });
+    
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -34,7 +49,7 @@ function LogIn() {
 
     setLoading(true);
     try {
-      await login(user);
+      await login(user); // Pass user with email, password, and deviceToken
     } catch (err) {
       console.error("Login failed:", err);
     } finally {
@@ -45,7 +60,9 @@ function LogIn() {
   const googleLoginHandler = useGoogleLogin({
     onSuccess: (response) => {
       console.log('Google login successful:', response.access_token);
-      googleLogin(response.access_token);
+      googleLogin(response.access_token, deviceToken);
+      console.log("device token", deviceToken);
+      
     },
     onError: (error) => {
       console.error('Google login error:', error);
