@@ -195,7 +195,7 @@ function CategoryGadgetPage() {
                 {hasMore && !loading && (
                     <div className="text-center mt-4">
                         <Button onClick={() => setPage((prevPage) => prevPage + 1)}>
-                            Xem thêm 20 sản phẩm 
+                            Xem thêm
                         </Button>
                     </div>
                 )}

@@ -157,6 +157,12 @@ const Header = () => {
                         <p>Hồ sơ</p>
                       </button>
                       <button
+                        onClick={() => navigate("/orderHistory")}
+                        className="flex justify-start cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300"
+                      >
+                        <p>Đơn hàng</p>
+                      </button>
+                      <button
                         onClick={() => navigate("/favorite")}
                         className="flex justify-start cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300"
                       >

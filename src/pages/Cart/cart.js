@@ -1,114 +1,116 @@
 import React, { useEffect, useState } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import { HomeOutlined, MinusOutlined, PhoneOutlined, PlusOutlined, CheckCircleOutlined, ShoppingCartOutlined ,LoadingOutlined } from '@ant-design/icons';
+import { HomeOutlined, MinusOutlined, PhoneOutlined, PlusOutlined, CheckCircleOutlined, ShoppingCartOutlined, LoadingOutlined } from '@ant-design/icons';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import slugify from '~/ultis/config';
+import { TrashIcon } from 'lucide-react';
 
 const OrderConfirmation = ({ selectedItems, cartItemsBySeller, totalPrice, onCancel }) => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const navigate = useNavigate();
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [orderSuccess, setOrderSuccess] = useState(false);
+    const navigate = useNavigate();
 
-  const handleConfirmOrder = async () => {
-    setIsProcessing(true);
-    try {
-        const listGadgetItems = Object.values(selectedItems).flat();
-        await AxiosInterceptor.post('/api/order', { listGadgetItems });
-        setOrderSuccess(true);
-    } catch (error) {
-        console.error("Error placing order:", error);
-        if (error.response && error.response.data && error.response.data.reasons) {
-            const reasons = error.response.data.reasons;
+    const handleConfirmOrder = async () => {
+        setIsProcessing(true);
+        try {
+            const listGadgetItems = Object.values(selectedItems).flat();
+            await AxiosInterceptor.post('/api/order', { listGadgetItems });
+            setOrderSuccess(true);
+        } catch (error) {
+            console.error("Error placing order:", error);
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
 
-            // Display the message from the first reason
-            if (reasons.length > 0) {
-                const reasonMessage = reasons[0].message;
-                toast.error(reasonMessage); 
-            } else {
-                toast.error("Đặt hàng thất bại. Vui lòng thử lại."); 
+                // Display the message from the first reason
+                if (reasons.length > 0) {
+                    const reasonMessage = reasons[0].message;
+                    toast.error(reasonMessage);
+                } else {
+                    toast.error("Đặt hàng thất bại. Vui lòng thử lại.");
+                }
             }
-        } 
-    } finally {
-        setIsProcessing(false);
-    }
-};
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
 
-  if (orderSuccess) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
-          <CheckCircleOutlined className="text-green-500 text-8xl mb-6" />
-          <h2 className="text-3xl font-bold mb-6 text-gray-800">Đặt hàng thành công!</h2>
-          <p className="text-gray-600 mb-8">Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đang được xử lý.</p>
-          <div className="flex flex-col space-y-4">
-            <button
-              onClick={() => navigate('/')}
-              className="w-full px-6 py-3 bg-primary/80 hover:bg-secondary/90 text-white rounded-lg transition duration-200 font-semibold"
-            >
-              Về trang Chủ
-            </button>
-            <button
-              onClick={() => navigate('/payment-history')}
-              className="w-full px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold"
-            >
-              Xem Lịch Sử Đơn hàng
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">  <ShoppingCartOutlined className="text-5xl text-primary" /> Xác nhận đơn hàng</h2>
-      
-      {Object.entries(selectedItems).map(([sellerId, productIds]) => (
-        <div key={sellerId} className="mb-6 border-b pb-4">
-          <h3 className="text-lg font-semibold mb-3 text-gray-700">
-            {cartItemsBySeller[sellerId][0]?.seller?.shopName}
-          </h3>
-          {productIds.map(productId => {
-            const item = cartItemsBySeller[sellerId].find(item => item.gadget.id === productId);
-            return (
-              <div key={productId} className="flex justify-between items-center mb-2">
-                <div className="flex items-center flex-grow mr-4">
-                  <img src={item.gadget.thumbnailUrl} alt={item.gadget.name} className="w-12 h-12 object-contain mr-2" />
-                  <span className="text-gray-600">{item.gadget.name} x {item.quantity}</span>
+    if (orderSuccess) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
+                <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+                    <CheckCircleOutlined className="text-green-500 text-8xl mb-6" />
+                    <h2 className="text-3xl font-bold mb-6 text-gray-800">Đặt hàng thành công!</h2>
+                    <p className="text-gray-600 mb-8">Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đang được xử lý.</p>
+                    <div className="flex flex-col space-y-4">
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full px-6 py-3 bg-primary/80 hover:bg-secondary/90 text-white rounded-lg transition duration-200 font-semibold"
+                        >
+                            Về trang Chủ
+                        </button>
+                        <button
+                            onClick={() => navigate('/payment-history')}
+                            className="w-full px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold"
+                        >
+                            Xem Lịch Sử Đơn hàng
+                        </button>
+                    </div>
                 </div>
-                <span className="font-medium text-gray-800 ml-4">
-                  {((item.gadget.discountPercentage > 0 ? item.gadget.discountPrice : item.gadget.price) * item.quantity).toLocaleString()}₫
-                </span>
-              </div>
-            );
-          })}
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">  <ShoppingCartOutlined className="text-5xl text-primary" /> Xác nhận đơn hàng</h2>
+
+            {Object.entries(selectedItems).map(([sellerId, productIds]) => (
+                <div key={sellerId} className="mb-6 border-b pb-4">
+                    <h3 className="text-lg font-semibold mb-3 text-gray-700">
+                        {cartItemsBySeller[sellerId][0]?.seller?.shopName}
+                    </h3>
+                    {productIds.map(productId => {
+                        const item = cartItemsBySeller[sellerId].find(item => item.gadget.id === productId);
+                        return (
+                            <div key={productId} className="flex justify-between items-center mb-2">
+                                <div className="flex items-center flex-grow mr-4">
+                                    <img src={item.gadget.thumbnailUrl} alt={item.gadget.name} className="w-12 h-12 object-contain mr-2" />
+                                    <span className="text-gray-600">{item.gadget.name} x {item.quantity}</span>
+                                </div>
+                                <span className="font-medium text-gray-800 ml-4">
+                                    {((item.gadget.discountPercentage > 0 ? item.gadget.discountPrice : item.gadget.price) * item.quantity).toLocaleString()}₫
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            ))}
+
+            <div className="flex justify-between items-center text-xl font-bold mb-6">
+                <span>Tổng cộng:</span>
+                <span className="text-red-600">{totalPrice.toLocaleString()}₫</span>
+            </div>
+
+            <div className="flex justify-end space-x-4">
+                <button
+                    onClick={onCancel}
+                    className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200"
+                >
+                    Hủy
+                </button>
+                <button
+                    onClick={handleConfirmOrder}
+                    disabled={isProcessing}
+                    className={`px-6 py-2 bg-primary/80 hover:bg-secondary/90 text-white rounded-lg transition duration-200 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    {isProcessing ? <LoadingOutlined /> : 'Thanh toán'}
+                </button>
+            </div>
         </div>
-      ))}
-      
-      <div className="flex justify-between items-center text-xl font-bold mb-6">
-        <span>Tổng cộng:</span>
-        <span className="text-red-600">{totalPrice.toLocaleString()}₫</span>
-      </div>
-      
-      <div className="flex justify-end space-x-4">
-        <button
-          onClick={onCancel}
-          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200"
-        >
-          Hủy
-        </button>
-        <button
-          onClick={handleConfirmOrder}
-          disabled={isProcessing}
-          className={`px-6 py-2 bg-primary/80 hover:bg-secondary/90 text-white rounded-lg transition duration-200 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          {isProcessing ? <LoadingOutlined /> : 'Thanh toán'}
-        </button>
-      </div>
-    </div>
-  );
+    );
 };
 
 const CartPage = () => {
@@ -117,7 +119,7 @@ const CartPage = () => {
     const [selectedItems, setSelectedItems] = useState({});
     const [totalPrice, setTotalPrice] = useState(0);
     const [showConfirmation, setShowConfirmation] = useState(false);
-
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchSellers = async () => {
             try {
@@ -146,7 +148,7 @@ const CartPage = () => {
 
     const handleQuantityChange = async (sellerId, productId, change) => {
         setCartItemsBySeller(prev => {
-           
+
             const updatedItems = prev[sellerId].map(item => {
                 if (item.gadget.id === productId) {
                     const newQuantity = Math.max(1, item.quantity + change);
@@ -154,17 +156,17 @@ const CartPage = () => {
                 }
                 return item;
             });
-    
+
             return {
                 ...prev,
                 [sellerId]: updatedItems,
             };
         });
-    
+
         try {
             const item = cartItemsBySeller[sellerId].find(item => item.gadget.id === productId);
             const newQuantity = Math.max(1, item.quantity + change);
-            
+
             await AxiosInterceptor.put(`/api/cart/old`, {
                 gadgetId: productId,
                 quantity: newQuantity
@@ -172,12 +174,12 @@ const CartPage = () => {
         } catch (error) {
             console.error("Error updating quantity:", error);
             toast.error("Failed to update item quantity. Please try again.");
-    
-            
+
+
             setCartItemsBySeller(prev => {
                 const revertedItems = prev[sellerId].map(item => {
                     if (item.gadget.id === productId) {
-                        return { ...item, quantity: item.quantity - change }; 
+                        return { ...item, quantity: item.quantity - change };
                     }
                     return item;
                 });
@@ -204,6 +206,39 @@ const CartPage = () => {
             toast.error("Xóa tất cả sản phẩm khỏi giỏ hàng thất bại.");
         }
     };
+    const handleRemoveItem = async (gadgetId, quantity) => {
+        try {
+            // Use AxiosInterceptor to delete the item by gadgetId and quantity
+            await AxiosInterceptor.delete('/api/cart', {
+                data: {
+                    gadgetId: gadgetId,
+                    quantity: quantity
+                }
+            });
+
+            // Update state to remove the specific item by gadgetId
+            setCartItemsBySeller(prev => {
+                const updatedCart = {};
+                Object.keys(prev).forEach(sellerId => {
+                    updatedCart[sellerId] = prev[sellerId].filter(item => item.gadget.id !== gadgetId);
+                });
+                return updatedCart;
+            });
+
+            toast.success("Xóa sản phẩm khỏi giỏ hàng thành công");
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
+                if (reasons.length > 0) {
+                    const reasonMessage = reasons[0].message;
+                    toast.error(reasonMessage);
+                } else {
+                    toast.error("Có lỗi xảy ra vui lòng thử lại");
+                }
+            }
+        }
+    };
+
 
     const handleSelectItem = (sellerId, productId) => {
         setSelectedItems(prev => {
@@ -340,7 +375,13 @@ const CartPage = () => {
                                                         className="w-20 h-20 object-contain rounded-md"
                                                     />
                                                     <div className="flex-grow flex flex-col space-y-2">
-                                                        <h4 className="font-bold">{item.gadget.name}</h4>
+                                                        <h4 className="font-bold"
+                                                            onClick={() => navigate(`/gadget/detail/${slugify(item.gadget.name)}`, {
+                                                                state: {
+                                                                    productId: item.gadget.id,
+                                                                }
+                                                            })}
+                                                        >{item.gadget.name}</h4>
                                                         <p>Hãng: {item.gadget.brand.name}</p>
                                                         <p>Loại sản phẩm: {item.gadget.category.name}</p>
                                                         <div className="flex items-center mt-2">
@@ -351,7 +392,7 @@ const CartPage = () => {
                                                                         {item.gadget.discountPrice.toLocaleString()}₫
                                                                     </div>
                                                                     <span className="line-through text-gray-500">
-                                                                        
+
                                                                         {item.gadget.price.toLocaleString()}đ
                                                                     </span>
                                                                 </>
@@ -389,6 +430,14 @@ const CartPage = () => {
                                                                 <PlusOutlined />
                                                             </button>
                                                         </div>
+                                                    </div>
+                                                    <div className='flex justify-end mt-2'>
+                                                        <button
+                                                            onClick={() => handleRemoveItem(item.gadget.id, item.quantity)}
+                                                            className="text-red-500 hover:underline"
+                                                        >
+                                                            <TrashIcon/>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))}
