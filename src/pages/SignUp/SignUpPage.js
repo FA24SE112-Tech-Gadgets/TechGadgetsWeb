@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import signupp from '~/assets/signupp.jpg';
 import google from '~/assets/google.svg';
@@ -6,17 +6,32 @@ import useAuth from '~/context/auth/useAuth';
 import { useGoogleLogin } from '@react-oauth/google';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { requestForToken } from '~/ultis/firebase';
 
 function SignUp() {
   const { signup, googleLogin, error } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [deviceToken, setDeviceToken] = useState("");
   const [user, setUser] = useState({
     fullName: "",
     password: "",
     email: "",
-    role: "Customer" // Default role is Customer
+    role: "Customer", // Default role is Customer
+    deviceToken: ""
   });
   const [showPassword, setShowPassword] = useState(false);
+
+
+  useEffect(() => {
+    requestForToken()
+    .then((token) => {
+      if (token) {
+        setDeviceToken(token);
+        setUser((prevUser) => ({ ...prevUser, deviceToken: token }));
+      }
+    });
+  }, []);
+
 
   const handleChangeValue = (fieldName, value) => {
     setUser((prev) => ({

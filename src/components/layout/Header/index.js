@@ -15,7 +15,7 @@ const Header = () => {
   const [open, setOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -31,6 +31,13 @@ const Header = () => {
     logout();
   };
 
+  const handleCartClick = () => {
+    if (!isAuthenticated) {
+        navigate('/signin'); 
+    } else {
+        navigate('/cart'); 
+    }
+};
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setOpen(false);
@@ -112,7 +119,7 @@ const Header = () => {
 
             {/* Cart button */}
             <button
-            onClick={()=> navigate("/cart")}
+            onClick={handleCartClick}
               className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
             >
               <span
@@ -155,6 +162,12 @@ const Header = () => {
                         className="flex justify-start cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300"
                       >
                         <p>Hồ sơ</p>
+                      </button>
+                      <button
+                        onClick={() => navigate("/orderHistory")}
+                        className="flex justify-start cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300"
+                      >
+                        <p>Đơn hàng</p>
                       </button>
                       <button
                         onClick={() => navigate("/favorite")}

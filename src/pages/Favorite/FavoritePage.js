@@ -205,8 +205,21 @@ function FavoritePage() {
                                                                 <MoreVert />
                                                             </IconButton>
                                                         </div>
-                                                        <div className="text-red-500 font-semibold text-sm">
-                                                            {product.price.toLocaleString()}đ
+                                                        <div className="flex py-4">
+                                                            {product.discountPercentage > 0 ? (
+                                                                <>
+                                                                    <div className="text-red-500 font-semibold text-sm mr-2">
+                                                                        {product.discountPrice.toLocaleString()}₫
+                                                                    </div>
+                                                                    <span className="line-through text-gray-500">
+                                                                        {product.price.toLocaleString()}₫
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                <div className="text-gray-800 font-semibold text-sm">
+                                                                    {product.price.toLocaleString()}₫
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <Menu
