@@ -63,7 +63,7 @@ const OrderHistory = () => {
       <div className="flex space-x-4 mb-6 justify-end">
         <button
           onClick={() => handleStatusChange("Pending")}
-          className={`px-4 py-2 rounded ${status === "Pending" ? "bg-blue-500 text-white" : "bg-gray-100"}`}
+          className={`px-4 py-2 rounded ${status === "Pending" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
         >
           <ShoppingCart className="inline-block mr-2" /> Đang chờ
         </button>
@@ -77,7 +77,7 @@ const OrderHistory = () => {
           onClick={() => handleStatusChange("Cancelled")}
           className={`px-4 py-2 rounded ${status === "Cancelled" ? "bg-red-500 text-white" : "bg-gray-100"}`}
         >
-          <XCircle className="inline-block mr-2" /> Dã hủy
+          <XCircle className="inline-block mr-2" /> Đã hủy
         </button>
       </div>
 
