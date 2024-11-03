@@ -18,7 +18,7 @@ const SellerApplication = () => {
   useEffect(() => {
     if (BusinessModel === 'Cá Nhân') {
       setValue('CompanyName', '');
-      setValue('BusinessRegistrationCertificate', '');
+      setValue('BusinessRegistrationCertificate');
       setPreviewImage(null);
     }
   }, [BusinessModel, setValue]);

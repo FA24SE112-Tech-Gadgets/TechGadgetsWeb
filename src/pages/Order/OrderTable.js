@@ -1,4 +1,5 @@
 import { HomeOutlined, PhoneOutlined } from "@ant-design/icons";
+import { Eye } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -102,7 +103,7 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
                 <th className="py-2 px-4 border-b w-1/4">Tổng giá tiền</th>
                 <th className="py-2 px-4 border-b w-1/4">Trạng thái</th>
                 <th className="py-2 px-4 border-b w-1/4">Ngày đặt</th>
-                {hasPendingOrders && <th className="py-2 px-4 border-b w-1/4">Hành động</th>}
+                {hasPendingOrders && <th className="py-2 px-4 border-b w-1/4"></th>}
               </tr>
             </thead>
             <tbody>
@@ -141,7 +142,18 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
                   <td className="py-2 px-4 border-b text-center">{order.amount.toLocaleString()}₫</td>
 
                   {/* Status Column */}
-                  <td className="py-2 px-4 border-b text-center">{translateStatus(order.status)}</td>
+                  <td className="py-2 px-4 border-b text-center">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+        ${order.status === 'Success' ? 'bg-green-100 text-green-800' :
+                        order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'}`}>
+                      {order.status === 'Success' ? 'Thành công' :
+                        order.status === 'Pending' ? 'Đang chờ' :
+                          order.status === 'Cancelled' ? 'Đã hủy' :
+                            order.status}
+                    </span>
+                  </td>
+
 
 
                   {/* Order Date Column */}
@@ -153,12 +165,13 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
                   {hasPendingOrders && (
                     <td className="py-2 px-4 border-b text-center">
                       {order.status === "Pending" && (
-                        <button
-                          className="text-red-600 hover:text-red-800"
-                          onClick={() => openCancelModal(order.id)}
-                        >
-                          Hủy
-                        </button>
+                         <button
+                         onClick={() => openCancelModal(order.id)}
+                         className="text-primary/70 hover:text-secondary/80"
+                     >
+                         <Eye className="h-5 w-5 items-center" />
+                     </button>
+                      
                       )}
                     </td>
                   )}
