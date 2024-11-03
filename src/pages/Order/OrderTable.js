@@ -20,7 +20,7 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
   // Function to handle the cancel request
   const handleCancelOrder = async () => {
     if (!cancelReason) {
-      toast.error("Vui lòng điền lý do hủy")
+      toast.error("Vui lòng điền lý do hủy!!")
       return;
     }
     try {
@@ -29,7 +29,7 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
       });
       setShowModal(false);
       setCancelReason("");
-      toast.success("Thay đổi trạng thái thành công")
+      toast.success("Bạn đã hủy đơn thành công!!")
 
       // Thêm phần này để update trạng thái của order
       if (onOrderCancelled) {
@@ -131,7 +131,7 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
                         <div>
                           <p className="font-semibold">{gadget.name}</p>
                           <p className="text-gray-600">
-                            {gadget.quantity} x {gadget.price.toLocaleString()}đ
+                            {gadget.quantity} x {gadget.price.toLocaleString()}₫
                           </p>
                         </div>
                       </div>
@@ -139,7 +139,7 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
                   </td>
 
                   {/* Total Amount Column */}
-                  <td className="py-2 px-4 border-b text-center">{order.amount.toLocaleString()}đ</td>
+                  <td className="py-2 px-4 border-b text-center">{order.amount.toLocaleString()}₫</td>
 
                   {/* Status Column */}
                   <td className="py-2 px-4 border-b text-center">

@@ -73,7 +73,7 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
                             Về trang Chủ
                         </button>
                         <button
-                            onClick={() => navigate('/payment-history')}
+                            onClick={() => navigate('/orderHistory')}
                             className="w-full px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold"
                         >
                             Xem Lịch Sử Đơn hàng
