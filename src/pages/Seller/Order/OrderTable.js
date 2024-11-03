@@ -278,7 +278,7 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto" onClick={() => setShowDetailsModal(false)}>
                     <div onClick={e => e.stopPropagation()} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-3xl m-4">
                         <div className="flex justify-between items-center p-6 border-b dark:border-gray-700">
-                            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                                 Chi tiết đơn hàng #{selectedOrderId}
                             </h2>
                             <button onClick={() => setShowDetailsModal(false)} className="text-gray-500 hover:text-gray-700">
@@ -310,54 +310,55 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
                         </div>
 
                         {orderInfo && (
-                         <div className="p-6 flex border-t border-gray-200 dark:border-gray-700">
-                         {/* Customer Info Section */}
-                         <div className="flex-grow pr-6">
-                             <h3 className="font-semibold flex items-center text-lg mb-4">
-                                 Thông tin khách hàng
-                                 <UserOutlined className="mr-2 text-xl text-primary/80" />
-                             </h3>
-                             <div className="flex items-center mb-2">
-                                 <InfoCircleOutlined className="mr-2 text-primary/80" />
-                                 <p className="text-gray-700 dark:text-gray-300">Tên: {orderInfo.customerInfo.fullName}</p>
-                             </div>
-                             <div className="flex items-center mb-2">
-                                 <HomeOutlined className="mr-2 text-primary/80" />
-                                 <p className="text-gray-700 dark:text-gray-300">Địa chỉ: {orderInfo.customerInfo.address}</p>
-                             </div>
-                             <div className="flex items-center mb-2">
-                                 <PhoneOutlined className="mr-2 text-primary/80" />
-                                 <p className="text-gray-700 dark:text-gray-300">Số điện thoại: {orderInfo.customerInfo.phoneNumber}</p>
-                             </div>
-                         </div>
-                     
-                         {/* Order Info Section */}
-                         <div className="flex-grow">
-                             <h3 className="font-semibold flex items-center text-lg mb-4">
-                                 Thông tin đơn hàng
-                                 <ShoppingCartOutlined className="mr-2 text-xl text-primary/80" />
-                             </h3>
-                             <div className="flex items-center mb-2">
-                                 <NumberOutlined className="mr-2 text-primary/80" />
-                                 <p className="text-gray-700 dark:text-gray-300">Tổng số lượng: {orderInfo.totalQuantity}</p>
-                             </div>
-                             <div className="flex items-center mb-2">
-                                 <MoneyCollectOutlined className="mr-2 text-primary/80" />
-                                 <p className="text-gray-700 dark:text-gray-300">Tổng số tiền: {orderInfo.totalAmount.toLocaleString()}đ</p>
-                             </div>
-                             <div className="flex items-center mb-2">
-                                 <WalletOutlined className="mr-2 text-primary/80" />
-                                 <p className="text-gray-700 dark:text-gray-300">Phương thức thanh toán: {orderInfo.paymentMethod}</p>
-                             </div>
-                             <div className="flex items-center mb-2">
-                             <DateRangeOutlined className="mr-2 text-primary/80 text-sm" />
+                            <div className="p-6 flex border-t border-gray-200 dark:border-gray-700">
+                                {/* Customer Info Section */}
+                                <div className="flex-grow pr-6">
+                                    <h3 className="font-semibold flex items-center text-lg mb-4">
+                                        {/* <InfoCircleOutlined className="mr-2 text-primary/80" /> */}
+                                        Thông tin khách hàng
+
+                                    </h3>
+                                    <div className="flex items-center mb-2">
+                                        <UserOutlined className="mr-2 text-xl text-primary/80" />
+                                        <p className="text-gray-700 dark:text-gray-300">Tên: {orderInfo.customerInfo.fullName}</p>
+                                    </div>
+                                    <div className="flex items-center mb-2">
+                                        <HomeOutlined className="mr-2 text-primary/80" />
+                                        <p className="text-gray-700 dark:text-gray-300">Địa chỉ: {orderInfo.customerInfo.address}</p>
+                                    </div>
+                                    <div className="flex items-center mb-2">
+                                        <PhoneOutlined className="mr-2 text-primary/80" />
+                                        <p className="text-gray-700 dark:text-gray-300">Số điện thoại: {orderInfo.customerInfo.phoneNumber}</p>
+                                    </div>
+                                </div>
+
+                                {/* Order Info Section */}
+                                <div className="flex-grow">
+                                    <h3 className="font-semibold flex items-center text-lg mb-4">
+                                        Thông tin đơn hàng
+                                        {/* <ShoppingCartOutlined className="mr-2 text-xl text-primary/80" /> */}
+                                    </h3>
+                                    <div className="flex items-center mb-2">
+                                        <NumberOutlined className="mr-2 text-primary/80" />
+                                        <p className="text-gray-700 dark:text-gray-300">Tổng số lượng: {orderInfo.totalQuantity}</p>
+                                    </div>
+                                    <div className="flex items-center mb-2">
+                                        <MoneyCollectOutlined className="mr-2 text-primary/80" />
+                                        <p className="text-gray-700 dark:text-gray-300">Tổng số tiền: {orderInfo.totalAmount.toLocaleString()}₫</p>
+                                    </div>
+                                    <div className="flex items-center mb-2">
+                                        <WalletOutlined className="mr-2 text-primary/80" />
+                                        <p className="text-gray-700 dark:text-gray-300">Phương thức thanh toán: {orderInfo.paymentMethod}</p>
+                                    </div>
+                                    <div className="flex items-center mb-2">
+                                        <DateRangeOutlined className="mr-2 text-primary/80 text-sm" />
 
 
-                                 <p className="text-gray-700 dark:text-gray-300">Ngày tạo đơn hàng: {new Date(orderInfo.sellerOrderCreatedAt).toLocaleString()}</p>
-                             </div>
-                         </div>
-                     </div>
-                     
+                                        <p className="text-gray-700 dark:text-gray-300">Ngày tạo đơn hàng: {new Date(orderInfo.sellerOrderCreatedAt).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+
                         )}
 
                         {orders.find(o => o.id === selectedOrderId)?.status === "Pending" && (

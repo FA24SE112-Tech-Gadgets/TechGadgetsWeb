@@ -39,6 +39,7 @@ import SellerProfilePage from "./pages/Seller/SellerProfile";
 import CartPage from "./pages/Cart/cart";
 import OrderHistory from "./pages/Order/Order";
 import OrderHistorySeller from "./pages/Seller/Order/Order";
+import SellerTransfer from "./pages/Wallet/SellerTransfer";
 
 
 function App() {
@@ -115,6 +116,10 @@ function App() {
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
         <Route path='/seller/Order-management' element={<OrderHistorySeller />} />
+      </Route>
+
+      <Route element={<SellerLayout />}>
+        <Route path='/seller/transaction-history' element={<SellerTransfer />} />
       </Route>
 
 

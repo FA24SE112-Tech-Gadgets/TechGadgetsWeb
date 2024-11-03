@@ -31,7 +31,7 @@ const SellerSidebar = () => {
             icon: <BarChartOutlined />,
             title: 'Ví của tôi',
             children: [
-                { key: 'marketingChannels', label: 'Lịch sử giao dịch', route: '/transaction-history' },
+                { key: 'marketingChannels', label: 'Lịch sử giao dịch', route: '/seller/transaction-history' },
             ],
         },
     ];
