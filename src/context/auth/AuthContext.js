@@ -123,7 +123,7 @@ const AuthProvider = ({ children }) => {
 								console.log('day ne', resData.data.seller);
 								navigate("/seller-application");
 							} else {
-								navigate("/seller");
+								navigate("/seller/Order-management");
 							}
 						} else {
 							navigate("/")

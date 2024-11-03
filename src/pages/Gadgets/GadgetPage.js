@@ -7,12 +7,12 @@ import { CiHeart } from 'react-icons/ci';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { Breadcrumb, Button } from 'antd';
 import slugify from '~/ultis/config';
-import Filter from './Filter/Filter';
 import { FilterOutlined } from '@ant-design/icons';
+import FilterPage from './Filter/FilterPage';
 
 function CategoryGadgetPage() {
     const location = useLocation();
-    const { categoryId, brandId } = location.state || {};
+    const { categoryId } = location.state || {};
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
     const { category } = useParams();
@@ -30,6 +30,9 @@ function CategoryGadgetPage() {
         const fetchBrandProducts = async () => {
             setLoading(true);
             const apiClient = isAuthenticated ? AxiosInterceptor : axios;
+            const Brands = appliedFilters.Brands
+                ? appliedFilters.Brands.map((brand) => `Brands=${brand}`).join('&')
+                : '';
 
             const gadgetFilters = appliedFilters.GadgetFilters
                 ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
@@ -38,12 +41,13 @@ function CategoryGadgetPage() {
             const maxPrice = appliedFilters.MaxPrice ? `MaxPrice=${appliedFilters.MaxPrice}` : '';
 
             const queryString = [
+                Brands,
                 gadgetFilters,
                 minPrice,
                 maxPrice
             ].filter(Boolean).join('&');
 
-            const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}&Page=${page}&PageSize=20`;
+            const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?${queryString}&Page=${page}&PageSize=20`;
 
             try {
                 const response = await apiClient.get(apiUrl);
@@ -54,6 +58,8 @@ function CategoryGadgetPage() {
 
                 setProducts((prevProducts) => page === 1 ? activeProducts : [...prevProducts, ...activeProducts]);
                 setHasMore(activeProducts.length === 20); // Check if there are more products to load
+                console.log(`${apiBaseUrl}/api/gadgets/category/${categoryId}?${queryString}&Page=${page}&PageSize=20`);
+
             } catch (error) {
                 console.error("Error fetching brand products:", error);
             } finally {
@@ -61,7 +67,7 @@ function CategoryGadgetPage() {
             }
         };
         fetchBrandProducts();
-    }, [category, brandId, categoryId, apiBaseUrl, appliedFilters, isAuthenticated, page]);
+    }, [category, categoryId, apiBaseUrl, appliedFilters, isAuthenticated, page]);
 
     const toggleFavorite = async (gadgetId, isFavorite) => {
         if (!isAuthenticated) {
@@ -86,10 +92,11 @@ function CategoryGadgetPage() {
     };
 
     const handleApplyFilters = (filters) => {
-        setAppliedFilters(filters);
+        setAppliedFilters(filters);  // Đảm bảo filters bao gồm cả Brands
         setFilterModalVisible(false);
-        setPage(1); // Reset page when filters are applied
+        setPage(1); // Reset page khi áp dụng bộ lọc
     };
+    
 
     return (
         <div className="bg-white dark:bg-gray-900 dark:text-white">
@@ -200,7 +207,7 @@ function CategoryGadgetPage() {
                     </div>
                 )}
             </div>
-            <Filter
+            <FilterPage
                 isVisible={isFilterModalVisible}
                 onClose={toggleFilterModal}
                 onApplyFilters={handleApplyFilters}

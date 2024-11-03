@@ -39,7 +39,6 @@ const SellerHeader = () => {
         {/* Notification Bell */}
         <div style={{ marginRight: '20px', cursor: 'pointer' }}>
           <BellOutlined style={{ fontSize: '20px' }} />
-          <Notifications/>
         </div>
 
         {/* User Profile Dropdown */}

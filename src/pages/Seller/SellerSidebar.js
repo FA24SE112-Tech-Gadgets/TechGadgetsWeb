@@ -1,58 +1,70 @@
-import React from "react";
-import { Layout, Menu } from "antd";
-import { 
-  ShoppingCartOutlined, 
-  AppstoreOutlined, 
-  BarChartOutlined, 
-  ShopOutlined, 
-  DollarOutlined 
-} from "@ant-design/icons";
-import icon from "~/assets/icon.ico";  // Your logo file
+import React from 'react';
+import { Layout, Menu } from 'antd';
+import { ShoppingCartOutlined, AppstoreOutlined, BarChartOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const { Sider } = Layout;
-const { SubMenu } = Menu;
 
 const SellerSidebar = () => {
-  return (
-    <Sider 
-      width={250} 
-      className="bg-primary/40 h-full" // Ensure full height and background color
-      style={{ minHeight: '100vh' }}  // Ensure it covers the viewport height
-    >
-     
+    const navigate = useNavigate();
 
-      {/* Menu Section */}
-      <Menu
-        mode="inline"
-        defaultOpenKeys={['orders', 'products', 'marketing', 'finance', 'shop']}
-        style={{ height: '100%', borderRight: 0 }}
-        className="text-black bg-primary/40 h-screen" // Apply the same text color
-      >
-        {/* Quản lý đơn hàng */}
-        <SubMenu key="orders" icon={<ShoppingCartOutlined />} title="Quản lý đơn hàng">
-          <Menu.Item key="allOrders">Tất cả</Menu.Item>
-          <Menu.Item key="bulkProcessing">Xử lý đơn hàng loạt</Menu.Item>
-        </SubMenu>
+    const menuItems = [
+        {
+            key: 'orders',
+            icon: <ShoppingCartOutlined />,
+            title: 'Quản lý đơn hàng',
+            children: [
+                { key: 'bulkProcessing', label: 'Xử lý đơn hàng', route: '/seller/Order-management' },
+            ],
+        },
+        {
+            key: 'products',
+            icon: <AppstoreOutlined />,
+            title: 'Quản lý sản phẩm',
+            children: [
+                { key: 'allProducts', label: 'Danh sách sản phẩm', route: '/all-products' },
+                { key: 'manageProducts', label: 'Đánh giá sản phẩm', route: '/manage-products' },
+            ],
+        },
+        {
+            key: 'marketing',
+            icon: <BarChartOutlined />,
+            title: 'Ví của tôi',
+            children: [
+                { key: 'marketingChannels', label: 'Lịch sử giao dịch', route: '/transaction-history' },
+            ],
+        },
+    ];
 
-        {/* Quản lý sản phẩm */}
-        <SubMenu key="products" icon={<AppstoreOutlined />} title="Quản lý sản phẩm">
-          <Menu.Item key="allProducts">Tất cả sản phẩm</Menu.Item>
-          <Menu.Item key="manageProducts">Quản lý sản phẩm</Menu.Item>
-        </SubMenu>
+    const handleMenuClick = (route) => {
+        navigate(route);
+    };
 
-        {/* Kênh Marketing */}
-        <SubMenu key="marketing" icon={<BarChartOutlined />} title="Kênh Marketing">
-          <Menu.Item key="marketingChannels">Kênh Marketing</Menu.Item>
-          <Menu.Item key="myAds">Quảng cáo của tôi</Menu.Item>
-        </SubMenu>
-
-        {/* Tài chính */}
-        <SubMenu key="finance" icon={<DollarOutlined />} title="Tài chính">
-          <Menu.Item key="revenue">Doanh thu</Menu.Item>
-        </SubMenu>
-      </Menu>
-    </Sider>
-  );
+    return (
+        <Sider
+            width={250}
+            className="bg-primary/40 h-full"
+            style={{ minHeight: '100vh' }}
+        >
+            {/* Menu Section */}
+            <Menu
+                mode="inline"
+                defaultOpenKeys={['orders', 'products', 'marketing']}
+                style={{ height: '100%', borderRight: 0 }}
+                className="text-black bg-primary/40 h-screen"
+            >
+                {menuItems.map(item => (
+                    <Menu.SubMenu key={item.key} icon={item.icon} title={item.title}>
+                        {item.children.map(child => (
+                            <Menu.Item key={child.key} onClick={() => handleMenuClick(child.route)}>
+                                {child.label}
+                            </Menu.Item>
+                        ))}
+                    </Menu.SubMenu>
+                ))}
+            </Menu>
+        </Sider>
+    );
 };
 
 export default SellerSidebar;
