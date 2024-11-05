@@ -4,16 +4,17 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import ChangePassword from '~/pages/Profile/ChangePassword';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { 
-    BankOutlined, 
-    ShopOutlined, 
-    HomeOutlined, 
-    PhoneOutlined, 
-    MailOutlined, 
-    BuildOutlined, 
-    FileTextOutlined, 
-    TagsOutlined 
+import {
+    BankOutlined,
+    ShopOutlined,
+    HomeOutlined,
+    PhoneOutlined,
+    MailOutlined,
+    BuildOutlined,
+    FileTextOutlined,
+    TagsOutlined
 } from '@ant-design/icons';
+
 const labels = {
     companyName: { text: 'Tên Công Ty', icon: <BankOutlined /> },
     shopName: { text: 'Tên Cửa Hàng', icon: <ShopOutlined /> },
@@ -38,6 +39,7 @@ const SellerProfilePage = () => {
         billingMails: [],
         taxCode: '',
     });
+    const [originalProfile, setOriginalProfile] = useState({});
 
     useEffect(() => {
         const getCurrentUser = async () => {
@@ -45,7 +47,7 @@ const SellerProfilePage = () => {
                 const response = await AxiosInterceptor.get('/api/seller/current');
                 const userData = response.data;
 
-                setProfile({
+                const loadedProfile = {
                     companyName: userData.companyName || '',
                     shopName: userData.shopName || '',
                     shopAddress: userData.shopAddress || '',
@@ -54,7 +56,10 @@ const SellerProfilePage = () => {
                     businessModel: userData.businessModel || '',
                     billingMails: userData.billingMails || [],
                     taxCode: userData.taxCode || '',
-                });
+                };
+
+                setProfile(loadedProfile);
+                setOriginalProfile(loadedProfile); // Store original data for comparison
             } catch (error) {
                 console.error('Error fetching seller profile:', error);
             }
@@ -71,10 +76,18 @@ const SellerProfilePage = () => {
     const handleSave = async () => {
         try {
             const formData = new FormData();
-            formData.append('CompanyName', profile.companyName);
-            formData.append('ShopName', profile.shopName);
-            formData.append('ShopAddress', profile.shopAddress);
-            formData.append('PhoneNumber', profile.phoneNumber);
+
+            // Only add fields that have been modified
+            if (profile.companyName !== originalProfile.companyName) formData.append('CompanyName', profile.companyName);
+            if (profile.shopName !== originalProfile.shopName) formData.append('ShopName', profile.shopName);
+            if (profile.shopAddress !== originalProfile.shopAddress) formData.append('ShopAddress', profile.shopAddress);
+            if (profile.phoneNumber !== originalProfile.phoneNumber) formData.append('PhoneNumber', profile.phoneNumber);
+
+            // Skip API call if there are no changes
+            if (Array.from(formData.keys()).length === 0) {
+                toast.info('Không có thay đổi nào để lưu.');
+                return;
+            }
 
             const response = await AxiosInterceptor.patch('/api/seller', formData, {
                 headers: {
@@ -84,6 +97,7 @@ const SellerProfilePage = () => {
 
             if (response.status >= 200 && response.status < 300) {
                 setIsEditing(false);
+                setOriginalProfile(profile); // Update original profile after successful save
                 toast.success('Cập nhật thông tin thành công!');
             } else {
                 const errorMessage = response.data.reasons?.[0]?.message || 'Vui lòng thử lại.';
@@ -116,7 +130,31 @@ const SellerProfilePage = () => {
                 <div className="grid grid-cols-2 gap-8">
                     {/* Editable Fields */}
                     <div>
-                        {['companyName', 'shopName', 'shopAddress', 'phoneNumber'].map((key) => (
+                        {/* Conditionally render companyName if businessModel is not Personal */}
+                        {profile.businessModel !== 'Personal' && (
+                            <div className="mb-4">
+                                <label className="flex items-center text-gray-700">
+                                    {labels.companyName.icon}
+                                    <span className="ml-2">{labels.companyName.text}</span>
+                                </label>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        name="companyName"
+                                        value={profile.companyName}
+                                        onChange={handleChange}
+                                        className="mt-2 p-2 border rounded w-full h-10"
+                                    />
+                                ) : (
+                                    <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10 truncate">
+                                        {profile.companyName || 'N/A'}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Other editable fields */}
+                        {['shopName', 'shopAddress', 'phoneNumber'].map((key) => (
                             <div key={key} className="mb-4">
                                 <label className="flex items-center text-gray-700">
                                     {labels[key].icon}
@@ -183,7 +221,7 @@ const SellerProfilePage = () => {
 
             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                    <ChangePassword closeModal={closeModal} />
+                    <ChangePassword onClose={closeModal} />
                 </div>
             )}
         </div>

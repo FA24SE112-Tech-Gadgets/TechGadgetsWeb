@@ -40,6 +40,7 @@ import CartPage from "./pages/Cart/cart";
 import OrderHistory from "./pages/Order/Order";
 import OrderHistorySeller from "./pages/Seller/Order/Order";
 import SellerTransfer from "./pages/Wallet/SellerTransfer";
+import Review from "./pages/Review/Review";
 
 
 function App() {
@@ -90,6 +91,14 @@ function App() {
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
               <ProfilePage />
+            </RoleBaseRoute>
+          </AuthRoute>
+
+        } />
+          <Route path='/review-gadget' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
+              <Review />
             </RoleBaseRoute>
           </AuthRoute>
 

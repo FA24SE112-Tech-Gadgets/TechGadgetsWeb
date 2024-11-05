@@ -5,7 +5,7 @@ import useAuth from '~/context/auth/useAuth';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from 'react-toastify';
 import { Breadcrumb } from 'antd';
-import { CheckCircleOutlined, LoadingOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, HomeFilled, InfoCircleFilled, LoadingOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 
 
 const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
@@ -324,17 +324,17 @@ const DetailGadgetPage = () => {
                 {/* Right column */}
                 <div className="lg:w-1/3">
                     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <div className="flex py-4">
+                        <div className="flex items-center py-4">
                             {product.discountPercentage > 0 ? (
                                 <>
-                                    <div className="mr-2 text-3xl font-bold text-red-600">
+                                    <div className="mr-4 text-3xl font-bold text-red-600">
                                         {product.discountPrice.toLocaleString()}₫
                                     </div>
-                                    <span className="line-through text-gray-500">
+                                    <span className="line-through text-gray-500 mr-4">
                                         {product.price.toLocaleString()}₫
                                     </span>
-                                    <div className='mr-2 text-xl font-bold text-red-600'>
-                                        {`${product.discountPercentage}%`}
+                                    <div className='ml-auto text-sm font-bold px-4 py-2 bg-red-100 text-red-600 rounded-full'>
+                                        (-{`${product.discountPercentage}%`})
                                     </div>
                                 </>
                             ) : (
@@ -343,43 +343,63 @@ const DetailGadgetPage = () => {
                                 </div>
                             )}
                         </div>
-
-                        <div className="space-y-2 mb-6">
+                        {product.isForSale === false && (
+                            <div className="relative">
+                                <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-lg">
+                                    Ngừng kinh doanh
+                                </div>
+                            </div>
+                        )}
+                        <div className={`space-y-2 mb-6 ${product.isForSale === false ? 'opacity-50' : ''}`}>
                             <div className="flex items-center space-x-3 mb-4">
-                                <button
-                                    className="px-2 py-1 bg-gray-200 rounded-md"
-                                    onClick={() => handleQuantityChange('decrement')}
-                                >
-                                    -
-                                </button>
-                                <span className="text-xl font-semibold">{quantity}</span>
-                                <button
-                                    className="px-2 py-1 bg-gray-200 rounded-md"
-                                    onClick={() => handleQuantityChange('increment')}
-                                >
-                                    +
-                                </button>
+                                <div className="text-gray-600">Số lượng:</div>
+                                <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+                                    <button
+                                        className="px-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-200"
+                                        onClick={() => handleQuantityChange('decrement')}
+                                        disabled={product.isForSale === false}
+                                    >
+                                        -
+                                    </button>
+                                    <span className="text-lg font-semibold px-2">{quantity}</span>
+                                    <button
+                                        className="px-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-200"
+                                        onClick={() => handleQuantityChange('increment')}
+                                        disabled={product.isForSale === false}
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
 
                             <button
                                 className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition duration-200"
                                 onClick={handleAddToCart}
+                                disabled={product.isForSale === false}
                             >
                                 Thêm vào giỏ hàng
                             </button>
-                            <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
+                            <button
+                                className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
                                 onClick={handleBuyNow}
+                                disabled={product.isForSale === false}
                             >
                                 Mua ngay
                             </button>
                         </div>
 
                         <h2 className="text-lg font-semibold">Thông tin người bán</h2>
-                        <p>{product.seller?.shopName}</p>
-                        <p>{product.seller?.shopAddress}</p>
+                        <div className="flex">
+                            <InfoCircleFilled />
+                            <p className='p-2'>{product.seller?.shopName}</p>
+                        </div>
+                        <div className="flex">
+                            <HomeFilled />
+                            <p className="p-2">{product.seller?.shopAddress}</p>
+                        </div>
                         <div className="flex">
 
-                            <h2 className="text-lg font-semibold mt-4 ">Brand</h2>
+                            <h2 className="text-lg font-semibold mt-4 ">Thương hiệu</h2>
                             {product.brand?.logoUrl && (
                                 <img src={product.brand.logoUrl} alt={product.brand.name || 'Brand Logo'} className="object-contain w-16 h-16 max-h-20 ml-5" />
                             )}

@@ -126,7 +126,7 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
                         <img
                           src={gadget.thumbnailUrl}
                           alt={gadget.name}
-                          className="w-12 h-12 object-cover rounded"
+                          className="w-12 h-12 object-contain rounded"
                         />
                         <div>
                           <p className="font-semibold">{gadget.name}</p>

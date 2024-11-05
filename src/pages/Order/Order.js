@@ -3,11 +3,12 @@ import { ShoppingCart, CheckCircle, XCircle } from "lucide-react";
 import OrderTable from "./OrderTable";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 import { toast, ToastContainer } from "react-toastify";
+import { PendingOutlined } from "@mui/icons-material";
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [status, setStatus] = useState("Pending");
+  const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -61,24 +62,45 @@ const OrderHistory = () => {
       </h1>
       <ToastContainer />
       <div className="flex space-x-4 mb-6 justify-end">
-        <button
-          onClick={() => handleStatusChange("Pending")}
-          className={`px-4 py-2 rounded ${status === "Pending" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
-        >
-          <ShoppingCart className="inline-block mr-2" /> Đang chờ
-        </button>
-        <button
-          onClick={() => handleStatusChange("Success")}
-          className={`px-4 py-2 rounded ${status === "Success" ? "bg-green-500 text-white" : "bg-gray-100"}`}
-        >
-          <CheckCircle className="inline-block mr-2" /> Thành công
-        </button>
-        <button
-          onClick={() => handleStatusChange("Cancelled")}
-          className={`px-4 py-2 rounded ${status === "Cancelled" ? "bg-red-500 text-white" : "bg-gray-100"}`}
-        >
-          <XCircle className="inline-block mr-2" /> Đã hủy
-        </button>
+        <table className="w-full border-collapse">
+          <tbody>
+            <tr>
+              <td className="px-4 py-2 border">
+                <button
+                  onClick={() => handleStatusChange("")}
+                  className={`w-full px-4 py-2 rounded ${status === "" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
+                >
+                  <ShoppingCart className="inline-block mr-2" /> Tất cả
+                </button>
+              </td>
+              <td className="px-4 py-2 border">
+                <button
+                  onClick={() => handleStatusChange("Pending")}
+                  className={`w-full px-4 py-2 rounded ${status === "Pending" ? "bg-blue-500 text-white" : "bg-gray-100"}`}
+                >
+                  <PendingOutlined className="inline-block mr-2" /> Đang chờ
+                </button>
+              </td>
+              <td className="px-4 py-2 border">
+                <button
+                  onClick={() => handleStatusChange("Success")}
+                  className={`w-full px-4 py-2 rounded ${status === "Success" ? "bg-green-500 text-white" : "bg-gray-100"}`}
+                >
+                  <CheckCircle className="inline-block mr-2" /> Thành công
+                </button>
+              </td>
+              <td className="px-4 py-2 border">
+                <button
+                  onClick={() => handleStatusChange("Cancelled")}
+                  className={`w-full px-4 py-2 rounded ${status === "Cancelled" ? "bg-red-500 text-white" : "bg-gray-100"}`}
+                >
+                  <XCircle className="inline-block mr-2" /> Đã hủy
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
       </div>
 
       {filteredOrders.length === 0 ? (

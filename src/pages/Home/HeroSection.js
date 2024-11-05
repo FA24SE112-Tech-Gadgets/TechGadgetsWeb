@@ -71,7 +71,7 @@ const fetchBrandsForCategories = async (navigate) => {
             `${process.env.REACT_APP_DEV_API || process.env.REACT_APP_PRO_API}/api/gadgets/hot?categoryId=${category.id}`
           );
           hotGadgets = hotGadgetsResponse.data.items || []; // Store hot gadgets
-     
+
 
         } catch (error) {
           console.error(`Error fetching hot gadgets for category ${category.name}`, error);
@@ -219,7 +219,7 @@ const HeroSection = ({ handleOrderPopup }) => {
     };
 
     loadCategories();
-  }, [navigate]);
+  }, []);
 
   const handleMouseEnterCategory = (index) => {
     setHoveredCategory(index);
@@ -319,19 +319,18 @@ const HeroSection = ({ handleOrderPopup }) => {
                   </div>
 
                   {/* Phần tử bên phải */}
-                  <div className="flex-1 min-w-[100px] space-y-4 ml-auto"> {/* Thêm ml-auto để đẩy sang phải */}
+                  <div className="flex-1 min-w-[100px] space-y-4 ml-auto w-full max-w-full overflow-hidden">
                     <h3 className="font-semibold text-gray-600 dark:text-gray-300 mb-4">
-                     Sản phẩm nổi bật
+                      Sản phẩm nổi bật
                     </h3>
                     <div className="grid gap-4">
                       {detail.hotGadgets?.map((gadget, index) => (
-                        
                         <div
                           key={index}
                           className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded"
                           onClick={() => handleBrandClick(gadget.navigate)}
                         >
-                          <div className="font-medium text-sm hover:text-primary">
+                          <div className="font-medium text-sm hover:text-primary truncate">
                             {gadget.name}
                           </div>
                         </div>

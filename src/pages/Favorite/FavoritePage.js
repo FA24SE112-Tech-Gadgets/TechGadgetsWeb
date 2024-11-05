@@ -190,7 +190,7 @@ function FavoritePage() {
                                                         <img
                                                             src={product.thumbnailUrl}
                                                             alt={product.name}
-                                                            className="w-full h-32 object-cover mb-2 rounded"
+                                                            className="w-full h-32 object-contain mb-2 rounded"
                                                         />
                                                         <div className="flex justify-between items-center mb-2 text-indigo-900 dark:text-white">
                                                             <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>

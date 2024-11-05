@@ -27,7 +27,7 @@ const apiBase = process.env.NODE_ENV === "development"
   : process.env.REACT_APP_PRO_API + "/";
 
 const categoryPaths = Object.fromEntries(
-  Object.entries(categoryIds).map(([key, id]) => [key, `${apiBase}api/gadgets/category/${id}?Page=1&PageSize=100`])
+  Object.entries(categoryIds).map(([key, id]) => [key, `${apiBase}api/gadgets/category/${id}?Page=1&PageSize=20`])
 );
 
 export default function ProductPage() {
@@ -90,8 +90,7 @@ export default function ProductPage() {
     };
 
     Object.keys(categoryIds).forEach(fetchCategoryData);
-  }, [isAuthenticated]);
-
+  }, []);
 
   const toggleFavorite = async (gadgetId, isFavorite, setCategory) => {
     if (!isAuthenticated) {
@@ -309,7 +308,7 @@ export default function ProductPage() {
   );
 
   return (
-    <div className="p-6">
+    <div className="p-6 relative">
       <ToastContainer />
       {loading && (
         <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
