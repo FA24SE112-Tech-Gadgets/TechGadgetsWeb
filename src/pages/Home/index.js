@@ -11,6 +11,7 @@ import Popup from "./Popup";
 import Footer from "~/components/layout/Footer";
 import Notifications from "~/Notification/Notification";
 import { onMessageListener, requestForToken } from "~/ultis/firebase";
+import GadgetHistory from "../Gadgets/GadgetHistory";
 
 function Home() {
   const [orderPopup, setOrderPopup] = React.useState(false);
@@ -42,6 +43,7 @@ function Home() {
       <HeroSection handleOrderPopup={handleOrderPopup} />
     
       <Products />
+      <GadgetHistory/>
       <TopProducts handleOrderPopup={handleOrderPopup}/>
       <Banner/>
       <Subscribe/>

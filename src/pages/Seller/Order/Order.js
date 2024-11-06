@@ -9,7 +9,7 @@ import { PendingOutlined } from "@mui/icons-material";
 const OrderHistorySeller = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [status, setStatus] = useState("Pending");
+  const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sortByDate, setSortByDate] = useState('DESC');

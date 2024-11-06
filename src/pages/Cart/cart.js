@@ -215,7 +215,7 @@ const CartPage = () => {
                     quantity: quantity
                 }
             });
-            
+
             // Cập nhật cartItemsBySeller
             setCartItemsBySeller(prev => {
                 const updatedCart = {};
@@ -224,7 +224,7 @@ const CartPage = () => {
                 });
                 return updatedCart;
             });
-    
+
             // Cập nhật selectedItems
             setSelectedItems(prev => {
                 const updatedSelected = { ...prev };
@@ -236,7 +236,7 @@ const CartPage = () => {
                 });
                 return updatedSelected;
             });
-    
+
             toast.success("Xóa sản phẩm khỏi giỏ hàng thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -385,6 +385,7 @@ const CartPage = () => {
                                                         alt={item.gadget.name}
                                                         className="w-20 h-20 object-contain rounded-md"
                                                     />
+
                                                     <div className="flex-grow flex flex-col space-y-2">
                                                         <h4 className="font-bold"
                                                             onClick={() => navigate(`/gadget/detail/${slugify(item.gadget.name)}`, {
@@ -395,6 +396,7 @@ const CartPage = () => {
                                                         >{item.gadget.name}</h4>
                                                         <p>Hãng: {item.gadget.brand.name}</p>
                                                         <p>Loại sản phẩm: {item.gadget.category.name}</p>
+                                                        
                                                         <div className="flex items-center mt-2">
                                                             <p>Đơn giá: </p>
                                                             {item.gadget.discountPercentage > 0 ? (
@@ -413,6 +415,7 @@ const CartPage = () => {
                                                                 </div>
                                                             )}
                                                         </div>
+                                                        
                                                         <div className="flex items-center mt-2">
                                                             <p>Thành tiền: </p>
                                                             <span className="font-semibold text-red-500 ml-2">
@@ -423,6 +426,11 @@ const CartPage = () => {
                                                                 ).toLocaleString()}₫
                                                             </span>
                                                         </div>
+                                                        {item.gadget.isForSale === false && (
+                                                            <div className="text-red-500">
+                                                                Ngừng kinh doanh
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="flex flex-col items-center gap-2">
                                                         <div className="flex items-center gap-2">
@@ -447,7 +455,7 @@ const CartPage = () => {
                                                             onClick={() => handleRemoveItem(item.gadget.id, item.quantity)}
                                                             className="text-red-500 hover:underline"
                                                         >
-                                                            <TrashIcon/>
+                                                            <TrashIcon />
                                                         </button>
                                                     </div>
                                                 </div>

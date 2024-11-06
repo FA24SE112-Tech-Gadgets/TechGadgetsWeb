@@ -65,7 +65,15 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
   }, {});
 
   const hasPendingOrders = orders.some(order => order.status === "Pending");
-
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
   const translateStatus = (status) => {
     switch (status) {
       case "Success":
@@ -131,7 +139,7 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
                         <div>
                           <p className="font-semibold">{gadget.name}</p>
                           <p className="text-gray-600">
-                            {gadget.quantity} x {gadget.price.toLocaleString()}₫
+                            {gadget.quantity} x {gadget.discountPrice.toLocaleString()}₫
                           </p>
                         </div>
                       </div>
@@ -158,7 +166,7 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
 
                   {/* Order Date Column */}
                   <td className="py-2 px-4 border-b text-center">
-                    {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                    {formatDate(order.createdAt)}
                   </td>
 
                   {/* Actions Column */}

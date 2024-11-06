@@ -7,8 +7,6 @@ import Verify from "./pages/SignUp/Verify";
 import LogIn from "./pages/SignIn/LoginPage";
 import FavoritePage from "./pages/Favorite/FavoritePage";
 import ProfilePage from "./pages/Profile/ProfilePage";
-import SearchPage from "./pages/Search/SearchPage";
-import Order from "./pages/Seller/Order";
 import MainLayout from "./components/layout/MainLayout";
 import AuthLayout from "./components/layout/AuthLayout";
 import SellerLayout from "./components/layout/SellerLayout";
@@ -41,6 +39,7 @@ import OrderHistory from "./pages/Order/Order";
 import OrderHistorySeller from "./pages/Seller/Order/Order";
 import SellerTransfer from "./pages/Wallet/SellerTransfer";
 import Review from "./pages/Review/Review";
+import ReviewPage from "./pages/Review/ReviewPage";
 
 
 function App() {
@@ -57,8 +56,8 @@ function App() {
 
       <Route element={<MainLayout />}>
         <Route path='/' element={<Home />} />
-        <Route path='/search' element={<SearchPage />} />
         <Route path='/gadget/detail/:name' element={<DetailGadgetPage />} />
+        <Route path='/gadget/detail/:name/reviews' element={<ReviewPage />} />
         <Route path='/favorite' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>

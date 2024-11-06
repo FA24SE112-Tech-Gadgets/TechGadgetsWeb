@@ -8,6 +8,7 @@ import axios from 'axios';
 import slugify from "~/ultis/config";
 import { Button } from "antd";
 // Image list for the slider
+
 const ImageList = [
   {
     id: 1,
@@ -212,12 +213,13 @@ const HeroSection = ({ handleOrderPopup }) => {
   const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [isHoveringDetails, setIsHoveringDetails] = useState(false);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const loadCategories = async () => {
       const fetchedCategories = await fetchBrandsForCategories(navigate);
       setCategories(fetchedCategories);
     };
-
+setLoading(false);
     loadCategories();
   }, []);
 
@@ -257,7 +259,16 @@ const HeroSection = ({ handleOrderPopup }) => {
     pauseOnHover: false,
     pauseOnFocus: true,
   };
-
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+        <div className="h-4 w-4 bg-white rounded-full"></div>
+      </div>
+      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+        Loading...
+      </span>
+    </div>
+  );
   return (
     <div className="relative overflow-hidden min-h-[800px] sm:min-h-[100px] bg-gray-100 flex dark:bg-gray-950 dark:text-white duration-200 p-5">
       {/* background pattern */}

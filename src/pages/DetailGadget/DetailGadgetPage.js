@@ -6,6 +6,13 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from 'react-toastify';
 import { Breadcrumb } from 'antd';
 import { CheckCircleOutlined, HomeFilled, InfoCircleFilled, LoadingOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import slugify from '~/ultis/config';
+import StarRatings from 'react-star-ratings';
+import { Star } from 'lucide-react';
+import GadgetHistory from '../Gadgets/GadgetHistory';
+import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
+import SuggestGadget from '../Gadgets/GadgetSuggest';
+import GadgetSuggest from '../Gadgets/GadgetSuggest';
 
 
 const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
@@ -140,10 +147,11 @@ const DetailGadgetPage = () => {
     const [product, setProduct] = useState(null);
     const [activeTab, setActiveTab] = useState('specifications');
     const [error, setError] = useState(null);
-
+    const [reviews, setReviews] = useState([]);
     const [quantity, setQuantity] = useState(1);
     const [price, setPrice] = useState(0);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const navigate = useNavigate();
     useEffect(() => {
         const apiClient = isAuthenticated ? AxiosInterceptor : axios;
         const fetchProduct = async () => {
@@ -161,7 +169,17 @@ const DetailGadgetPage = () => {
             }
         };
 
+        const fetchReviews = async () => {
+            try {
+                const response = await AxiosInterceptor.get(`/api/reviews/gadget/${productId}`);
+                setReviews(response.data.items.slice(0, 2)); // Show only the first 2 reviews
+            } catch (error) {
+                toast.error('Failed to fetch reviews');
+            }
+        };
+
         fetchProduct();
+        fetchReviews();
     }, [productId, isAuthenticated, apiBase]);
     const imgRef = useRef(null); // Tạo ref để tham chiếu đến hình ảnh chính
 
@@ -178,6 +196,15 @@ const DetailGadgetPage = () => {
     const handleQuantityChange = (type) => {
         setQuantity(prev => type === 'increment' ? prev + 1 : Math.max(1, prev - 1));
     };
+
+    const handleShowMoreReviews = () => {
+        navigate(`/gadget/detail/${slugify(product.name)}/reviews`, {
+            state: {
+                productId: product.id,
+            },
+        });
+    };
+
 
     const handleAddToCart = async () => {
         const totalPrice = price * quantity;
@@ -210,7 +237,26 @@ const DetailGadgetPage = () => {
     };
 
     const totalPrice = product.price * quantity;
+    const totalReviews = reviews.length;
+    const starCounts = [0, 0, 0, 0, 0];
 
+    reviews.forEach((review) => {
+        starCounts[review.rating - 1]++;
+    });
+
+    const starPercentages = starCounts.map((count) => ((count / totalReviews) * 100).toFixed(2));
+    const averageRating = (reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews).toFixed(1);
+
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <Breadcrumb
@@ -282,7 +328,7 @@ const DetailGadgetPage = () => {
                                         .sort((a, b) => a.index - b.index)
                                         .map((spec) => (
                                             <div key={spec.id}
-                                                className="flex items-start border-b border-gray-200 py-3 last:border-0"
+                                                className="flex items-start text-sm border-b border-gray-200 py-3 last:border-0"
                                             >
                                                 <div className="w-1/3 text-gray-600">
                                                     {spec.specificationKey || 'N/A'}
@@ -307,7 +353,7 @@ const DetailGadgetPage = () => {
                                                     desc.value.endsWith(".png"));
 
                                             return (
-                                                <div key={desc.id} className={desc.type === 'BoldText' ? 'font-bold' : ''}>
+                                                <div key={desc.id} className={desc.type === 'BoldText' ? ' font-bold' : ' text-sx'}>
                                                     {isImageUrl ? (
                                                         <img src={desc.value} alt="Gadget" className="max-w-full h-auto" />
                                                     ) : (
@@ -319,6 +365,83 @@ const DetailGadgetPage = () => {
                             </div>
                         )}
                     </div>
+                    <div className="mt-7 ">
+                        <h2 className="text-sm font-bold mb-4 text-center">Đánh giá sản phẩm {product.name}</h2>
+                        {reviews.length === 0 ? (
+                            <p></p>
+                        ) : (
+                            <div className="mb-6 w-full flex ">
+                                <div className="w-full max-w-md">
+                                    {/* Average rating with stars */}
+                                    <div className="flex items-center mb-4 justify-center">
+                                        <span className="text-xl font-bold text-orange-500">{averageRating}</span>
+                                        <div className="ml-2 flex">
+                                            <StarRatings
+                                                rating={parseFloat(averageRating)}
+                                                starRatedColor="orange"
+                                                numberOfStars={5}
+                                                starDimension="24px"
+                                                starSpacing="2px"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Star rating breakdown */}
+                                    <div className="space-y-2">
+                                        {starCounts.map((count, index) => (
+                                            <div key={index} className="flex items-center">
+                                                <span className="w-8 text-right">{5 - index}</span>
+                                                <Star size={16} className="text-gray-400 ml-2" />
+                                                <div className="flex-1 mx-2 h-3 bg-gray-200 rounded">
+                                                    <div
+                                                        className="h-3 bg-orange-500 rounded"
+                                                        style={{ width: `${Math.floor(starPercentages[5 - index - 1])}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="w-12 text-right">{Math.floor(starPercentages[5 - index - 1])}%</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="mt-8">
+                            {reviews.length > 0 ? (
+                                reviews.map((review) => (
+                                    <div key={review.id} className="mb-4 p-4 border rounded-lg">
+                                        <div className="flex items-center mb-2">
+                                            <img
+                                                src={review.customer.avatarUrl || '/default-avatar.png'}
+                                                alt={review.customer.fullName}
+                                                className="w-10 h-10 rounded-full mr-2"
+                                            />
+                                            <div>
+                                                <p className="font-semibold text-sm">{review.customer.fullName}</p>
+                                                <p className="text-sm text-gray-500">
+                                                    {formatDate(review.createdAt)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center mb-2">
+                                            <span className="text-yellow-500">{'★'.repeat(review.rating)}</span>
+                                            <span className="text-gray-400">{'★'.repeat(5 - review.rating)}</span>
+                                        </div>
+                                        <p className="text-xs">{review.content}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center">
+                                    <p className="text-sx">Nếu đã mua sản phẩm này tại TechGadget. Hãy đánh giá ngay để giúp hàng ngàn người chọn mua hàng tốt nhất bạn nhé! </p>
+                                </div>
+                            )}
+                            {reviews.length > 1 && (
+                                <button onClick={handleShowMoreReviews} className="text-primary mt-4 text-center">
+                                    Xem tất cả
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Right column */}
@@ -326,17 +449,22 @@ const DetailGadgetPage = () => {
                     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                         <div className="flex items-center py-4">
                             {product.discountPercentage > 0 ? (
-                                <>
-                                    <div className="mr-4 text-3xl font-bold text-red-600">
-                                        {product.discountPrice.toLocaleString()}₫
+                                <div className="flex flex-col w-full">
+                                    <div className="flex items-center">
+                                        <div className="text-3xl font-bold text-red-600">
+                                            {product.discountPrice.toLocaleString()}₫
+                                        </div>
+                                        <span className="line-through text-gray-500 ml-4">
+                                            {product.price.toLocaleString()}₫
+                                        </span>
+                                        <div className="ml-auto text-sm font-bold px-4 py-2 bg-red-100 text-red-600 rounded-full">
+                                            -{product.discountPercentage}%
+                                        </div>
                                     </div>
-                                    <span className="line-through text-gray-500 mr-4">
-                                        {product.price.toLocaleString()}₫
-                                    </span>
-                                    <div className='ml-auto text-sm font-bold px-4 py-2 bg-red-100 text-red-600 rounded-full'>
-                                        (-{`${product.discountPercentage}%`})
+                                    <div className="mt-2 text-sm text-gray-500">
+                                        Ưu đãi đến: {formatDate(product.discountExpiredDate)}
                                     </div>
-                                </>
+                                </div>
                             ) : (
                                 <div className="text-gray-800 font-semibold text-3xl">
                                     {product.price.toLocaleString()}₫
@@ -406,8 +534,13 @@ const DetailGadgetPage = () => {
                         </div>
 
                     </div>
+                    <GadgetHistoryDetail />
                 </div>
             </div>
+
+            {/* Reviews */}
+
+            <GadgetSuggest />
             {showConfirmation && (
                 <OrderConfirmation
                     product={product}

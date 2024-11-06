@@ -172,7 +172,7 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+       
         return (
             <div className="mt-4">
                 {/* Pagination Controls */}
@@ -210,7 +210,15 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
         </div>
     );
     if (error) return <div className="text-center mt-8 text-red-600">{error}</div>;
-
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleString('vi-VN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      };
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full bg-white border-2 border-gray-200  table-fixed">
@@ -248,7 +256,7 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
                                 </td>
 
                                 <td className="py-2 px-4 border-b text-center text-sm">
-                                    {order.createdAt && new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                                {formatDate(order.createdAt)}
                                 </td>
                                 <td>
                                     <button
@@ -354,7 +362,7 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
                                         <DateRangeOutlined className="mr-2 text-primary/80 text-sm" />
 
 
-                                        <p className="text-gray-700 dark:text-gray-300">Ngày tạo đơn hàng: {new Date(orderInfo.sellerOrderCreatedAt).toLocaleString()}</p>
+                                        <p className="text-gray-700 dark:text-gray-300">Ngày tạo đơn hàng:  {formatDate(orderInfo.sellerOrderCreatedAt)}</p>
                                     </div>
                                 </div>
                             </div>

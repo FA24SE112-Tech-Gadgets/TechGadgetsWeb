@@ -59,6 +59,9 @@ const Review = () => {
   return (
     <div className="container mx-auto p-4">
       <ToastContainer />
+      <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
+          Đánh giá của bạn
+      </h1>
       <div className="flex justify-between items-center mb-6">
         <div className="mb-4">
           <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-3">Sắp xếp theo ngày</label>
