@@ -296,12 +296,12 @@ const DetailGadgetPage = () => {
                         {product.gadgetImages && product.gadgetImages.map((image, index) => (
                             <img
                                 key={index}
-                                src={image}
+                                src={image.imageUrl}
                                 alt={`${product.name} - Image ${index + 1}`}
                                 width={100}
                                 height={100}
                                 className="rounded-md border border-gray-200 cursor-pointer"
-                                onClick={() => handleImageClick(image)}
+                                onClick={() => handleImageClick(image.imageUrl)}
                             />
                         ))}
                     </div>
