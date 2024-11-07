@@ -40,6 +40,7 @@ import OrderHistorySeller from "./pages/Seller/Order/Order";
 import SellerTransfer from "./pages/Wallet/SellerTransfer";
 import Review from "./pages/Review/Review";
 import ReviewPage from "./pages/Review/ReviewPage";
+import NaturalLanguageSearch from "./pages/AiSearch/NaturalLanguageSearch";
 
 
 function App() {
@@ -84,6 +85,8 @@ function App() {
         } />
         {/* <Route path="/gadgets/:category/:categoryId/:brand/:brandId" element={<BrandGadgetPage />} /> */}
 
+
+
         <Route path="/gadgets/:category/:brand" element={<BrandGadgetPage />} />
         <Route path="/gadgets/:category/" element={<CategoryGadgetPage />} />
         <Route path='/profile' element={
@@ -120,7 +123,8 @@ function App() {
         } />
 
       </Route>
-
+      {/* Search by AI */}
+      <Route path="/search-by-natural-language" element={<NaturalLanguageSearch />} />
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
         <Route path='/seller/Order-management' element={<OrderHistorySeller />} />

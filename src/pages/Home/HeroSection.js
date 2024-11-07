@@ -47,13 +47,12 @@ const fetchBrandsForCategories = async (navigate) => {
       categoriesData.map(async (category) => {
         const brands = [];
         let page = 1;
-        const pageSize = 1; // Giả sử số lượng item mỗi trang là 50
         let hasNextPage = true;
 
         while (hasNextPage) {
           try {
             const brandsResponse = await axios.get(
-              `${process.env.REACT_APP_DEV_API || process.env.REACT_APP_PRO_API}/api/brands/categories/${category.id}?page=${page}&pageSize=${pageSize}`
+              `${process.env.REACT_APP_DEV_API || process.env.REACT_APP_PRO_API}/api/brands/categories/${category.id}?page=${page}&pageSize=20`
             );
 
             const brandsPage = brandsResponse.data.items || [];
@@ -218,11 +217,20 @@ const HeroSection = ({ handleOrderPopup }) => {
     const loadCategories = async () => {
       const fetchedCategories = await fetchBrandsForCategories(navigate);
       setCategories(fetchedCategories);
+      setLoading(false);
     };
-setLoading(false);
     loadCategories();
   }, []);
-
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+        <div className="h-4 w-4 bg-white rounded-full"></div>
+      </div>
+      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+        Loading...
+      </span>
+    </div>
+  );
   const handleMouseEnterCategory = (index) => {
     setHoveredCategory(index);
     setIsHoveringDetails(true);

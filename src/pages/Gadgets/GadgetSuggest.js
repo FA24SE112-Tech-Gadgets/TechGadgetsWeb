@@ -64,7 +64,7 @@ const SuggestGadget = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-bold mb-4">Sản phẩm gợi ý</h1>
+      <h1 className="text-2xl font-bold mb-4">Gợi ý sản phẩm cho bạn</h1>
       <ToastContainer />
       <div className="relative group">
         <Swiper
