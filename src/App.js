@@ -41,6 +41,7 @@ import SellerTransfer from "./pages/Wallet/SellerTransfer";
 import Review from "./pages/Review/Review";
 import ReviewPage from "./pages/Review/ReviewPage";
 import NaturalLanguageSearch from "./pages/AiSearch/NaturalLanguageSearch";
+import ReviewSeller from "./pages/Seller/Review/ReviewSeller";
 
 
 function App() {
@@ -134,6 +135,9 @@ function App() {
         <Route path='/seller/transaction-history' element={<SellerTransfer />} />
       </Route>
 
+      <Route element={<SellerLayout />}>
+        <Route path='/seller/manage-reviews-gadgets' element={<ReviewSeller />} />
+      </Route>
 
       <Route path="/sellerProfile" element={
         <AuthRoute>

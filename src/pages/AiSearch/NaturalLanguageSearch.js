@@ -5,6 +5,10 @@ import GadgetSearchHistory from './GadgetSearchHistory';
 import Logo from "~/assets/logo.png";
 import { useNavigate } from 'react-router-dom';
 import slugify from '~/ultis/config';
+import { CiHeart } from 'react-icons/ci';
+import { toast, ToastContainer } from 'react-toastify';
+import { LoadingOutlined, SendOutlined } from '@ant-design/icons';
+import { FaCircle, FaDotCircle } from 'react-icons/fa';
 const NaturalLanguageSearch = () => {
     const [searchText, setSearchText] = useState('');
     const [gadgets, setGadgets] = useState([]);
@@ -13,6 +17,7 @@ const NaturalLanguageSearch = () => {
     const itemsPerPage = 8;
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+
     const fetchGadgets = async () => {
         setLoading(true);
         try {
@@ -64,10 +69,23 @@ const NaturalLanguageSearch = () => {
     const totalPages = Math.ceil(gadgets.length / itemsPerPage);
     const displayedGadgets = gadgets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+    const toggleFavorite = async (gadgetId, isFavorite) => {
+        try {
+            await AxiosInterceptor.post(`/api/favorite-gadgets/${gadgetId}`);
+            setGadgets((prevProducts) =>
+                prevProducts.map((product) =>
+                    product.id === gadgetId ? { ...product, isFavorite: !isFavorite } : product
+                )
+            );
+        } catch (error) {
+            console.error("Error toggling favorite status:", error);
+            toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+        }
+    };
     return (
         <div className="flex h-screen relative z-0">
             <GadgetSearchHistory />
-
+            <ToastContainer />
             <div className=" flex flex-col flex-grow overflow-hiddden ">
                 {/* Product List Section */}
                 <div className="flex-grow  p-4">
@@ -89,7 +107,7 @@ const NaturalLanguageSearch = () => {
                                     <div
                                         key={gadget.id}
                                         onClick={() => handleProductClick(gadget)}
-                                        className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105  hover:border-primary/50 h-[220px]">
+                                        className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105 hover:border-primary/50 h-[250px]">
                                         {gadget.discountPercentage > 0 && (
                                             <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md">
                                                 Giảm {`${gadget.discountPercentage}%`}
@@ -100,7 +118,7 @@ const NaturalLanguageSearch = () => {
                                                 Ngừng kinh doanh
                                             </div>
                                         )}
-                                        <div className="p-2">
+                                        <div className="p-2 flex flex-col flex-grow">
                                             <img
                                                 src={gadget.thumbnailUrl}
                                                 alt={gadget.name}
@@ -113,7 +131,7 @@ const NaturalLanguageSearch = () => {
                                                         <div className="text-red-500 font-semibold text-sm mr-2">
                                                             {gadget.discountPrice.toLocaleString()}₫
                                                         </div>
-                                                        <span className="line-through text-gray-500">
+                                                        <span className="line-through text-gray-500 text-xs">
                                                             {gadget.price.toLocaleString()}₫
                                                         </span>
                                                     </>
@@ -122,6 +140,31 @@ const NaturalLanguageSearch = () => {
                                                         {gadget.price.toLocaleString()}₫
                                                     </div>
                                                 )}
+                                            </div>
+                                        </div>
+                                        <div className="absolute bottom-2 right-1 flex items-center">
+                                            <div className='w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500'>
+                                                <span className="mr-2">Yêu thích</span>
+                                                <span
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleFavorite(gadget.id, gadget.isFavorite);
+                                                    }}
+                                                    className="cursor-pointer flex items-center"
+                                                >
+                                                    {gadget.isFavorite ? (
+                                                        <svg
+                                                            className="h-8 w-5 text-red-500"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24"
+                                                            fill="currentColor"
+                                                        >
+                                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                                        </svg>
+                                                    ) : (
+                                                        <CiHeart className="h-8 w-5 text-gray-500" />
+                                                    )}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -133,18 +176,18 @@ const NaturalLanguageSearch = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex items-center justify-between p-2  bg-white">
+                <div className="flex items-center justify-between p-1 bg-white border-t">
                     <button
                         onClick={() => handlePageChange('prev')}
                         disabled={currentPage === 1}
-                        className="flex items-center gap-1 px-3 py-2 bg-gray-200 text-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1 px-3 py-2  bg-gray-200 text-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <ChevronLeft className="w-4 h-4" /> Trước
                     </button>
 
-                    <span className="text-gray-600">
+                    {/* <span className="text-gray-600">
                         Trang {currentPage} / {totalPages}
-                    </span>
+                    </span> */}
 
                     <button
                         onClick={() => handlePageChange('next')}
@@ -163,10 +206,10 @@ const NaturalLanguageSearch = () => {
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                             onKeyDown={handleKeyPress}
-                            className="w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-primary-500"
+                            className="w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-primary/80 "
                         />
                         <button onClick={handleSearch} className="ml-2 p-2 bg-primary-500 text-gray rounded-md hover:bg-primary-600">
-                            <Search className="w-5 h-5 text-black" />
+                            {loading ? <LoadingOutlined className="w-5 h-5 text-primary/80" /> : <SendOutlined className="w-5 h-5 text-primary/80" />}
                         </button>
                     </div>
                 </div>

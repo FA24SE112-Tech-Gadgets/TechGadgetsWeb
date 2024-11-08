@@ -142,7 +142,8 @@ const ReviewPage = () => {
       </div>
       {reviews.length > 0 ? (
         reviews.map((review) => (
-          <div key={review.id} className="mb-4 p-4 border rounded-lg">
+          <div key={review.id}
+           className="mb-4 p-4 border rounded-lg">
             <div className="flex items-center mb-2">
               <img src={review.customer.avatarUrl || '/default-avatar.png'} alt={review.customer.fullName} className="w-10 h-10 rounded-full mr-2" />
               <div>
@@ -155,6 +156,15 @@ const ReviewPage = () => {
               <span className="text-gray-400">{'★'.repeat(5 - review.rating)}</span>
             </div>
             <p>{review.content}</p>
+            {review.sellerReply && (
+              <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
+                  <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
+                <div>
+                  <p className="text-gray-700">{review.sellerReply.content}</p>
+                </div>
+              </div>
+            )}
           </div>
         ))
       ) : (

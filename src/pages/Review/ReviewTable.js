@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 import StarRatings from 'react-star-ratings';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { AliwangwangOutlined, ArrowRightOutlined, SendOutlined } from '@ant-design/icons';
+import slugify from '~/ultis/config';
+import { useNavigate } from 'react-router-dom';
 
 const ReviewTable = ({ orders, onOrderStatusChanged }) => {
   const [showModal, setShowModal] = useState(false);
@@ -11,7 +13,9 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [ratings, setRatings] = useState({});
   const [contents, setContents] = useState({});
-
+  const [sellerReplies, setSellerReplies] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const handleOpenModal = (order, isEdit = false) => {
     setCurrentOrder(order);
     setRatings((prev) => ({
@@ -21,6 +25,10 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
     setContents((prev) => (prev[order.id] ? prev : {
       ...prev,
       [order.id]: order.review ? order.review.content : '',
+    }));
+    setSellerReplies((prev) => (prev[order.id] ? prev : {
+      ...prev,
+      [order.id]: order.review.sellerReply ? order.review.sellerReply.content : '',
     }));
     setIsEditing(isEdit);
     setShowModal(true);
@@ -45,6 +53,7 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
       [orderId]: newContent,
     }));
   };
+
 
   const handleSubmitReview = async (order) => {
     const rating = ratings[order.sellerOrderItemId] || 0;
@@ -111,46 +120,65 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
       minute: '2-digit',
     });
   };
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(orders.length / itemsPerPage);
+  const navigate = useNavigate();
+  const handleChangePage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
 
   return (
-    <div className="flex flex-col gap-4">
-      {orders.map((order) => (
-        <div key={order.id} className="bg-white p-4 rounded-lg shadow-md flex relative">
+<div className="container max-w-6xl mx-auto p-4 flex flex-col gap-4">
+      {currentOrders.map((order) => (
+        <div key={order.id}
+          onClick={() => navigate(`/gadget/detail/${slugify(order.name)}`, {
+            state: {
+              productId: order.gadgetId,
+            }
+          })}
+          className="bg-white p-4 rounded-lg shadow-md flex relative">
           <img src={order.thumbnailUrl} alt={order.name} className="w-24 h-24 object-contain rounded mr-4" />
           <div className="flex-1">
             <h3 className="text-lg font-semibold mb-2">{order.name}</h3>
             {order.review === null ? (
-              <div>
-                <StarRatings
-                  rating={ratings[order.sellerOrderItemId] || 0}
-                  starRatedColor="#ffd700"
-                  changeRating={(newRating) => handleRatingChange(order.sellerOrderItemId, newRating)}
-                  numberOfStars={5}
-                  starDimension="20px"
-                  starSpacing="2px"
-                />
-                <div className="flex items-start">
-                <AliwangwangOutlined />
-                  <div className="relative w-full h-10">
-                    <textarea
-                      value={contents[order.sellerOrderItemId] || ''}
-                      onChange={(e) => handleContentChange(order.sellerOrderItemId, e.target.value)}
-                      className="w-full h-8 overflow-hidden px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary mt-2 resize-none"
-                      rows={4} // Adjust number of rows as needed
-                      placeholder="Enter your review..."
+              <div
+              onClick={(e) => e.stopPropagation()}
+              > 
+                    <StarRatings
+                      rating={ratings[order.sellerOrderItemId] || 0}
+                      starRatedColor="#ffd700"
+                      changeRating={(newRating) => handleRatingChange(order.sellerOrderItemId, newRating)}
+                      numberOfStars={5}
+                      starDimension="20px"
+                      starSpacing="2px"
+                     
                     />
-                    <button
-                      onClick={() => handleSubmitReview(order)}
-                      className="absolute top-4 right-3 text-primary bg-transparent hover:text-secondary/80"
-                    >
-                      <SendOutlined  className="text-lg" />
-                    </button>
-                  </div>
-                </div>
-
+                    <div className="flex items-start">
+                      <AliwangwangOutlined />
+                      <div className="relative w-full h-10">
+                        <textarea
+                          value={contents[order.sellerOrderItemId] || ''}
+                          onChange={(e) => handleContentChange(order.sellerOrderItemId, e.target.value)}
+                          className="w-full h-8 overflow-hidden px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary mt-2 resize-none"
+                          rows={4} // Adjust number of rows as needed
+                          placeholder="Enter your review..."
+                         
+                        />
+                        <button
+                          onClick={() => handleSubmitReview(order)}
+                          className="absolute top-4 right-3 text-primary bg-transparent hover:text-secondary/80"
+                        >
+                          <SendOutlined className="text-lg" />
+                        </button>
+                      </div>
+                    </div>
               </div>
             ) : (
-              <div>
+              <div  onClick={(e) => e.stopPropagation()}>
                 <StarRatings
                   rating={order.review.rating}
                   starRatedColor="#ffd700"
@@ -165,10 +193,33 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
                 </button>
               </div>
             )}
+            {/* Seller Reply Section */}
+            {order.review && order.review.sellerReply && (
+                <div className=" bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
+                  <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
+                <div>
+                  <p className="text-gray-700">{order.review.sellerReply.content}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ))}
-
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-4">
+        <nav className="flex items-center space-x-2">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => handleChangePage(i + 1)}
+              className={`px-4 py-2 rounded-md ${i + 1 === currentPage ? 'bg-primary/70 text-white' : 'bg-gray-200 text-gray-700'}`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </nav>
+      </div>
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-[500px]">

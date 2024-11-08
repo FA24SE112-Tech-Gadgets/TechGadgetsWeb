@@ -173,6 +173,8 @@ const DetailGadgetPage = () => {
             try {
                 const response = await AxiosInterceptor.get(`/api/reviews/gadget/${productId}`);
                 setReviews(response.data.items.slice(0, 2)); // Show only the first 2 reviews
+                console.log("Reviews:", response.data.items);
+
             } catch (error) {
                 toast.error('Failed to fetch reviews');
             }
@@ -405,34 +407,40 @@ const DetailGadgetPage = () => {
                                 </div>
                             </div>
                         )}
-
                         <div className="mt-8">
                             {reviews.length > 0 ? (
                                 reviews.map((review) => (
-                                    <div key={review.id} className="mb-4 p-4 border rounded-lg">
-                                        <div className="flex items-center mb-2">
+                                    <div key={review.id} className="mb-6 p-6 border border-gray-200 rounded-lg shadow-sm">
+                                        <div className="flex items-center mb-4">
                                             <img
                                                 src={review.customer.avatarUrl || '/default-avatar.png'}
                                                 alt={review.customer.fullName}
-                                                className="w-10 h-10 rounded-full mr-2"
+                                                className="w-12 h-12 rounded-full mr-4"
                                             />
                                             <div>
-                                                <p className="font-semibold text-sm">{review.customer.fullName}</p>
-                                                <p className="text-sm text-gray-500">
-                                                    {formatDate(review.createdAt)}
-                                                </p>
+                                                <p className="font-semibold text-base">{review.customer.fullName}</p>
+                                                <p className="text-sm text-gray-500">{formatDate(review.createdAt)}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center mb-2">
-                                            <span className="text-yellow-500">{'★'.repeat(review.rating)}</span>
-                                            <span className="text-gray-400">{'★'.repeat(5 - review.rating)}</span>
+                                        <div className="flex items-center mb-4">
+                                            <span className="text-yellow-500 text-lg">{'★'.repeat(review.rating)}</span>
+                                            <span className="text-gray-300 text-lg">{'★'.repeat(5 - review.rating)}</span>
                                         </div>
-                                        <p className="text-xs">{review.content}</p>
+                                        <p className="text-sm text-gray-700 mb-4">{review.content}</p>
+                                        {review.sellerReply && (
+                                            <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
+                                                <div>
+                                                    <p className="text-gray-700">{review.sellerReply.content}</p>
+                                                    <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))
                             ) : (
                                 <div className="text-center">
-                                    <p className="text-sx">Nếu đã mua sản phẩm này tại TechGadget. Hãy đánh giá ngay để giúp hàng ngàn người chọn mua hàng tốt nhất bạn nhé! </p>
+                                    <p className="text-sm">Nếu đã mua sản phẩm này tại TechGadget. Hãy đánh giá ngay để giúp hàng ngàn người chọn mua hàng tốt nhất bạn nhé!</p>
                                 </div>
                             )}
                             {reviews.length > 1 && (

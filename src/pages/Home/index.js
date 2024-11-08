@@ -13,11 +13,12 @@ import Notifications from "~/Notification/Notification";
 import { onMessageListener, requestForToken } from "~/ultis/firebase";
 import GadgetHistory from "../Gadgets/GadgetHistory";
 import AiFeature from "./AiFeature";
+import useAuth from "~/context/auth/useAuth";
 
 function Home() {
   const [orderPopup, setOrderPopup] = React.useState(false);
   const [deviceToken, setDeviceToken] = React.useState(null);
-
+const{isAuthenticated}=useAuth();
   const handleOrderPopup = () => {
     setOrderPopup(!orderPopup);
   };
@@ -42,9 +43,11 @@ function Home() {
   return (
     <div className="bg-white dark:bg-gray-900 dark:text-white duration-200">
       <HeroSection handleOrderPopup={handleOrderPopup} />
-      <AiFeature />
+      
+      {isAuthenticated && <AiFeature />}
+
       <Products />
-      <GadgetHistory />
+      {isAuthenticated && <GadgetHistory />}
       <TopProducts handleOrderPopup={handleOrderPopup} />
       <Banner />
       <Subscribe />
