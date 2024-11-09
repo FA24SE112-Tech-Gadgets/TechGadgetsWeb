@@ -42,6 +42,8 @@ import Review from "./pages/Review/Review";
 import ReviewPage from "./pages/Review/ReviewPage";
 import NaturalLanguageSearch from "./pages/AiSearch/NaturalLanguageSearch";
 import ReviewSeller from "./pages/Seller/Review/ReviewSeller";
+import OrderDetail from "./pages/Order/OrderDetail";
+import OrderDetailSeller from "./pages/Seller/Order/OrderDetailSeller";
 
 
 function App() {
@@ -60,6 +62,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/gadget/detail/:name' element={<DetailGadgetPage />} />
         <Route path='/gadget/detail/:name/reviews' element={<ReviewPage />} />
+       <Route path='/order/detail/:orderId' element={<OrderDetail />} />
         <Route path='/favorite' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
@@ -137,6 +140,10 @@ function App() {
 
       <Route element={<SellerLayout />}>
         <Route path='/seller/manage-reviews-gadgets' element={<ReviewSeller />} />
+      </Route>
+
+      <Route element={<SellerLayout />}>
+        <Route path='/order/detail-seller/:orderId' element={<OrderDetailSeller />} />
       </Route>
 
       <Route path="/sellerProfile" element={

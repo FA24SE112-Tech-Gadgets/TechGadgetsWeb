@@ -11,10 +11,10 @@ const OrderHistory = () => {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [sortByDate, setSortByDate] = useState('DESC');
   const fetchOrders = async (pageNumber = 1, statusFilter = status) => {
     try {
-      const response = await AxiosInterceptor.get(`/api/seller-orders`, {
+      const response = await AxiosInterceptor.get(`/api/seller-orders?SortByDate=${sortByDate}`, {
         params: { Page: pageNumber, PageSize: 100, Status: statusFilter },
       });
 
@@ -22,6 +22,8 @@ const OrderHistory = () => {
 
       setOrders(items);
       setTotalPages(Math.ceil(totalCount / 10));
+      console.log("data", items);
+      
     } catch (error) {
       if (error.response && error.response.data && error.response.data.reasons) {
         const reasons = error.response.data.reasons;
@@ -37,7 +39,8 @@ const OrderHistory = () => {
 
   useEffect(() => {
     fetchOrders(page, status);
-  }, [page, status]);
+  }, [page, status, sortByDate]);
+
 
   useEffect(() => {
     setFilteredOrders(orders);
@@ -60,6 +63,21 @@ const OrderHistory = () => {
       <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
         Đơn hàng của bạn
       </h1>
+      <div className="mb-4">
+          <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-3">Sắp xếp theo ngày</label>
+          <select
+            id="sort-by-date"
+            value={sortByDate}
+            onChange={(e) => {
+              setSortByDate(e.target.value);
+              setPage(1);
+            }}
+            className="w-full sm:w-[180px] px-1 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
+          >
+            <option value="DESC">Mới nhất</option>
+            <option value="ASC">Cũ nhất</option>
+          </select>
+        </div>
       <ToastContainer />
       <div className="flex space-x-4 mb-6 justify-end">
         <table className="w-full border-collapse">

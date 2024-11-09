@@ -336,7 +336,7 @@ const DetailGadgetPage = () => {
                                                     {spec.specificationKey || 'N/A'}
                                                 </div>
                                                 <div className="w-2/3 font-medium text-gray-900">
-                                                    {spec.value || 'N/A'}
+                                                    {spec.value || 'N/A'} {spec.specificationUnit || ''}
                                                 </div>
                                             </div>
                                         ))
