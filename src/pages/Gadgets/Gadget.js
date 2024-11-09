@@ -143,14 +143,14 @@ const fetchBrandProducts = async () => {
                 )}
                 {product.isForSale === false && (
                   <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
-                    Ngường kinh doanh
+                    Ngừng kinh doanh
                   </div>
                 )}
                 <div className="p-2">
                   <img
                     src={product.thumbnailUrl}
                     alt={product.name}
-                    className="w-full h-32 object-cover mb-2 rounded"
+                    className="w-full h-32 object-contain mb-2 rounded"
                   />
                   <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
                   <div className="flex py-4">

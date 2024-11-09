@@ -8,6 +8,7 @@ import axios from 'axios';
 import slugify from "~/ultis/config";
 import { Button } from "antd";
 // Image list for the slider
+
 const ImageList = [
   {
     id: 1,
@@ -46,13 +47,12 @@ const fetchBrandsForCategories = async (navigate) => {
       categoriesData.map(async (category) => {
         const brands = [];
         let page = 1;
-        const pageSize = 1; // Giả sử số lượng item mỗi trang là 50
         let hasNextPage = true;
 
         while (hasNextPage) {
           try {
             const brandsResponse = await axios.get(
-              `${process.env.REACT_APP_DEV_API || process.env.REACT_APP_PRO_API}/api/brands/categories/${category.id}?page=${page}&pageSize=${pageSize}`
+              `${process.env.REACT_APP_DEV_API || process.env.REACT_APP_PRO_API}/api/brands/categories/${category.id}?page=${page}&pageSize=20`
             );
 
             const brandsPage = brandsResponse.data.items || [];
@@ -71,7 +71,7 @@ const fetchBrandsForCategories = async (navigate) => {
             `${process.env.REACT_APP_DEV_API || process.env.REACT_APP_PRO_API}/api/gadgets/hot?categoryId=${category.id}`
           );
           hotGadgets = hotGadgetsResponse.data.items || []; // Store hot gadgets
-     
+
 
         } catch (error) {
           console.error(`Error fetching hot gadgets for category ${category.name}`, error);
@@ -212,15 +212,25 @@ const HeroSection = ({ handleOrderPopup }) => {
   const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [isHoveringDetails, setIsHoveringDetails] = useState(false);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const loadCategories = async () => {
       const fetchedCategories = await fetchBrandsForCategories(navigate);
       setCategories(fetchedCategories);
+      setLoading(false);
     };
-
     loadCategories();
-  }, [navigate]);
-
+  }, []);
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+        <div className="h-4 w-4 bg-white rounded-full"></div>
+      </div>
+      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+        Loading...
+      </span>
+    </div>
+  );
   const handleMouseEnterCategory = (index) => {
     setHoveredCategory(index);
     setIsHoveringDetails(true);
@@ -257,7 +267,16 @@ const HeroSection = ({ handleOrderPopup }) => {
     pauseOnHover: false,
     pauseOnFocus: true,
   };
-
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+        <div className="h-4 w-4 bg-white rounded-full"></div>
+      </div>
+      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+        Loading...
+      </span>
+    </div>
+  );
   return (
     <div className="relative overflow-hidden min-h-[800px] sm:min-h-[100px] bg-gray-100 flex dark:bg-gray-950 dark:text-white duration-200 p-5">
       {/* background pattern */}
@@ -319,19 +338,18 @@ const HeroSection = ({ handleOrderPopup }) => {
                   </div>
 
                   {/* Phần tử bên phải */}
-                  <div className="flex-1 min-w-[100px] space-y-4 ml-auto"> {/* Thêm ml-auto để đẩy sang phải */}
+                  <div className="flex-1 min-w-[100px] space-y-4 ml-auto w-full max-w-full overflow-hidden">
                     <h3 className="font-semibold text-gray-600 dark:text-gray-300 mb-4">
-                     Sản phẩm nổi bật
+                      Sản phẩm nổi bật
                     </h3>
                     <div className="grid gap-4">
                       {detail.hotGadgets?.map((gadget, index) => (
-                        
                         <div
                           key={index}
                           className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded"
                           onClick={() => handleBrandClick(gadget.navigate)}
                         >
-                          <div className="font-medium text-sm hover:text-primary">
+                          <div className="font-medium text-sm hover:text-primary truncate">
                             {gadget.name}
                           </div>
                         </div>

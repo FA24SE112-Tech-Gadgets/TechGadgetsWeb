@@ -11,11 +11,14 @@ import Popup from "./Popup";
 import Footer from "~/components/layout/Footer";
 import Notifications from "~/Notification/Notification";
 import { onMessageListener, requestForToken } from "~/ultis/firebase";
+import GadgetHistory from "../Gadgets/GadgetHistory";
+import AiFeature from "./AiFeature";
+import useAuth from "~/context/auth/useAuth";
 
 function Home() {
   const [orderPopup, setOrderPopup] = React.useState(false);
   const [deviceToken, setDeviceToken] = React.useState(null);
-
+const{isAuthenticated}=useAuth();
   const handleOrderPopup = () => {
     setOrderPopup(!orderPopup);
   };
@@ -30,23 +33,26 @@ function Home() {
   }, []);
   useEffect(() => { // Yêu cầu quyền nhận thông báo và lấy token     
     onMessageListener()
-    .then((payload) => {
-      console.log("Foreground notification received: ", payload); // Bạn có thể hiển thị thông báo hoặc xử lý payload tại đây 
-      alert(`New notification: ${payload.notification.title} - ${payload.notification.body}`);
-    })
-    .catch((err) => console.log("Failed to receive message: ", err));
+      .then((payload) => {
+        console.log("Foreground notification received: ", payload); // Bạn có thể hiển thị thông báo hoặc xử lý payload tại đây 
+        alert(`New notification: ${payload.notification.title} - ${payload.notification.body}`);
+      })
+      .catch((err) => console.log("Failed to receive message: ", err));
   }, []);
-    
+
   return (
     <div className="bg-white dark:bg-gray-900 dark:text-white duration-200">
       <HeroSection handleOrderPopup={handleOrderPopup} />
-    
+      
+      {isAuthenticated && <AiFeature />}
+
       <Products />
-      <TopProducts handleOrderPopup={handleOrderPopup}/>
-      <Banner/>
-      <Subscribe/>
-      <Testimonials/>
-      <Footer/>
+      {isAuthenticated && <GadgetHistory />}
+      <TopProducts handleOrderPopup={handleOrderPopup} />
+      <Banner />
+      <Subscribe />
+      <Testimonials />
+      <Footer />
       <Popup orderPopup={orderPopup} setOrderPopup={setOrderPopup} />
     </div>
   )

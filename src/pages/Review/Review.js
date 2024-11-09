@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { ShoppingCart, CheckCircle, XCircle } from "lucide-react";
-
+import { ShoppingCart, CheckCircle } from "lucide-react";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 import { toast, ToastContainer } from "react-toastify";
-import OrderTableSeller from "./OrderTable";
-import { PendingOutlined } from "@mui/icons-material";
+import ReviewTable from "./ReviewTable";
 
-const OrderHistorySeller = () => {
+const Review = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("NotReview");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sortByDate, setSortByDate] = useState('DESC');
+
   const fetchOrders = async (pageNumber = 1, statusFilter = status) => {
     try {
-      const response = await AxiosInterceptor.get(`/api/seller-orders?SortByDate=${sortByDate}`, {
-        params: { Page: pageNumber, PageSize: 100, Status: statusFilter },
+      const response = await AxiosInterceptor.get(`/api/reviews/seller-order-items?FilterBy=${statusFilter}&SortByDate=${sortByDate}`, {
+        params: { Page: pageNumber, PageSize: 100 },
       });
 
       const { items, totalCount } = response.data;
@@ -51,15 +50,40 @@ const OrderHistorySeller = () => {
     fetchOrders(1, newStatus);
   };
 
+  const handleOrderUpdateStatus = (updatedOrder) => {
+    setOrders((prevOrders) => {
+      const orderIndex = prevOrders.findIndex(order => order.sellerOrderItemId === updatedOrder.sellerOrderItemId);
+      if (orderIndex !== -1) {
+        const newOrders = [...prevOrders];
+        newOrders[orderIndex] = updatedOrder;
+        return newOrders;
+      }
+      return prevOrders.filter(order => order.sellerOrderItemId !== updatedOrder.sellerOrderItemId);
+    });
+    setFilteredOrders((prevFilteredOrders) => {
+      const orderIndex = prevFilteredOrders.findIndex(order => order.sellerOrderItemId === updatedOrder.sellerOrderItemId);
+      if (orderIndex !== -1) {
+        const newFilteredOrders = [...prevFilteredOrders];
+        newFilteredOrders[orderIndex] = updatedOrder;
+        return newFilteredOrders;
+      }
+      return prevFilteredOrders.filter(order => order.sellerOrderItemId !== updatedOrder.sellerOrderItemId);
+    });
+  };
+
   const handleOrderStatus = (orderId) => {
     // Update orders and filteredOrders state to remove the cancelled order
-    setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
-    setFilteredOrders((prevFilteredOrders) => prevFilteredOrders.filter((order) => order.id !== orderId));
+    setOrders((prevOrders) => prevOrders.filter((order) => order.sellerOrderItemId !== orderId));
+    setFilteredOrders((prevFilteredOrders) => prevFilteredOrders.filter((order) => order.sellerOrderItemId !== orderId));
   };
+
 
   return (
     <div className="container mx-auto p-4">
       <ToastContainer />
+      <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
+          Đánh giá của bạn
+      </h1>
       <div className="flex justify-between items-center mb-6">
         <div className="mb-4">
           <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-3">Sắp xếp theo ngày</label>
@@ -77,40 +101,27 @@ const OrderHistorySeller = () => {
           </select>
         </div>
         <div className="flex space-x-4 mb-6 justify-end">
-        <button
-            onClick={() => handleStatusChange("")}
-            className={`px-4 py-2 rounded ${status === "" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
+          <button
+            onClick={() => handleStatusChange("NotReview")}
+            className={`px-4 py-2 rounded ${status === "NotReview" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
           >
-            <ShoppingCart className="inline-block mr-2" /> Tất cả
+            <ShoppingCart className="inline-block mr-2" /> Chưa đánh giá
           </button>
           <button
-            onClick={() => handleStatusChange("Pending")}
-            className={`px-4 py-2 rounded ${status === "Pending" ? "bg-blue-500 text-white" : "bg-gray-100"}`}
+            onClick={() => handleStatusChange("Reviewed")}
+            className={`px-4 py-2 rounded ${status === "Reviewed" ? "bg-green-500 text-white" : "bg-gray-100"}`}
           >
-            <PendingOutlined className="inline-block mr-2" /> Đang chờ
-          </button>
-          <button
-            onClick={() => handleStatusChange("Success")}
-            className={`px-4 py-2 rounded ${status === "Success" ? "bg-green-500 text-white" : "bg-gray-100"}`}
-          >
-            <CheckCircle className="inline-block mr-2" /> Thành công
-          </button>
-          <button
-            onClick={() => handleStatusChange("Cancelled")}
-            className={`px-4 py-2 rounded ${status === "Cancelled" ? "bg-red-500 text-white" : "bg-gray-100"}`}
-          >
-            <XCircle className="inline-block mr-2" /> Đã hủy
+            <CheckCircle className="inline-block mr-2" /> Đã đánh giá
           </button>
         </div>
-
       </div>
       {filteredOrders.length === 0 ? (
         <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
       ) : (
-        <OrderTableSeller orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} />
+        <ReviewTable orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} onOrderUpdateStatusChanged={handleOrderUpdateStatus}/>
       )}
     </div>
   );
 };
 
-export default OrderHistorySeller;
+export default Review;

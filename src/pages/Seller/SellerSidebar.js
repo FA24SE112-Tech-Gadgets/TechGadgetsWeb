@@ -23,7 +23,7 @@ const SellerSidebar = () => {
             title: 'Quản lý sản phẩm',
             children: [
                 { key: 'allProducts', label: 'Danh sách sản phẩm', route: '/all-products' },
-                { key: 'manageProducts', label: 'Đánh giá sản phẩm', route: '/manage-products' },
+                { key: 'manageProducts', label: 'Đánh giá sản phẩm', route: '/seller/manage-reviews-gadgets' },
             ],
         },
         {
@@ -43,7 +43,7 @@ const SellerSidebar = () => {
     return (
         <Sider
             width={250}
-            className="bg-primary/40 h-full"
+            className="bg-primary/80 shadow-md"
             style={{ minHeight: '100vh' }}
         >
             {/* Menu Section */}
@@ -51,12 +51,17 @@ const SellerSidebar = () => {
                 mode="inline"
                 defaultOpenKeys={['orders', 'products', 'marketing']}
                 style={{ height: '100%', borderRight: 0 }}
-                className="text-black bg-primary/40 h-screen"
+                className="text-black bg-primary/80"
             >
                 {menuItems.map(item => (
                     <Menu.SubMenu key={item.key} icon={item.icon} title={item.title}>
                         {item.children.map(child => (
-                            <Menu.Item key={child.key} onClick={() => handleMenuClick(child.route)}>
+                            <Menu.Item
+                                key={child.key}
+                                onClick={() => handleMenuClick(child.route)}
+                                className="hover:bg-gray-100"
+                                style={{ padding: '10px 20px' }}
+                            >
                                 {child.label}
                             </Menu.Item>
                         ))}

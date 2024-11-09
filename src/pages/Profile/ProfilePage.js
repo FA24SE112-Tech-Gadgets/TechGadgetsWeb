@@ -16,6 +16,7 @@ const labels = {
   email: 'Email',
   avatar: 'Ảnh đại diện'
 };
+
 const formatDateToDisplay = (dateString) => {
   if (!dateString) {
     return ''; 
@@ -30,6 +31,28 @@ const formatDateToDisplay = (dateString) => {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
+};
+
+const translateGender = (gender) => {
+  switch (gender) {
+    case 'Male':
+      return 'Nam';
+    case 'Female':
+      return 'Nữ';
+    default:
+      return gender;
+  }
+};
+
+const reverseTranslateGender = (gender) => {
+  switch (gender) {
+    case 'Nam':
+      return 'Male';
+    case 'Nữ':
+      return 'Female';
+    default:
+      return gender;
+  }
 };
 
 const ProfilePage = () => {
@@ -58,7 +81,7 @@ const ProfilePage = () => {
           name: userData.fullName,
           address: userData.address || '',
           cccd: userData.cccd || '',
-          gender: userData.gender || 'Male',
+          gender: translateGender(userData.gender) || '',
           dateOfBirth: formatDateToDisplay(userData.dateOfBirth),
           phoneNumber: userData.phoneNumber || '',
           email: response.data.email,
@@ -92,7 +115,7 @@ const ProfilePage = () => {
       if (profile.name) formData.append('FullName', profile.name);
       if (profile.address) formData.append('Address', profile.address);
       if (profile.cccd) formData.append('CCCD', profile.cccd);
-      if (profile.gender) formData.append('Gender', profile.gender);
+      if (profile.gender) formData.append('Gender', reverseTranslateGender(profile.gender));
 
       // Chuyển đổi ngày từ DD/MM/YYYY sang YYYY/MM/DD
       const [day, month, year] = profile.dateOfBirth.split('/');
@@ -200,8 +223,8 @@ const ProfilePage = () => {
                           onChange={handleChange}
                           className="mt-2 p-2 border rounded w-full h-10"
                         >
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
+                          <option value="Nam">Nam</option>
+                          <option value="Nữ">Nữ</option>
                         </select>
                       ) : key === 'dateOfBirth' ? (
                         <input

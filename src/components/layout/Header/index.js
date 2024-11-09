@@ -9,6 +9,7 @@ import R from "~/assets/R.png";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import Notifications from "~/Notification/Notification";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
+import SearchComponent from "~/pages/Search/Search";
 
 
 const Header = () => {
@@ -102,20 +103,7 @@ const Header = () => {
 
           {/* search bar */}
           <div className="flex justify-between items-center gap-4">
-            <div className="relative group hidden sm:block">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearch} // triggers on pressing Enter
-                placeholder="Tìm kiếm"
-                className="w-[200px] sm:w-[200px] group-hover:w-[300px] transition-all duration-300 rounded-full border border-gray-300 px-2 py-1 focus:outline-none focus:border-1 focus:border-primary dark:border-gray-500 dark:bg-gray-800"
-              />
-              <IoMdSearch
-                className="text-gray-500 group-hover:text-primary absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer"
-                onClick={handleSearch} // triggers on clicking search icon
-              />
-            </div>
+          <SearchComponent/>
 
             {/* Cart button */}
             <button
@@ -175,7 +163,12 @@ const Header = () => {
                       >
                         <p>Yêu thích</p>
                       </button>
-
+                      <button
+                        onClick={() => navigate("/review-gadget")}
+                        className="flex justify-start cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300"
+                      >
+                        <p>Đánh giá sản phẩm</p>
+                      </button>
                       {/* Wallet Amount Display */}
                       <div className="p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full">
                         <div className="flex justify-between items-center">

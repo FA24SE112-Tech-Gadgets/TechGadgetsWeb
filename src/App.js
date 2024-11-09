@@ -7,8 +7,6 @@ import Verify from "./pages/SignUp/Verify";
 import LogIn from "./pages/SignIn/LoginPage";
 import FavoritePage from "./pages/Favorite/FavoritePage";
 import ProfilePage from "./pages/Profile/ProfilePage";
-import SearchPage from "./pages/Search/SearchPage";
-import Order from "./pages/Seller/Order";
 import MainLayout from "./components/layout/MainLayout";
 import AuthLayout from "./components/layout/AuthLayout";
 import SellerLayout from "./components/layout/SellerLayout";
@@ -40,6 +38,12 @@ import CartPage from "./pages/Cart/cart";
 import OrderHistory from "./pages/Order/Order";
 import OrderHistorySeller from "./pages/Seller/Order/Order";
 import SellerTransfer from "./pages/Wallet/SellerTransfer";
+import Review from "./pages/Review/Review";
+import ReviewPage from "./pages/Review/ReviewPage";
+import NaturalLanguageSearch from "./pages/AiSearch/NaturalLanguageSearch";
+import ReviewSeller from "./pages/Seller/Review/ReviewSeller";
+import OrderDetail from "./pages/Order/OrderDetail";
+import OrderDetailSeller from "./pages/Seller/Order/OrderDetailSeller";
 
 
 function App() {
@@ -56,8 +60,9 @@ function App() {
 
       <Route element={<MainLayout />}>
         <Route path='/' element={<Home />} />
-        <Route path='/search' element={<SearchPage />} />
         <Route path='/gadget/detail/:name' element={<DetailGadgetPage />} />
+        <Route path='/gadget/detail/:name/reviews' element={<ReviewPage />} />
+       <Route path='/order/detail/:orderId' element={<OrderDetail />} />
         <Route path='/favorite' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
@@ -84,12 +89,22 @@ function App() {
         } />
         {/* <Route path="/gadgets/:category/:categoryId/:brand/:brandId" element={<BrandGadgetPage />} /> */}
 
+
+
         <Route path="/gadgets/:category/:brand" element={<BrandGadgetPage />} />
         <Route path="/gadgets/:category/" element={<CategoryGadgetPage />} />
         <Route path='/profile' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
               <ProfilePage />
+            </RoleBaseRoute>
+          </AuthRoute>
+
+        } />
+          <Route path='/review-gadget' element={
+          <AuthRoute>
+            <RoleBaseRoute accessibleRoles={["Customer"]}>
+              <Review />
             </RoleBaseRoute>
           </AuthRoute>
 
@@ -112,7 +127,8 @@ function App() {
         } />
 
       </Route>
-
+      {/* Search by AI */}
+      <Route path="/search-by-natural-language" element={<NaturalLanguageSearch />} />
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
         <Route path='/seller/Order-management' element={<OrderHistorySeller />} />
@@ -122,6 +138,13 @@ function App() {
         <Route path='/seller/transaction-history' element={<SellerTransfer />} />
       </Route>
 
+      <Route element={<SellerLayout />}>
+        <Route path='/seller/manage-reviews-gadgets' element={<ReviewSeller />} />
+      </Route>
+
+      <Route element={<SellerLayout />}>
+        <Route path='/order/detail-seller/:orderId' element={<OrderDetailSeller />} />
+      </Route>
 
       <Route path="/sellerProfile" element={
         <AuthRoute>
