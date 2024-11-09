@@ -27,7 +27,7 @@ const apiBase = process.env.NODE_ENV === "development"
   : process.env.REACT_APP_PRO_API + "/";
 
 const categoryPaths = Object.fromEntries(
-  Object.entries(categoryIds).map(([key, id]) => [key, `${apiBase}api/gadgets/category/${id}?Page=1&PageSize=100`])
+  Object.entries(categoryIds).map(([key, id]) => [key, `${apiBase}api/gadgets/category/${id}?Page=1&PageSize=20`])
 );
 
 export default function ProductPage() {
@@ -90,8 +90,7 @@ export default function ProductPage() {
     };
 
     Object.keys(categoryIds).forEach(fetchCategoryData);
-  }, [isAuthenticated]);
-
+  }, []);
 
   const toggleFavorite = async (gadgetId, isFavorite, setCategory) => {
     if (!isAuthenticated) {
@@ -107,7 +106,7 @@ export default function ProductPage() {
         )
 
       }));
-      // toast.success("Thêm vào yêu thích thành công");
+      toast.success(isFavorite ? 'Xóa khỏi yêu thích thành công' : 'Thêm vào yêu thích thành công');
     } catch (error) {
       console.error("Error toggling favorite status:", error);
       toast.error("Có lỗi xảy ra, vui lòng thử lại.");
@@ -307,15 +306,19 @@ export default function ProductPage() {
       </div>
     </div>
   );
-
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+        <div className="h-4 w-4 bg-white rounded-full"></div>
+      </div>
+      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+        Loading...
+      </span>
+    </div>
+  );
   return (
-    <div className="p-6">
+    <div className="p-6 relative">
       <ToastContainer />
-      {loading && (
-        <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-          <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-        </div>
-      )}
       {renderCategory("laptop", "Laptop")}
       {renderCategory("headphones", "Tai nghe")}
       {renderCategory("speakers", "Loa")}
