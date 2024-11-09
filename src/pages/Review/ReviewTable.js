@@ -7,7 +7,7 @@ import { AliwangwangOutlined, ArrowRightOutlined, SendOutlined } from '@ant-desi
 import slugify from '~/ultis/config';
 import { useNavigate } from 'react-router-dom';
 
-const ReviewTable = ({ orders, onOrderStatusChanged }) => {
+const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged }) => {
   const [showModal, setShowModal] = useState(false);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -22,13 +22,13 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
       ...prev,
       [order.id]: order.review ? order.review.rating : 0,
     }));
-    setContents((prev) => (prev[order.id] ? prev : {
+    setContents((prev) => ({
       ...prev,
       [order.id]: order.review ? order.review.content : '',
     }));
-    setSellerReplies((prev) => (prev[order.id] ? prev : {
+    setSellerReplies((prev) => ({
       ...prev,
-      [order.id]: order.review.sellerReply ? order.review.sellerReply.content : '',
+      [order.id]: order.review && order.review.sellerReply ? order.review.sellerReply.content : '',
     }));
     setIsEditing(isEdit);
     setShowModal(true);
@@ -97,7 +97,15 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
       });
       toast.success('Đánh giá đã được cập nhật.');
       handleCloseModal();
-      onOrderStatusChanged(currentOrder.sellerOrderItemId);
+      onOrderUpdateStatusChanged({
+        ...currentOrder,
+        review: {
+          ...currentOrder.review,
+          rating: ratings[currentOrder.id],
+          content: contents[currentOrder.id],
+          isUpdated: true,
+        },
+      });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.reasons) {
         const reasons = error.response.data.reasons;
@@ -132,7 +140,7 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
 
 
   return (
-<div className="container max-w-6xl mx-auto p-4 flex flex-col gap-4">
+    <div className="container max-w-6xl mx-auto p-4 flex flex-col gap-4">
       {currentOrders.map((order) => (
         <div key={order.id}
           onClick={() => navigate(`/gadget/detail/${slugify(order.name)}`, {
@@ -146,39 +154,39 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
             <h3 className="text-lg font-semibold mb-2">{order.name}</h3>
             {order.review === null ? (
               <div
-              onClick={(e) => e.stopPropagation()}
-              > 
-                    <StarRatings
-                      rating={ratings[order.sellerOrderItemId] || 0}
-                      starRatedColor="#ffd700"
-                      changeRating={(newRating) => handleRatingChange(order.sellerOrderItemId, newRating)}
-                      numberOfStars={5}
-                      starDimension="20px"
-                      starSpacing="2px"
-                     
+                onClick={(e) => e.stopPropagation()}
+              >
+                <StarRatings
+                  rating={ratings[order.sellerOrderItemId] || 0}
+                  starRatedColor="#ffd700"
+                  changeRating={(newRating) => handleRatingChange(order.sellerOrderItemId, newRating)}
+                  numberOfStars={5}
+                  starDimension="20px"
+                  starSpacing="2px"
+
+                />
+                <div className="flex items-start">
+                  <AliwangwangOutlined />
+                  <div className="relative w-full h-10">
+                    <textarea
+                      value={contents[order.sellerOrderItemId] || ''}
+                      onChange={(e) => handleContentChange(order.sellerOrderItemId, e.target.value)}
+                      className="w-full h-8 overflow-hidden px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary mt-2 resize-none"
+                      rows={4} // Adjust number of rows as needed
+                      placeholder="Enter your review..."
+
                     />
-                    <div className="flex items-start">
-                      <AliwangwangOutlined />
-                      <div className="relative w-full h-10">
-                        <textarea
-                          value={contents[order.sellerOrderItemId] || ''}
-                          onChange={(e) => handleContentChange(order.sellerOrderItemId, e.target.value)}
-                          className="w-full h-8 overflow-hidden px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary mt-2 resize-none"
-                          rows={4} // Adjust number of rows as needed
-                          placeholder="Enter your review..."
-                         
-                        />
-                        <button
-                          onClick={() => handleSubmitReview(order)}
-                          className="absolute top-4 right-3 text-primary bg-transparent hover:text-secondary/80"
-                        >
-                          <SendOutlined className="text-lg" />
-                        </button>
-                      </div>
-                    </div>
+                    <button
+                      onClick={() => handleSubmitReview(order)}
+                      className="absolute top-4 right-3 text-primary bg-transparent hover:text-secondary/80"
+                    >
+                      <SendOutlined className="text-lg" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
-              <div  onClick={(e) => e.stopPropagation()}>
+              <div onClick={(e) => e.stopPropagation()}>
                 <StarRatings
                   rating={order.review.rating}
                   starRatedColor="#ffd700"
@@ -186,8 +194,15 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
                   starDimension="24px"
                   starSpacing="2px"
                 />
-                <p className="mt-2 text-gray-700">{order.review.content}</p>
+                <div className="mt-2 flex items-center text-gray-700">
+                  <p>{order.review.content}</p>
+                  {order.review.isUpdated && (
+                    <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                  )}
+                </div>
+
                 <p className="mt-2 text-gray-500 text-sm">{formatDate(order.review.createdAt)}</p>
+
                 <button onClick={() => handleOpenModal(order, true)} className="text-primary/70 hover:text-secondary/80 mt-2">
                   <Edit className="h-5 w-5 absolute top-4 right-4" />
                 </button>
@@ -195,12 +210,16 @@ const ReviewTable = ({ orders, onOrderStatusChanged }) => {
             )}
             {/* Seller Reply Section */}
             {order.review && order.review.sellerReply && (
-                <div className=" bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <div className=" bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
-                  <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
-                <div>
-                  <p className="text-gray-700">{order.review.sellerReply.content}</p>
-                </div>
+                <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
+
+                <div className="mt-2 flex items-center text-gray-700">
+                      <p className="text-gray-700">{order.review.sellerReply.content}</p>
+                      {order.review.sellerReply.isUpdated && (
+                        <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                      )}
+                    </div>
               </div>
             )}
           </div>

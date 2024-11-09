@@ -56,6 +56,27 @@ const ReviewSeller = () => {
     setFilteredOrders((prevFilteredOrders) => prevFilteredOrders.filter((order) => order.review.id !== orderId));
   };
 
+  const handleOrderUpdateStatus = (updatedOrder) => {
+    setOrders((prevOrders) => {
+      const orderIndex = prevOrders.findIndex(order => order.review.id === updatedOrder.review.id);
+      if (orderIndex !== -1) {
+        const newOrders = [...prevOrders];
+        newOrders[orderIndex] = updatedOrder;
+        return newOrders;
+      }
+      return prevOrders.filter(order => order.review.id !== updatedOrder.review.id);
+    });
+    setFilteredOrders((prevFilteredOrders) => {
+      const orderIndex = prevFilteredOrders.findIndex(order => order.review.id === updatedOrder.review.id);
+      if (orderIndex !== -1) {
+        const newFilteredOrders = [...prevFilteredOrders];
+        newFilteredOrders[orderIndex] = updatedOrder;
+        return newFilteredOrders;
+      }
+      return prevFilteredOrders.filter(order => order.review.id !== updatedOrder.review.id);
+    });
+  };
+
   return (
     <div className="container mx-auto p-4">
       <ToastContainer />
@@ -96,7 +117,7 @@ const ReviewSeller = () => {
       {filteredOrders.length === 0 ? (
         <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
       ) : (
-        <ReviewSellerTable orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} />
+        <ReviewSellerTable orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} onOrderUpdateStatusChanged={handleOrderUpdateStatus} />
       )}
     </div>
   );

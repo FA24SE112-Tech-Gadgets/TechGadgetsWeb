@@ -4,8 +4,8 @@ import { toast } from 'react-toastify';
 import StarRatings from 'react-star-ratings';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { AliwangwangOutlined, ArrowRightOutlined, SendOutlined } from '@ant-design/icons';
-
-const ReviewSellerTable = ({ orders, onOrderStatusChanged }) => {
+import user from "~/assets/R.png"
+const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged }) => {
   const [showModal, setShowModal] = useState(false);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -64,6 +64,17 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged }) => {
         Content: contents[currentOrder.review.sellerReply.id],
       });
       toast.success('Đánh giá đã được cập nhật.');
+      onOrderUpdateStatusChanged({
+        ...currentOrder,
+        review: {
+          ...currentOrder.review,
+          sellerReply: {
+            ...currentOrder.review.sellerReply,
+            content: contents[currentOrder.review.sellerReply.id],
+            isUpdated: true,
+          },
+        },
+      });
       handleCloseModal();
       onOrderStatusChanged(currentOrder.review.sellerReply.id);
     } catch (error) {
@@ -111,11 +122,11 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged }) => {
           <img src={order.thumbnailUrl} alt={order.name} className="w-24 h-24 object-contain rounded mr-4" />
           <div className="flex-1">
             <h3 className="text-lg font-semibold mb-2">{order.name}</h3>
-            
+
             {/* Buyer Review Section */}
             <div className="border-b pb-4 mb-4">
               <div className="flex items-center ml-4 mb-2">
-                <img src={order.review.customer.avatarUrl} alt={order.review.customer.fullName} className="w-10 h-10 rounded-full mr-2" />
+              <img src={order.review.customer.avatarUrl || user} alt={order.review.customer.fullName} className="w-10 h-10 rounded-full mr-2" />
                 <div>
                   <p className="text-sm font-semibold">{order.review.customer.fullName}</p>
                 </div>
@@ -129,13 +140,20 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged }) => {
                   starSpacing="2px"
                 />
               </div>
-              <p className="text-gray-700">{order.review ? order.review.content : 'No review content'}</p>
+
+
+              <div className="mt-2 flex items-center text-gray-700">
+                <p className="text-gray-700">{order.review ? order.review.content : 'No review content'}</p>
+                {order.review.isUpdated && (
+                  <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                )}
+              </div>
               <p className="text-gray-500 text-sm">{order.review ? formatDate(order.review.createdAt) : ''}</p>
-              
+
             </div>
 
-        {/* Seller Reply Section */}
-        {order.review && (order.review.sellerReply || isWithinTenMinutes(order.review.createdAt)) && (
+            {/* Seller Reply Section */}
+            {order.review && (order.review.sellerReply || isWithinTenMinutes(order.review.createdAt)) && (
               <div className="mt-4 bg-gray-50 p-4 rounded-lg">
                 <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
                 {order.review.sellerReply === null ? (
@@ -156,10 +174,17 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged }) => {
                   </div>
                 ) : (
                   <div>
-                    <p className="text-gray-700">{order.review.sellerReply.content}</p>
+
+
+                    <div className="mt-2 flex items-center text-gray-700">
+                      <p className="text-gray-700">{order.review.sellerReply.content}</p>
+                      {order.review.sellerReply.isUpdated && (
+                        <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                      )}
+                    </div>
                     <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
                     <button onClick={() => handleOpenModal(order, true)} className="text-primary/70 hover:text-secondary/80 mt-2 flex items-center">
-                      <Edit className="h-5 w-5 absolute top-100 right-4" /> 
+                      <Edit className="h-5 w-5 absolute top-100 right-4" />
                     </button>
                   </div>
                 )}

@@ -13,7 +13,7 @@ import GadgetHistory from '../Gadgets/GadgetHistory';
 import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
 import SuggestGadget from '../Gadgets/GadgetSuggest';
 import GadgetSuggest from '../Gadgets/GadgetSuggest';
-
+import user from "~/assets/R.png"
 
 const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -413,7 +413,7 @@ const DetailGadgetPage = () => {
                                     <div key={review.id} className="mb-6 p-6 border border-gray-200 rounded-lg shadow-sm">
                                         <div className="flex items-center mb-4">
                                             <img
-                                                src={review.customer.avatarUrl || '/default-avatar.png'}
+                                                src={review.customer.avatarUrl || user}
                                                 alt={review.customer.fullName}
                                                 className="w-12 h-12 rounded-full mr-4"
                                             />

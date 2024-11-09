@@ -4,7 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { Star } from 'lucide-react';
 import axios from 'axios';
 import StarRatings from 'react-star-ratings';
-
+import user from "~/assets/R.png"
 const ReviewPage = () => {
   const location = useLocation();
   const { productId } = location.state || {};
@@ -143,9 +143,9 @@ const ReviewPage = () => {
       {reviews.length > 0 ? (
         reviews.map((review) => (
           <div key={review.id}
-           className="mb-4 p-4 border rounded-lg">
+            className="mb-4 p-4 border rounded-lg">
             <div className="flex items-center mb-2">
-              <img src={review.customer.avatarUrl || '/default-avatar.png'} alt={review.customer.fullName} className="w-10 h-10 rounded-full mr-2" />
+              <img src={review.customer.avatarUrl || user} alt={review.customer.fullName} className="w-10 h-10 rounded-full mr-2" />
               <div>
                 <p className="font-semibold">{review.customer.fullName}</p>
                 <p className="text-sm text-gray-500">{formatDate(review.createdAt)}</p>
@@ -155,13 +155,21 @@ const ReviewPage = () => {
               <span className="text-yellow-500">{'★'.repeat(review.rating)}</span>
               <span className="text-gray-400">{'★'.repeat(5 - review.rating)}</span>
             </div>
-            <p>{review.content}</p>
+            <div className="mt-2 flex items-center text-gray-700">
+              <p>{review.content}</p>
+              {review.isUpdated && (
+                <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+              )}
+            </div>
             {review.sellerReply && (
               <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
-                  <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
-                <div>
-                  <p className="text-gray-700">{review.sellerReply.content}</p>
+                <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
+                <div className="mt-2 flex items-center text-gray-700">
+                  <p>{review.sellerReply.content}</p>
+                  {review.sellerReply.isUpdated && (
+                    <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                  )}
                 </div>
               </div>
             )}

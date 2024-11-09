@@ -50,11 +50,33 @@ const Review = () => {
     fetchOrders(1, newStatus);
   };
 
+  const handleOrderUpdateStatus = (updatedOrder) => {
+    setOrders((prevOrders) => {
+      const orderIndex = prevOrders.findIndex(order => order.sellerOrderItemId === updatedOrder.sellerOrderItemId);
+      if (orderIndex !== -1) {
+        const newOrders = [...prevOrders];
+        newOrders[orderIndex] = updatedOrder;
+        return newOrders;
+      }
+      return prevOrders.filter(order => order.sellerOrderItemId !== updatedOrder.sellerOrderItemId);
+    });
+    setFilteredOrders((prevFilteredOrders) => {
+      const orderIndex = prevFilteredOrders.findIndex(order => order.sellerOrderItemId === updatedOrder.sellerOrderItemId);
+      if (orderIndex !== -1) {
+        const newFilteredOrders = [...prevFilteredOrders];
+        newFilteredOrders[orderIndex] = updatedOrder;
+        return newFilteredOrders;
+      }
+      return prevFilteredOrders.filter(order => order.sellerOrderItemId !== updatedOrder.sellerOrderItemId);
+    });
+  };
+
   const handleOrderStatus = (orderId) => {
     // Update orders and filteredOrders state to remove the cancelled order
     setOrders((prevOrders) => prevOrders.filter((order) => order.sellerOrderItemId !== orderId));
     setFilteredOrders((prevFilteredOrders) => prevFilteredOrders.filter((order) => order.sellerOrderItemId !== orderId));
   };
+
 
   return (
     <div className="container mx-auto p-4">
@@ -96,7 +118,7 @@ const Review = () => {
       {filteredOrders.length === 0 ? (
         <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
       ) : (
-        <ReviewTable orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} />
+        <ReviewTable orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} onOrderUpdateStatusChanged={handleOrderUpdateStatus}/>
       )}
     </div>
   );

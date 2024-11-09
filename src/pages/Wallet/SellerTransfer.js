@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import { toast, ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
+
 export default function SellerTransfer() {
   const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const [pageSize] = useState(10); 
-  const [sortByDate, setSortByDate] = useState('DESC'); 
-
+  const [pageSize] = useState(10);
+  const [sortByDate, setSortByDate] = useState('DESC');
+const navigate = useNavigate();
   const fetchDeposits = async () => {
     try {
       const response = await AxiosInterceptor.get(`/api/wallet-trackings?SortByDate=${sortByDate}&Page=${currentPage}&PageSize=${pageSize}`);
-      console.log('day ne', response.data);
-      
-      
       setDeposits(Array.isArray(response.data.items) ? response.data.items : []);
-      setTotalItems(response.data.totalItems || 0); 
+      setTotalItems(response.data.totalItems || 0);
       setLoading(false);
     } catch (err) {
       setError('Không thể lấy lịch sử nạp tiền');
@@ -31,7 +28,7 @@ export default function SellerTransfer() {
 
   useEffect(() => {
     fetchDeposits();
-  }, [currentPage, sortByDate]); 
+  }, [currentPage, sortByDate]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('vi-VN', {
@@ -51,7 +48,7 @@ export default function SellerTransfer() {
   };
 
   const handleChangePage = (newPage) => {
-    setCurrentPage(newPage); 
+    setCurrentPage(newPage);
   };
 
   if (loading) return (
@@ -67,81 +64,79 @@ export default function SellerTransfer() {
 
   if (error) return <div className="text-center mt-8 text-red-600">{error}</div>;
 
-  const totalPages = Math.ceil(totalItems / pageSize); 
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Lịch Sử Giao Dịch</h2>
-
+    <div className="container mx-auto p-4 sm:p-6 bg-gray-50">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-gray-700">Lịch Sử Giao Dịch</h2>
       </div>
-      {/* Thêm dropdown để sắp xếp */}
+
       <div className="mb-4">
-        <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-3">Sắp xếp theo ngày</label>
+        <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-2">Sắp xếp theo ngày</label>
         <select
           id="sort-by-date"
           value={sortByDate}
           onChange={(e) => {
             setSortByDate(e.target.value);
-            setCurrentPage(1); 
+            setCurrentPage(1);
           }}
-          className="w-full sm:w-[180px] px-1 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
+          className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
         >
           <option value="DESC">Mới nhất</option>
           <option value="ASC">Cũ nhất</option>
         </select>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        {deposits.length === 0 ? ( // Kiểm tra length của deposits
-          <div className="text-center p-6">
-            <p className="text-gray-500">Bạn chưa có lịch sử giao dịch nào</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {[ 'Số tiền', 'Trạng thái', 'Ngày tạo giao dịch'].map((header) => (
-                    <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {deposits.map((deposit) => (
-                  <tr key={deposit.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(deposit.amount)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        deposit.status === 'Success' ? 'bg-green-100 text-green-800' :
-                        deposit.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                        deposit.status === 'Expired' ? 'bg-red-100 text-red-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {deposit.status === 'Success' ? 'Thành công' :
-                         deposit.status === 'Pending' ? 'Đang chờ' :
-                         deposit.status === 'Expired' ? 'Đã hết hạn' :
-                         deposit.status === 'Cancelled' ? 'Đã hủy' :
-                         deposit.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
-                      {formatDate(deposit.createdAt)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {deposits.length === 0 ? (
+        <div className="text-center p-6">
+          <p className="text-gray-500">Bạn chưa có lịch sử giao dịch nào</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {deposits.map((deposit) => (
+            <div key={deposit.id}
+            onClick={() => navigate(`/order/detail-seller/${deposit.sellerOrderId}`)}
+            className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex items-center justify-between cursor-pointer">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-700">
+                  Mã giao dịch: <span className="text-gray-900">{deposit.sellerOrderId}</span>
+                </p>
+                <p className="text-sm text-gray-500">Loại giao dịch: Tự động</p>
+                <div className="flex items-center mt-1">
+                  <p className="text-sm font-semibold text-gray-700">Trạng thái:</p>
+                  <span
+                    className={`ml-2 px-3 py-1 rounded-full text-xs font-semibold ${deposit.status === 'Success' ? 'bg-green-200 text-green-700' :
+                        deposit.status === 'Pending' ? 'bg-yellow-200 text-yellow-700' :
+                          deposit.status === 'Expired' ? 'bg-red-200 text-red-700' :
+                            'bg-gray-200 text-gray-700'
+                      }`}
+                  >
+                    {deposit.status === 'Success' ? 'Hoàn thành' :
+                      deposit.status === 'Pending' ? 'Đang chờ' :
+                        deposit.status === 'Expired' ? 'Đã hết hạn' :
+                          deposit.status === 'Cancelled' ? 'Đã hủy' :
+                            deposit.status}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <p className="text-sm font-semibold text-gray-700">
+                  Số tiền: <span className="text-green-600">+ {formatCurrency(deposit.amount)}</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-5">
+                  Ngày tạo: {formatDate(deposit.createdAt)}
+                </p>
+              </div>
+            </div>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
+          ))}
+        </div>
+      )}
+
+      <div className="flex justify-center mt-6">
         <nav className="flex items-center space-x-2">
-          {Array.from({ length: Math.ceil(totalItems / pageSize) }, (_, i) => (
+          {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i + 1}
               onClick={() => handleChangePage(i + 1)}

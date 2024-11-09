@@ -165,7 +165,7 @@ const OrderDetailSeller = () => {
             {orderDetails.status === "Success" && (
                 <div className="mt-6 p-4 bg-green-100 rounded-lg">
                     <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-green-700 ">Đơn hàng của bạn đã được giao thành công</h3>
+                        <h3 className="font-semibold text-green-700 ">Đơn hàng của bạn đã được xác nhận</h3>
                         <p className="text-sm text-gray-600">
                         Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
                             <span className={`px-2 py-1 rounded ${getStatusClass(orderDetails.status)}`}>
@@ -173,6 +173,7 @@ const OrderDetailSeller = () => {
                             </span>
                         </p>
                     </div>
+                    <p>Thời gian hoàn thành đơn hàng: {formatDate(orderDetails.sellerOrderUpdatedAt)}</p>
                 </div>
             )}
 
