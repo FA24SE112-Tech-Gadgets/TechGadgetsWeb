@@ -31,14 +31,14 @@ const{isAuthenticated}=useAuth();
     });
     AOS.refresh();
   }, []);
-  useEffect(() => { // Yêu cầu quyền nhận thông báo và lấy token     
-    onMessageListener()
-      .then((payload) => {
-        console.log("Foreground notification received: ", payload); // Bạn có thể hiển thị thông báo hoặc xử lý payload tại đây 
-        alert(`New notification: ${payload.notification.title} - ${payload.notification.body}`);
-      })
-      .catch((err) => console.log("Failed to receive message: ", err));
-  }, []);
+  // useEffect(() => { // Yêu cầu quyền nhận thông báo và lấy token     
+  //   onMessageListener()
+  //     .then((payload) => {
+  //       console.log("Foreground notification received: ", payload); // Bạn có thể hiển thị thông báo hoặc xử lý payload tại đây 
+  //       alert(`New notification: ${payload.notification.title} - ${payload.notification.body}`);
+  //     })
+  //     .catch((err) => console.log("Failed to receive message: ", err));
+  // }, []);
 
   return (
     <div className="bg-white dark:bg-gray-900 dark:text-white duration-200">

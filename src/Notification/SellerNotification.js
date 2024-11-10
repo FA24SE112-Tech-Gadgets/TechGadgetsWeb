@@ -3,7 +3,7 @@ import { Bell, Circle } from 'lucide-react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { onMessageListener } from '~/ultis/firebase';
 
-const Notification = () => {
+const SellerNotification = () => {
     const [notifications, setNotifications] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
@@ -202,4 +202,4 @@ const Notification = () => {
     );
 };
 
-export default Notification;
+export default SellerNotification;
