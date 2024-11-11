@@ -54,8 +54,11 @@ function CategoryGadgetPage() {
                 const newProducts = response.data.items;
 
                 // Filter out products with seller status "Inactive"
-                const activeProducts = newProducts.filter(product => product.sellerStatus === 'Active');
-
+                // const activeProducts = newProducts.filter(product => product.sellerStatus === 'Active');
+                const activeProducts = newProducts.filter(
+                    (product) => product.sellerStatus === 'Active' && product.gadgetStatus === 'Active'
+                  );
+                  
                 setProducts((prevProducts) => page === 1 ? activeProducts : [...prevProducts, ...activeProducts]);
                 setHasMore(activeProducts.length === 20); // Check if there are more products to load
                 console.log(`${apiBaseUrl}/api/gadgets/category/${categoryId}?${queryString}&Page=${page}&PageSize=20`);

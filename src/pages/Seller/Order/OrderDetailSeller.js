@@ -234,7 +234,7 @@ const OrderDetailSeller = () => {
                       <img
                         src={item.thumbnailUrl}
                         alt={item.name}
-                        className="w-16 h-16 object-cover rounded"
+                        className="w-16 h-16 object-contain rounded"
                       />
                       <div className="flex-grow">
                         <p className="font-semibold">{item.name}</p>

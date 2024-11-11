@@ -75,9 +75,13 @@ export default function ProductPage() {
       const api = isAuthenticated ? AxiosInterceptor : axios;
       try {
         const productResponse = await api.get(categoryPaths[category]);
-        const activeProducts = productResponse.data.items.filter(product => product.sellerStatus === 'Active');
+        
+        // Filter products to only include those with both "sellerStatus" and "gadgetStatus" as "Active"
+        const activeProducts = productResponse.data.items.filter(
+          (product) => product.sellerStatus === 'Active' && product.gadgetStatus === 'Active'
+        );
+        
         setProducts((prev) => ({ ...prev, [category]: activeProducts }));
-
 
         const brandResponse = await axios.get(`${apiBase}api/brands/categories/${categoryIds[category]}`);
         setBrands((prev) => ({ ...prev, [category]: brandResponse.data.items }));
@@ -91,6 +95,7 @@ export default function ProductPage() {
 
     Object.keys(categoryIds).forEach(fetchCategoryData);
   }, []);
+
 
   const toggleFavorite = async (gadgetId, isFavorite, setCategory) => {
     if (!isAuthenticated) {

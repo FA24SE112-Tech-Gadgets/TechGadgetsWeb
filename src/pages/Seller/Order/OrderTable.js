@@ -118,7 +118,7 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
              
               className="hover:bg-gray-50 cursor-pointer">
                 <td className="py-2 px-4 border-b text-center text-sm">{order.id}</td>
-                <td className="py-2 px-4 border-b text-center text-sm">{order.amount?.toLocaleString()}đ</td>
+                <td className="py-2 px-4 border-b text-center text-sm">{order.amount?.toLocaleString()}₫</td>
                 <td className="py-2 px-4 border-b text-center text-sm">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

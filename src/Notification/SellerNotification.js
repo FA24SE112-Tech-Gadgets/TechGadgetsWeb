@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell, Circle } from 'lucide-react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { onMessageListener } from '~/ultis/firebase';
+import { useNavigate } from 'react-router-dom';
 
 const SellerNotification = () => {
     const [notifications, setNotifications] = useState([]);
@@ -11,10 +12,10 @@ const SellerNotification = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const dropdownRef = useRef(null);
-    const pageRef = useRef(currentPage); // Thêm ref để theo dõi currentPage
-
+    const pageRef = useRef(currentPage);
+    const navigate = useNavigate();
     const fetchNotifications = async (page = 1) => {
-        if (isFetching || !hasMore) return; // Ngăn fetch trùng lặp
+        if (isFetching || !hasMore) return;
 
         try {
             setIsFetching(true);
@@ -26,14 +27,13 @@ const SellerNotification = () => {
                 return [...prev, ...newNotifications];
             });
 
-            // Tính toán số thông báo chưa đọc
             const unreadNotifications = page === 1
                 ? newNotifications.filter(notification => !notification.isRead).length
                 : notifications.concat(newNotifications).filter(notification => !notification.isRead).length;
-
             setUnreadCount(unreadNotifications);
+
             setHasMore(response.data.hasNextPage);
-            pageRef.current = page; // Cập nhật pageRef
+            pageRef.current = page;
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
         } finally {
@@ -41,7 +41,6 @@ const SellerNotification = () => {
         }
     };
 
-    // Xử lý click outside để đóng dropdown
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -53,7 +52,6 @@ const SellerNotification = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Khởi tạo và lắng nghe thông báo mới
     useEffect(() => {
         fetchNotifications();
 
@@ -79,12 +77,8 @@ const SellerNotification = () => {
     }, []);
 
     const toggleDropdown = () => {
-        if (!showDropdown) {
-            // Reset và fetch lại data khi mở dropdown
-            setCurrentPage(1);
-            pageRef.current = 1;
-            fetchNotifications(1);
-        }
+        // Reset unreadCount về 0 khi click vào chuông
+        setUnreadCount(0);
         setShowDropdown(!showDropdown);
     };
 
@@ -98,7 +92,6 @@ const SellerNotification = () => {
                         : notification
                 )
             );
-            setUnreadCount(prev => Math.max(0, prev - 1));
         } catch (error) {
             console.error('Failed to mark notification as read:', error);
         }
@@ -118,15 +111,23 @@ const SellerNotification = () => {
 
     const handleScroll = useCallback((e) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target;
-        const threshold = 50; // Thêm ngưỡng để fetch sớm hơn
+        const threshold = 50;
 
         if (scrollHeight - scrollTop - threshold <= clientHeight && !isFetching && hasMore) {
             const nextPage = pageRef.current + 1;
             setCurrentPage(nextPage);
             fetchNotifications(nextPage);
         }
-    }, [hasMore, isFetching]); // Bỏ currentPage khỏi dependencies
+    }, [hasMore, isFetching]);
 
+    const handleNotificationClick = (notification) => {
+        markAsRead(notification.id);
+        if (notification.type === 'SellerOrder' && notification.sellerOrderId) {
+            navigate(`/order/detail-seller/${notification.sellerOrderId}`);
+        } else if (notification.type === 'WalletTracking') {
+            navigate('/seller/transaction-history');
+        }
+    };
     return (
         <div className="relative" ref={dropdownRef}>
             <button
@@ -161,7 +162,7 @@ const SellerNotification = () => {
                     >
                         {isFetching && currentPage === 1 ? (
                             <div className="flex justify-center p-4">
-                                {/* <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div> */}
+                                <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
                             </div>
                         ) : notifications.length === 0 ? (
                             <p className="p-4 text-center text-gray-500">Không có thông báo</p>
@@ -169,9 +170,10 @@ const SellerNotification = () => {
                             notifications.map((notification) => (
                                 <div
                                     key={notification.id}
+
                                     className={`p-4 border-b hover:bg-gray-100 cursor-pointer transition-colors
                     ${notification.isRead ? 'bg-white' : 'bg-gray-200'}`}
-                                    onClick={() => markAsRead(notification.id)}
+                                    onClick={() => handleNotificationClick(notification)}
                                 >
                                     <div className="flex items-center">
                                         <div className="flex-grow">
@@ -182,9 +184,9 @@ const SellerNotification = () => {
                                             </p>
                                         </div>
                                         {!notification.isRead && (
-                                           <span className="text-blue-500">
-                                           <Circle fill="currentColor" className="w-4 h-4" />
-                                         </span>
+                                            <span className="text-blue-500">
+                                                <Circle fill="currentColor" className="w-4 h-4" />
+                                            </span>
                                         )}
                                     </div>
                                 </div>

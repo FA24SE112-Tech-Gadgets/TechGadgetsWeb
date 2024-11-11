@@ -9,9 +9,7 @@ import { CheckCircleOutlined, HomeFilled, InfoCircleFilled, LoadingOutlined, Sho
 import slugify from '~/ultis/config';
 import StarRatings from 'react-star-ratings';
 import { Star } from 'lucide-react';
-import GadgetHistory from '../Gadgets/GadgetHistory';
 import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
-import SuggestGadget from '../Gadgets/GadgetSuggest';
 import GadgetSuggest from '../Gadgets/GadgetSuggest';
 import user from "~/assets/R.png"
 

@@ -47,7 +47,9 @@ const fetchBrandProducts = async () => {
 
   try {
     const response = await apiClient.get(apiUrl);
-    const activeProducts = response.data.items.filter(product => product.sellerStatus === "Active");
+    const activeProducts = response.data.items.filter(
+      (product) => product.sellerStatus === 'Active' && product.gadgetStatus === 'Active'
+    );
     setProducts(activeProducts);
   } catch (error) {
     console.error("Error fetching brand products:", error);

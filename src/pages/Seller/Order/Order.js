@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { ShoppingCart, CheckCircle, XCircle } from "lucide-react";
-
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 import { toast, ToastContainer } from "react-toastify";
 import OrderTableSeller from "./OrderTable";
@@ -12,16 +11,17 @@ const OrderHistorySeller = () => {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const [sortByDate, setSortByDate] = useState('DESC');
+
   const fetchOrders = async (pageNumber = 1, statusFilter = status) => {
+    setIsLoading(true);
     try {
       const response = await AxiosInterceptor.get(`/api/seller-orders?SortByDate=${sortByDate}`, {
         params: { Page: pageNumber, PageSize: 100, Status: statusFilter },
       });
 
       const { items, totalCount } = response.data;
-      console.log("data seller", response.data);
-
       setOrders(items);
       setTotalPages(Math.ceil(totalCount / 10));
     } catch (error) {
@@ -31,9 +31,11 @@ const OrderHistorySeller = () => {
           const reasonMessage = reasons[0].message;
           toast.error(reasonMessage);
         } else {
-          toast.error("Có lỗi xảy ra vui lòng thử lại ");
+          toast.error("Có lỗi xảy ra vui lòng thử lại");
         }
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,7 +54,6 @@ const OrderHistorySeller = () => {
   };
 
   const handleOrderStatus = (orderId) => {
-    // Update orders and filteredOrders state to remove the cancelled order
     setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
     setFilteredOrders((prevFilteredOrders) => prevFilteredOrders.filter((order) => order.id !== orderId));
   };
@@ -62,7 +63,9 @@ const OrderHistorySeller = () => {
       <ToastContainer />
       <div className="flex justify-between items-center mb-6">
         <div className="mb-4">
-          <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-3">Sắp xếp theo ngày</label>
+          <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-3">
+            Sắp xếp theo ngày
+          </label>
           <select
             id="sort-by-date"
             value={sortByDate}
@@ -77,7 +80,7 @@ const OrderHistorySeller = () => {
           </select>
         </div>
         <div className="flex space-x-4 mb-6 justify-end">
-        <button
+          <button
             onClick={() => handleStatusChange("")}
             className={`px-4 py-2 rounded ${status === "" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
           >
@@ -102,13 +105,26 @@ const OrderHistorySeller = () => {
             <XCircle className="inline-block mr-2" /> Đã hủy
           </button>
         </div>
+        </div>
+        {isLoading && (
+            <div className="flex items-center justify-center min-h-screen">
+            <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+              <div className="h-4 w-4 bg-white rounded-full"></div>
+            </div>
+            <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+              Loading...
+            </span>
+          </div>
+      )}
+    
 
-      </div>
-      {filteredOrders.length === 0 ? (
+      {filteredOrders.length === 0 && !isLoading ? (
         <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
       ) : (
         <OrderTableSeller orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} />
       )}
+
+     
     </div>
   );
 };

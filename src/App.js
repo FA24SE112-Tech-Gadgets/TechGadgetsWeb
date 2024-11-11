@@ -44,6 +44,9 @@ import NaturalLanguageSearch from "./pages/AiSearch/NaturalLanguageSearch";
 import ReviewSeller from "./pages/Seller/Review/ReviewSeller";
 import OrderDetail from "./pages/Order/OrderDetail";
 import OrderDetailSeller from "./pages/Seller/Order/OrderDetailSeller";
+import SellerGadgetManagement from "./pages/Seller/Gadgets/GadgetManagement";
+import GadgetManagementPage from "./pages/Seller/Gadgets/GadgetManagementPage";
+import GadgetDetailSeller from "./pages/Seller/Gadgets/GadgetDetailSeller";
 
 
 function App() {
@@ -145,7 +148,12 @@ function App() {
       <Route element={<SellerLayout />}>
         <Route path='/order/detail-seller/:orderId' element={<OrderDetailSeller />} />
       </Route>
-
+      <Route element={<SellerLayout />}>
+        <Route path='/gadget/detail-seller/:name' element={<GadgetDetailSeller />} />
+      </Route>
+      <Route element={<SellerLayout />}>
+        <Route path='/all-products' element={<GadgetManagementPage />} />
+      </Route>
       <Route path="/sellerProfile" element={
         <AuthRoute>
           <RoleBaseRoute accessibleRoles={["Seller"]}>
