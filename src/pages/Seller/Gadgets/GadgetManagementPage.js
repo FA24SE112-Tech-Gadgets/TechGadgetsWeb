@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Laptop, Headphones, Speaker, Smartphone } from 'lucide-react';
 import GadgetManagement from './GadgetManagement';
 import { ToastContainer } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
 
 const categoryIds = {
   laptop: "458d7752-e45e-444a-adf9-f7201c07acd1",
@@ -19,7 +20,7 @@ const categoryNames = {
 
 const GadgetManagementPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(categoryIds.laptop);
-
+const navigate = useNavigate();
   const categoryIcons = {
     [categoryIds.laptop]: Laptop,
     [categoryIds.headphones]: Headphones,
@@ -50,6 +51,8 @@ const GadgetManagementPage = () => {
               </button>
             );
           })}
+          <button onClick={()=>navigate("/seller/gadgets/create")} className="px-4 py-2 bg-primary/80 text-white rounded"
+          >Tạo sản phẩm</button>
         </div>
       </div>
       <GadgetManagement categoryId={selectedCategory} />

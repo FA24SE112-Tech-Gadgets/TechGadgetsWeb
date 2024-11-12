@@ -47,6 +47,7 @@ import OrderDetailSeller from "./pages/Seller/Order/OrderDetailSeller";
 import SellerGadgetManagement from "./pages/Seller/Gadgets/GadgetManagement";
 import GadgetManagementPage from "./pages/Seller/Gadgets/GadgetManagementPage";
 import GadgetDetailSeller from "./pages/Seller/Gadgets/GadgetDetailSeller";
+import CreateGadget from "./pages/Seller/Gadgets/CreateGadget";
 
 
 function App() {
@@ -153,6 +154,9 @@ function App() {
       </Route>
       <Route element={<SellerLayout />}>
         <Route path='/all-products' element={<GadgetManagementPage />} />
+      </Route>
+      <Route element={<SellerLayout />}>
+        <Route path='/seller/gadgets/create' element={<CreateGadget />} />
       </Route>
       <Route path="/sellerProfile" element={
         <AuthRoute>
