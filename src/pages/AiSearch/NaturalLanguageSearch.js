@@ -9,6 +9,7 @@ import { CiHeart } from 'react-icons/ci';
 import { toast, ToastContainer } from 'react-toastify';
 import { LoadingOutlined, SendOutlined } from '@ant-design/icons';
 import { FaCircle, FaDotCircle } from 'react-icons/fa';
+
 const NaturalLanguageSearch = () => {
     const [searchText, setSearchText] = useState('');
     const [gadgets, setGadgets] = useState([]);
@@ -17,6 +18,8 @@ const NaturalLanguageSearch = () => {
     const itemsPerPage = 8;
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+    const [sellers, setSellers] = useState([]);
+    const [resultType, setResultType] = useState('gadget');
 
     const fetchGadgets = async () => {
         setLoading(true);
@@ -24,9 +27,16 @@ const NaturalLanguageSearch = () => {
             const response = await AxiosInterceptor.post('/api/natural-languages/search', {
                 input: searchText,
             });
-            setGadgets(response.data.gadgets);
+            setResultType(response.data.type);
+            if (response.data.type === 'gadget') {
+                setGadgets(response.data.gadgets);
+                setSellers([]);
+            } else {
+                setSellers(response.data.sellers);
+                setGadgets([]);
+            }
         } catch (error) {
-            console.error('Failed to fetch gadgets:', error);
+            console.error('Failed to fetch results:', error);
         } finally {
             setLoading(false);
         }
@@ -86,9 +96,9 @@ const NaturalLanguageSearch = () => {
         <div className="flex h-screen relative z-0">
             <GadgetSearchHistory />
             <ToastContainer />
-            <div className=" flex flex-col flex-grow overflow-hiddden ">
+            <div className="flex flex-col flex-grow overflow-hiddden">
                 {/* Product List Section */}
-                <div className="flex-grow  p-4">
+                <div className="flex-grow p-4">
                     <div className="flex items-center justify-between mb-4 border-b">
                         <div>
                             <button onClick={() => navigate("/")} className="font-bold text-2xl sm:text-3xl flex gap-2">
@@ -100,7 +110,7 @@ const NaturalLanguageSearch = () => {
                     </div>
                     {loading ? (
                         <p className="text-center text-gray-500">Đang tải...</p>
-                    ) :
+                    ) : resultType === 'gadget' ? (
                         displayedGadgets.length > 0 ? (
                             <div className="container w-full max-w-screen-lg mx-auto grid grid-cols-4 gap-4 h-[400px] overflow-y-hiden">
                                 {displayedGadgets.map((gadget) => (
@@ -172,33 +182,78 @@ const NaturalLanguageSearch = () => {
                             </div>
                         ) : (
                             <p className="text-center text-gray-500 mt-4">Không tìm thấy từ khóa, hãy thử tìm với từ khóa khác</p>
-                        )}
+                        )
+                    ) : (
+                        sellers.length > 0 ? (
+                            <div className="container w-full max-w-screen-lg h-[550px] mx-auto overflow-y-auto">
+                                <div className="grid grid-cols-1 gap-4 p-4">
+                                    {sellers.map((seller) => (
+                                        <div key={seller.id}
+                                            className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h3 className="font-bold text-lg text-primary/80">
+                                                    {seller.shopName || "Chưa đặt tên shop"}
+                                                </h3>
+                                                <span className="text-sm px-3 py-1 bg-gray-100 rounded-full">
+                                                    {seller.businessModel === 'Personal'
+                                                        ? 'Cá nhân'
+                                                        : seller.businessModel === 'BusinessHouseHold'
+                                                            ? 'Doanh nghiệp'
+                                                            : 'Công ty'}
+
+                                                </span>
+                                            </div>
+                                            <div className="space-y-2 text-gray-600">
+                                                <p className="flex items-center gap-2">
+                                                    <span className="font-semibold min-w-[100px]">Địa chỉ:</span>
+                                                    <span className="text-gray-700">{seller.shopAddress}</span>
+                                                </p>
+                                                <p className="flex items-center gap-2">
+                                                    <span className="font-semibold min-w-[100px]">Mã số thuế:</span>
+                                                    <span className="text-gray-700">{seller.taxCode}</span>
+                                                </p>
+                                                <p className="flex items-center gap-2">
+                                                    <span className="font-semibold min-w-[100px]">Số điện thoại:</span>
+                                                    <span className="text-gray-700">{seller.phoneNumber}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-center text-gray-500 mt-4">Không tìm thấy người bán nào phù hợp</p>
+                        )
+                    )}
                 </div>
 
-                {/* Pagination */}
-                <div className="flex items-center justify-between p-1 bg-white border-t">
-                    <button
-                        onClick={() => handlePageChange('prev')}
-                        disabled={currentPage === 1}
-                        className="flex items-center gap-1 px-3 py-2  bg-gray-200 text-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <ChevronLeft className="w-4 h-4" /> Trước
-                    </button>
+                {/* Pagination - only show for gadgets */}
+                {resultType === 'gadget' && displayedGadgets.length > 0 && (
+                    <div className="flex items-center justify-between p-1 bg-white border-t">
+                        <button
+                            onClick={() => handlePageChange('prev')}
+                            disabled={currentPage === 1}
+                            className="flex items-center gap-1 px-3 py-2  bg-gray-200 text-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <ChevronLeft className="w-4 h-4" /> Trước
+                        </button>
 
-                    {/* <span className="text-gray-600">
-                        Trang {currentPage} / {totalPages}
-                    </span> */}
+                        {/* <span className="text-gray-600">
+                            Trang {currentPage} / {totalPages}
+                        </span> */}
 
-                    <button
-                        onClick={() => handlePageChange('next')}
-                        disabled={currentPage === totalPages}
-                        className="flex items-center gap-1 px-3 py-2 bg-gray-200 text-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Kế tiếp <ChevronRight className="w-4 h-4" />
-                    </button>
-                </div>
+                        <button
+                            onClick={() => handlePageChange('next')}
+                            disabled={currentPage === totalPages}
+                            className="flex items-center gap-1 px-3 py-2 bg-gray-200 text-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Kế tiếp <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+
                 {/* Search Bar */}
-                <div className="sticky top-0 bg-white p-4  ">
+                <div className="sticky top-0 bg-white p-4">
                     <div className="flex items-center">
                         <input
                             type="text"

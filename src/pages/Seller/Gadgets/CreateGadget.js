@@ -25,7 +25,7 @@ const CreateGadget = () => {
     quantity: '',
     discount: {
       discountPercentage: '',
-      discountExpiredDate: null,
+      discountExpiredDate: '',
     },
     gadgetImages: [],
     gadgetDescriptions: [{ Image:'', Text: '', Type: 'Image' }],
@@ -81,24 +81,22 @@ const CreateGadget = () => {
 
     // Validate discount fields
     if (gadgetData.discount.discountPercentage || gadgetData.discount.discountExpiredDate) {
-      const discountPercentage = parseFloat(gadgetData.discount.discountPercentage);
-      const discountExpiredDate = new Date(gadgetData.discount.discountExpiredDate);
-      if (!gadgetData.discount.discountPercentage || !gadgetData.discount.discountExpiredDate) {
-        toast.error("Both discount percentage and expiration date must be provided");
-        return;
-      }
-      if (discountPercentage <= 0 || discountPercentage > 90) {
-        toast.error("Discount percentage must be greater than 0 and less than or equal to 90");
-        return;
-      }
-      if (discountExpiredDate <= new Date()) {
+      const DiscountPercentage = parseFloat(gadgetData.discount.discountPercentage);
+      // if (!gadgetData.Discount.DiscountPercentage || !gadgetData.Discount.DiscountExpiredDate) {
+      //   toast.error("Both discount percentage and expiration date must be provided");
+      //   return;
+      // }
+      // if (DiscountPercentage <= 0 || DiscountPercentage > 90) {
+      //   toast.error("Discount percentage must be greater than 0 and less than or equal to 90");
+      //   return;
+      // }
+      const now = new Date();
+      const discountDate = new Date(gadgetData.discount.discountExpiredDate);
+      if (discountDate <= now) {
         toast.error("Discount expiration date must be in the future");
         return;
       }
     }
-
-    // Validate gadget descriptions
-
 
     // Prepare form data
     const formData = new FormData();
@@ -109,10 +107,12 @@ const CreateGadget = () => {
     formData.append('categoryId', gadgetData.categoryId);
     formData.append('condition', gadgetData.condition);
     formData.append('quantity', gadgetData.quantity);
-    if (gadgetData.discount.discountPercentage && gadgetData.discount.discountExpiredDate) {
-      formData.append('discountPercentage', gadgetData.discount.discountPercentage);
-      formData.append('discountExpiredDate', gadgetData.discount.discountExpiredDate);
-    }
+    // if (gadgetData.Discount.DiscountPercentage && gadgetData.Discount.DiscountExpiredDate) {
+    //   formData.append('discountPercentage', gadgetData.Discount.DiscountPercentage);
+    //   formData.append('discountExpiredDate', gadgetData.Discount.DiscountExpiredDate);
+    // }
+    formData.append('discount.discountPercentage', gadgetData.discount.discountPercentage);
+    formData.append('discount.discountExpiredDate', gadgetData.discount.discountExpiredDate);
     gadgetData.gadgetImages.forEach((image, index) => {
       formData.append('gadgetImages', image);
     });
@@ -157,14 +157,28 @@ const CreateGadget = () => {
 
   // Handle discount date formatting
   const handleDateChange = (date) => {
-    setGadgetData((prev) => ({
-      ...prev,
-      discount: {
-        ...prev.discount,
-        discountExpiredDate: date ? dayjs(date).format('YYYY-MM-DDTHH:mm:ss') : null,
-      },
-    }));
+    if (date) {
+      // Convert to ISO string format
+      const isoDate = new Date(date).toISOString();
+      setGadgetData((prev) => ({
+        ...prev,
+        discount: {
+          ...prev.discount,
+          discountExpiredDate: isoDate,
+        },
+      }));
+    } else {
+      setGadgetData((prev) => ({
+        ...prev,
+        discount: {
+          ...prev.discount,
+          discountExpiredDate: null,
+        },
+      }));
+    }
   };
+
+
 
   const handleBrandChange = (e) => {
     const selectedBrand = brands.find(brand => brand.name === e.target.value);
@@ -325,7 +339,9 @@ const CreateGadget = () => {
           timeFormat="HH:mm"
           timeIntervals={15}
           dateFormat="dd/MM/yyyy HH:mm"
+          minDate={new Date()}
           className="w-full border rounded p-3"
+          placeholderText="Chọn ngày và giờ"
         />
         <Calendar className="ml-2" />
       </div>
