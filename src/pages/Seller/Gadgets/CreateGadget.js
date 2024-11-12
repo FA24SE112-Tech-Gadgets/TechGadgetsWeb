@@ -7,7 +7,10 @@ import 'tailwindcss/tailwind.css';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from 'react-toastify';
 import { Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 const CreateGadget = () => {
+  const navigate = useNavigate();
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
   const [specificationKeys, setSpecificationKeys] = useState([]);
@@ -18,34 +21,43 @@ const CreateGadget = () => {
     price: '',
     thumbnailUrl: '',
     categoryId: '',
-    condition: 'Mới',
+    condition: '',
     quantity: '',
     discount: {
       discountPercentage: '',
       discountExpiredDate: null,
     },
     gadgetImages: [],
-    gadgetDescriptions: [{ image: '', text: '', type: 'Image' }],
+    gadgetDescriptions: [{ Image:'', Text: '', Type: 'Image' }],
     specificationValues: [{ specificationKeyId: '', specificationUnitId: '', value: '' }],
   });
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [gadgetImagePreviews, setGadgetImagePreviews] = useState([]);
   const [gadgetDescriptionPreviews, setGadgetDescriptionPreviews] = useState([]);
 
-  // Fetch brands and categories on component mount
+  // Fetch categories on component mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
-        const brandsRes = await AxiosInterceptor.get("/api/brands");
-        setBrands(brandsRes.data.items);
         const categoriesRes = await AxiosInterceptor.get("/api/categories");
         setCategories(categoriesRes.data.items);
       } catch (error) {
-        console.error("Error fetching brands or categories", error);
+        console.error("Error fetching categories", error);
       }
     };
-    fetchData();
+    fetchCategories();
   }, []);
+
+  // Fetch brands when a category is selected
+  useEffect(() => {
+    if (gadgetData.categoryId) {
+      AxiosInterceptor.get(`/api/brands/categories/${gadgetData.categoryId}`)
+        .then((res) => {
+          setBrands(res.data.items);
+        })
+        .catch((error) => console.error("Error fetching brands", error));
+    }
+  }, [gadgetData.categoryId]);
 
   // Fetch specification keys when a category is selected
   useEffect(() => {
@@ -86,16 +98,7 @@ const CreateGadget = () => {
     }
 
     // Validate gadget descriptions
-    for (const desc of gadgetData.gadgetDescriptions) {
-      if (desc.type === 'Image' && !desc.image) {
-        toast.error("Image type description must contain an image");
-        return;
-      }
-      if (desc.type !== 'Image' && !desc.text) {
-        toast.error("Text type description must contain text");
-        return;
-      }
-    }
+
 
     // Prepare form data
     const formData = new FormData();
@@ -111,15 +114,17 @@ const CreateGadget = () => {
       formData.append('discountExpiredDate', gadgetData.discount.discountExpiredDate);
     }
     gadgetData.gadgetImages.forEach((image, index) => {
-      formData.append(`gadgetImages`, image);
+      formData.append('gadgetImages', image);
     });
     gadgetData.gadgetDescriptions.forEach((desc, index) => {
-      formData.append(`gadgetDescriptions[${index}][type]`, desc.type);
-      if (desc.type === 'Image') {
-        formData.append(`gadgetDescriptions[${index}][image]`, desc.image);
+      if (desc.Type === 'Image') {
+        formData.append(`GadgetDescriptions[${index}].Image`, desc.Image);
+        formData.append(`GadgetDescriptions[${index}].Text`, '');  // Empty string for image type
       } else {
-        formData.append(`gadgetDescriptions[${index}][text]`, desc.text);
+        formData.append(`GadgetDescriptions[${index}].Image`, '');  // Empty string for text types
+        formData.append(`GadgetDescriptions[${index}].Text`, desc.Text);
       }
+      formData.append(`GadgetDescriptions[${index}].Type`, desc.Type);
     });
     gadgetData.specificationValues.forEach((spec, index) => {
       formData.append(`specificationValues[${index}][specificationKeyId]`, spec.specificationKeyId);
@@ -135,6 +140,8 @@ const CreateGadget = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
+      toast.success("Tạo sản phẩm thành công!");
+      navigate('/all-products');
     } catch (error) {
       if (error.response && error.response.data && error.response.data.reasons) {
         const reasons = error.response.data.reasons;
@@ -167,6 +174,14 @@ const CreateGadget = () => {
     }));
   };
 
+  const handleCategoryChange = (e) => {
+    setGadgetData((prev) => ({
+      ...prev,
+      categoryId: e.target.value,
+      brandId: '', // Reset brand when category changes
+    }));
+  };
+
   const handleThumbnailChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -188,7 +203,7 @@ const CreateGadget = () => {
     const file = e.target.files?.[0];
     if (file) {
       const newDescriptions = [...gadgetData.gadgetDescriptions];
-      newDescriptions[index].image = file;
+      newDescriptions[index].Image = file; // Ensure the file is set in the state
       setGadgetData({ ...gadgetData, gadgetDescriptions: newDescriptions });
       const newPreviews = [...gadgetDescriptionPreviews];
       newPreviews[index] = URL.createObjectURL(file);
@@ -202,6 +217,21 @@ const CreateGadget = () => {
     <ToastContainer />
     <h2 className="text-2xl font-bold mb-6">Tạo Sản Phẩm Mới</h2>
 
+    {/* Category Selection */}
+    <div className="mb-6">
+      <label className="block text-gray-700 mb-2">Danh Mục</label>
+      <select
+        value={gadgetData.categoryId}
+        onChange={handleCategoryChange}
+        className="w-full border rounded p-3"
+      >
+        <option value="">Chọn Danh Mục</option>
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>{category.name}</option>
+        ))}
+      </select>
+    </div>
+
     {/* Brand Selection */}
     <div className="mb-6">
       <label className="block text-gray-700 mb-2">Thương Hiệu</label>
@@ -209,6 +239,7 @@ const CreateGadget = () => {
         value={brands.find(brand => brand.id === gadgetData.brandId)?.name || ''}
         onChange={handleBrandChange}
         className="w-full border rounded p-3"
+        disabled={!gadgetData.categoryId} // Disable brand selection if no category is selected
       >
         <option value="">Chọn Thương Hiệu</option>
         {brands.map((brand) => (
@@ -252,32 +283,15 @@ const CreateGadget = () => {
       )}
     </div>
 
-    {/* Category Selection */}
-    <div className="mb-6">
-      <label className="block text-gray-700 mb-2">Danh Mục</label>
-      <select
-        value={gadgetData.categoryId}
-        onChange={(e) => setGadgetData({ ...gadgetData, categoryId: e.target.value })}
-        className="w-full border rounded p-3"
-      >
-        <option value="">Chọn Danh Mục</option>
-        {categories.map((category) => (
-          <option key={category.id} value={category.id}>{category.name}</option>
-        ))}
-      </select>
-    </div>
-
     {/* Condition */}
     <div className="mb-6">
       <label className="block text-gray-700 mb-2">Tình Trạng</label>
-      <select
+      <input
+        type="text"
         value={gadgetData.condition}
         onChange={(e) => setGadgetData({ ...gadgetData, condition: e.target.value })}
         className="w-full border rounded p-3"
-      >
-        <option value="Mới">Mới</option>
-        <option value="Cũ">Cũ</option>
-      </select>
+      />
     </div>
 
     {/* Quantity */}
@@ -339,10 +353,10 @@ const CreateGadget = () => {
       {gadgetData.gadgetDescriptions.map((desc, index) => (
         <div key={index} className="mb-4">
           <select
-            value={desc.type}
+            value={desc.Type}
             onChange={(e) => {
               const newDescriptions = [...gadgetData.gadgetDescriptions];
-              newDescriptions[index].type = e.target.value;
+              newDescriptions[index].Type = e.target.value;
               setGadgetData({ ...gadgetData, gadgetDescriptions: newDescriptions });
             }}
             className="w-full border rounded p-3 mb-2"
@@ -351,7 +365,7 @@ const CreateGadget = () => {
             <option value="normalText">Văn Bản Thường</option>
             <option value="boldText">Văn Bản Đậm</option>
           </select>
-          {desc.type === 'Image' ? (
+          {desc.Type === 'Image' ? (
             <>
               <input
                 type="file"
@@ -365,10 +379,10 @@ const CreateGadget = () => {
           ) : (
             <input
               type="text"
-              value={desc.text}
+              value={desc.Text}
               onChange={(e) => {
                 const newDescriptions = [...gadgetData.gadgetDescriptions];
-                newDescriptions[index].text = e.target.value;
+                newDescriptions[index].Text = e.target.value;
                 setGadgetData({ ...gadgetData, gadgetDescriptions: newDescriptions });
               }}
               className="w-full border rounded p-3"
@@ -379,7 +393,7 @@ const CreateGadget = () => {
       ))}
       <button
         type="button"
-        onClick={() => setGadgetData({ ...gadgetData, gadgetDescriptions: [...gadgetData.gadgetDescriptions, { image: '', text: '', type: 'Image' }] })}
+        onClick={() => setGadgetData({ ...gadgetData, gadgetDescriptions: [...gadgetData.gadgetDescriptions, { Image: '', Text: '', Type: 'Image' }] })}
         className="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-green-600"
       >
         Thêm Mô Tả
