@@ -8,6 +8,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import useAuth from '~/context/auth/useAuth';
 import { Wallet } from '@mui/icons-material';
 import SellerNotification from '~/Notification/SellerNotification';
+import { useDeviceToken } from '~/context/auth/Noti';
 
 const { Header } = Layout;
 
@@ -16,7 +17,12 @@ const SellerHeader = () => {
   const navigate = useNavigate();
   const [walletAmount, setWalletAmount] = useState(0);
   const [showWalletAmount, setShowWalletAmount] = useState(false);
-
+  const { deleteDeviceToken } = useDeviceToken();
+  const handleLogout = async () => {
+    console.log("Logout clicked");
+    await deleteDeviceToken(); 
+    logout();
+  };
   const formatWalletAmount = (amount) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
@@ -70,7 +76,7 @@ const SellerHeader = () => {
         </div>
       </Menu.Item>
 
-      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={logout}>
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
         Đăng xuất
       </Menu.Item>
     </Menu>

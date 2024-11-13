@@ -117,7 +117,7 @@ const AuthProvider = ({ children }) => {
 						setError(null);
 						console.log("Login successful, navigating to home...", resData);
 						if (clientRole === "Manager") {
-							navigate("/dashboard");
+							navigate("/specification-unit");
 						} else if (clientRole === "Seller") {
 							if (resData.data.seller === null) {
 								console.log('day ne', resData.data.seller);

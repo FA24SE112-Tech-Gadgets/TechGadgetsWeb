@@ -205,7 +205,7 @@ const NaturalLanguageSearch = () => {
                                 <div className="grid grid-cols-1 gap-4 p-4">
                                     {sellers.map((seller) => (
                                         <div key={seller.id}
-                                        onClick={() => handleSellerClick(seller)}
+                                            onClick={() => handleSellerClick(seller)}
                                             className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white">
                                             <div className="flex items-center justify-between mb-2">
                                                 <h3 className="font-bold text-lg text-primary/80">
@@ -214,11 +214,13 @@ const NaturalLanguageSearch = () => {
                                                 <span className="text-sm px-3 py-1 bg-gray-100 rounded-full">
                                                     {seller.businessModel === 'Personal'
                                                         ? 'Cá nhân'
-                                                        : seller.businessModel === 'BusinessHouseHold'
-                                                            ? 'Doanh nghiệp'
-                                                            : 'Công ty'}
-
+                                                        : seller.businessModel === 'BusinessHousehold'
+                                                            ? 'Hộ kinh doanh'
+                                                            : seller.businessModel === 'Company'
+                                                                ? 'Công ty'
+                                                                : ''}
                                                 </span>
+
                                             </div>
                                             <div className="space-y-2 text-gray-600">
                                                 <p className="flex items-center gap-2">
@@ -309,8 +311,8 @@ const NaturalLanguageSearch = () => {
                 </div>
             )}
             {selectedSeller && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" 
-                    style={{ zIndex: 1000 }} 
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+                    style={{ zIndex: 1000 }}
                     onClick={() => setSelectedSeller(null)}>
                     <div className="bg-white p-6 rounded-md shadow-md" onClick={(e) => e.stopPropagation()}>
                         <h2 className="text-lg font-bold mb-4">Xác nhận</h2>

@@ -49,6 +49,7 @@ import GadgetManagementPage from "./pages/Seller/Gadgets/GadgetManagementPage";
 import GadgetDetailSeller from "./pages/Seller/Gadgets/GadgetDetailSeller";
 import CreateGadget from "./pages/Seller/Gadgets/CreateGadget";
 import SellerPage from "./pages/SellerPage/SellerPage";
+import ManageGadgetPage from "./pages/Manager/Gadget/ManageGadgetPage";
 
 
 function App() {
@@ -67,7 +68,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/gadget/detail/:name' element={<DetailGadgetPage />} />
         <Route path='/gadget/detail/:name/reviews' element={<ReviewPage />} />
-       <Route path='/order/detail/:orderId' element={<OrderDetail />} />
+        <Route path='/order/detail/:orderId' element={<OrderDetail />} />
         <Route path='/favorite' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
@@ -98,7 +99,7 @@ function App() {
 
         <Route path="/gadgets/:category/:brand" element={<BrandGadgetPage />} />
         <Route path="/gadgets/:category/" element={<CategoryGadgetPage />} />
-        <Route path="/seller-page/:name" element={<SellerPage/>} />
+        <Route path="/seller-page/:name" element={<SellerPage />} />
         <Route path='/profile' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
@@ -107,7 +108,7 @@ function App() {
           </AuthRoute>
 
         } />
-          <Route path='/review-gadget' element={
+        <Route path='/review-gadget' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
               <Review />
@@ -206,6 +207,12 @@ function App() {
         } />
         <Route path='/manage-seller-application' element={
           <ManageSellerApplicationPage />
+        } />
+        <Route path='/manage-gadget' element={
+          <ManageGadgetPage />
+        } />
+          <Route path='/gadget/detail-manager/:name' element={
+          <GadgetDetailSeller/>
         } />
       </Route>
     </Routes>

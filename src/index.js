@@ -6,9 +6,11 @@ import reportWebVitals from './reportWebVitals';
 import GlobalStyles from './components/GlobalStyles';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/auth/AuthContext';
+
 import { BrowserRouter } from 'react-router-dom';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { NotiProvider } from './context/auth/Noti';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -16,9 +18,11 @@ root.render(
   <GoogleOAuthProvider clientId="918667179231-suhe212hae2usf0v7o8bcsdj5fd81cto.apps.googleusercontent.com">
     <BrowserRouter>
       <AuthProvider>
+        <NotiProvider>
         <GlobalStyles>
           <App />
         </GlobalStyles>
+        </NotiProvider>
       </AuthProvider>
     </BrowserRouter>
     </GoogleOAuthProvider>

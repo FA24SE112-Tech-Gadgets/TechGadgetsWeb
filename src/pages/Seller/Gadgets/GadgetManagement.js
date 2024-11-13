@@ -3,8 +3,7 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { toast, ToastContainer } from "react-toastify";
-import { Eye, X, Percent, Plus, Box, ShoppingBag, Pause, Search } from 'lucide-react'; // Add Search import
-import { Switch } from 'antd';
+import { Eye, X, Percent, Plus, Box, ShoppingBag, Pause, Search, Loader } from 'lucide-react'; // Add Loader
 import slugify from '~/ultis/config';
 
 const formatDate = (dateString) => {
@@ -27,6 +26,7 @@ const GadgetManagement = ({ categoryId }) => {
     const [formattedDate, setFormattedDate] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [searchInput, setSearchInput] = useState('');
+    const [loadingStates, setLoadingStates] = useState({}); // Add this state
     const itemsPerPage = 5;
     const navigate = useNavigate();
     const formRef = React.useRef(null);
@@ -75,14 +75,21 @@ const GadgetManagement = ({ categoryId }) => {
     const totalPages = Math.ceil(gadgets.length / itemsPerPage);
 
     const handleSaleToggle = async (id, isForSale) => {
+        setLoadingStates(prev => ({ ...prev, [id]: true }));
         try {
-            setIsLoading(true);
-            if (isForSale) {
-                await AxiosInterceptor.put(`/api/gadgets/${id}/set-not-for-sale`);
-            } else {
-                await AxiosInterceptor.put(`/api/gadgets/${id}/set-for-sale`);
-            }
-            await fetchGadgets();
+            const endpoint = isForSale 
+                ? `/api/gadgets/${id}/set-not-for-sale` 
+                : `/api/gadgets/${id}/set-for-sale`;
+            
+            // Send the API request without awaiting a response for `fetchGadgets`
+            await AxiosInterceptor.put(endpoint);
+            
+            // Update the local state to reflect the new sale status without refetching
+            setGadgets(prevGadgets =>
+                prevGadgets.map(gadget =>
+                    gadget.id === id ? { ...gadget, isForSale: !isForSale } : gadget
+                )
+            );
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
                 const reasons = error.response.data.reasons;
@@ -94,9 +101,10 @@ const GadgetManagement = ({ categoryId }) => {
                 }
             }
         } finally {
-            setIsLoading(false);
+            setLoadingStates(prev => ({ ...prev, [id]: false }));
         }
     };
+    
 
     const handleChangePage = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -365,15 +373,22 @@ const GadgetManagement = ({ categoryId }) => {
 
                             </td>
                             <td className="p-4">
-                                <Switch
-                                    checked={gadget.isForSale}
-                                    onChange={() => handleSaleToggle(gadget.id, gadget.isForSale)}
-                                    disabled={isLoading}
-                                    style={{
-                                        backgroundColor: gadget.isForSale ? 'rgba(59, 130, 246, 0.8)' : 'gray', // Set `primary/80` color when checked
-                                    }}
-                                />
-
+                                <div className="flex items-center gap-2">
+                                    {loadingStates[gadget.id] ? (
+                                        <Loader className="h-5 w-5 animate-spin text-primary" />
+                                    ) : (
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={gadget.isForSale}
+                                                onChange={() => handleSaleToggle(gadget.id, gadget.isForSale)}
+                                                disabled={loadingStates[gadget.id]}
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    )}
+                                </div>
                             </td>
                             <td className="p-4">
                                 <button
