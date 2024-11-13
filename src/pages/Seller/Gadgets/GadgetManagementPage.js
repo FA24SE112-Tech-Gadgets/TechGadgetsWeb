@@ -20,7 +20,13 @@ const categoryNames = {
 
 const GadgetManagementPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(categoryIds.laptop);
-const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  // Add resetPage function
+  const handleCategoryChange = (id) => {
+    setSelectedCategory(id);
+  };
+
   const categoryIcons = {
     [categoryIds.laptop]: Laptop,
     [categoryIds.headphones]: Headphones,
@@ -31,19 +37,27 @@ const navigate = useNavigate();
   return (
     <div className="container mx-auto p-4">
       <ToastContainer />
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Quản lý sản phẩm</h1>
-        <div className="flex space-x-4 mb-6 justify-end">
+      <div className="flex flex-col space-y-4 mb-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Quản lý sản phẩm</h1>
+          <button 
+            onClick={()=>navigate("/seller/gadgets/create")} 
+            className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary transition duration-200"
+          >
+            Tạo sản phẩm
+          </button>
+        </div>
+        <div className="flex space-x-4">
           {Object.entries(categoryIds).map(([key, id]) => {
             const IconComponent = categoryIcons[id];
             return (
               <button
                 key={key}
-                onClick={() => setSelectedCategory(id)}
-                className={`px-4 py-2 rounded flex items-center ${
+                onClick={() => handleCategoryChange(id)}
+                className={`px-4 py-2 rounded flex items-center transition duration-200 ${
                   selectedCategory === id 
                     ? "bg-primary/80 text-white" 
-                    : "bg-gray-100"
+                    : "bg-gray-100 hover:bg-gray-200"
                 }`}
               >
                 <IconComponent className="inline-block mr-2" />
@@ -51,8 +65,6 @@ const navigate = useNavigate();
               </button>
             );
           })}
-          <button onClick={()=>navigate("/seller/gadgets/create")} className="px-4 py-2 bg-primary/80 text-white rounded"
-          >Tạo sản phẩm</button>
         </div>
       </div>
       <GadgetManagement categoryId={selectedCategory} />

@@ -48,6 +48,7 @@ import SellerGadgetManagement from "./pages/Seller/Gadgets/GadgetManagement";
 import GadgetManagementPage from "./pages/Seller/Gadgets/GadgetManagementPage";
 import GadgetDetailSeller from "./pages/Seller/Gadgets/GadgetDetailSeller";
 import CreateGadget from "./pages/Seller/Gadgets/CreateGadget";
+import SellerPage from "./pages/SellerPage/SellerPage";
 
 
 function App() {
@@ -97,6 +98,7 @@ function App() {
 
         <Route path="/gadgets/:category/:brand" element={<BrandGadgetPage />} />
         <Route path="/gadgets/:category/" element={<CategoryGadgetPage />} />
+        <Route path="/seller-page/:name" element={<SellerPage/>} />
         <Route path='/profile' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>

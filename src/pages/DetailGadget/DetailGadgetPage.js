@@ -521,11 +521,22 @@ const DetailGadgetPage = () => {
                                 Mua ngay
                             </button>
                         </div>
+                        <div className="flex items-center space-x-4">
+                            <h2 className="text-lg font-semibold">Thông tin người bán</h2>
+                            <button
+                                onClick={() => navigate(`/seller-page/${slugify(product.seller?.shopName)}`, {
+                                    state: { sellerId: product.seller?.id },
+                                })}
+                                className="px-4 py-2 bg-primary/80 text-white font-semibold rounded-lg shadow-md hover:bg-primary transition duration-200"
+                            >
+                                Xem Shop
+                            </button>
+                        </div>
 
-                        <h2 className="text-lg font-semibold">Thông tin người bán</h2>
                         <div className="flex">
                             <InfoCircleFilled />
                             <p className='p-2'>{product.seller?.shopName}</p>
+
                         </div>
                         <div className="flex">
                             <HomeFilled />
@@ -540,13 +551,14 @@ const DetailGadgetPage = () => {
                         </div>
 
                     </div>
-                    <GadgetHistoryDetail />
+                    {isAuthenticated && <GadgetHistoryDetail />}
+
                 </div>
             </div>
 
             {/* Reviews */}
+            {isAuthenticated && <GadgetSuggest />}
 
-            <GadgetSuggest />
             {showConfirmation && (
                 <OrderConfirmation
                     product={product}

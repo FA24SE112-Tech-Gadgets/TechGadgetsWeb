@@ -20,6 +20,7 @@ const NaturalLanguageSearch = () => {
     const [loading, setLoading] = useState(true);
     const [sellers, setSellers] = useState([]);
     const [resultType, setResultType] = useState('gadget');
+    const [selectedSeller, setSelectedSeller] = useState(null);
 
     const fetchGadgets = async () => {
         setLoading(true);
@@ -76,6 +77,21 @@ const NaturalLanguageSearch = () => {
     const handleCloseModal = () => {
         setSelectedGadget(null);
     };
+
+    const handleSellerClick = (seller) => {
+        setSelectedSeller(seller);
+    };
+
+    const handleConfirmSellerNavigation = () => {
+        if (selectedSeller) {
+            navigate(`/seller-page/${slugify(selectedSeller.shopName)}`, {
+                state: {
+                    sellerId: selectedSeller.id,
+                }
+            });
+        }
+    };
+
     const totalPages = Math.ceil(gadgets.length / itemsPerPage);
     const displayedGadgets = gadgets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -189,6 +205,7 @@ const NaturalLanguageSearch = () => {
                                 <div className="grid grid-cols-1 gap-4 p-4">
                                     {sellers.map((seller) => (
                                         <div key={seller.id}
+                                        onClick={() => handleSellerClick(seller)}
                                             className="border rounded-lg p-4 hover:shadow-lg transition-shadow bg-white">
                                             <div className="flex items-center justify-between mb-2">
                                                 <h3 className="font-bold text-lg text-primary/80">
@@ -283,6 +300,30 @@ const NaturalLanguageSearch = () => {
                             </button>
                             <button
                                 onClick={handleConfirmNavigation}
+                                className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary-600"
+                            >
+                                Đồng ý
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {selectedSeller && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" 
+                    style={{ zIndex: 1000 }} 
+                    onClick={() => setSelectedSeller(null)}>
+                    <div className="bg-white p-6 rounded-md shadow-md" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="text-lg font-bold mb-4">Xác nhận</h2>
+                        <p>Bạn có muốn đến trang chi tiết người bán không?</p>
+                        <div className="mt-4 flex justify-end space-x-2">
+                            <button
+                                onClick={() => setSelectedSeller(null)}
+                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                onClick={handleConfirmSellerNavigation}
                                 className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary-600"
                             >
                                 Đồng ý
