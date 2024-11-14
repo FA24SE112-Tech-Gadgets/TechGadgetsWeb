@@ -3,7 +3,7 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { toast, ToastContainer } from "react-toastify";
-import { Eye, X, Percent, Plus } from 'lucide-react';
+import { Eye, X, Percent, Plus, Edit  } from 'lucide-react';
 import { Switch } from 'antd';
 import slugify from '~/ultis/config';
 
@@ -192,6 +192,10 @@ const GadgetManagement = ({ categoryId }) => {
         </div>
     );
 
+    const handleUpdateGadget = (gadgetId) => {
+        navigate(`/seller/gadgets/update/${gadgetId}`);
+    };
+
     return (
         <div className="p-6">
             <ToastContainer position="top-right" autoClose={3000} />
@@ -213,15 +217,24 @@ const GadgetManagement = ({ categoryId }) => {
                     {currentGadgets.map((gadget) => (
                         <tr key={gadget.id} className="border-b hover:bg-gray-50">
                             <td className="p-4">
-                                <img
-                                    src={gadget.thumbnailUrl}
-                                    alt={gadget.name}
-                                    className="w-32 h-32 object-contain rounded"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = '/placeholder-image.png';
-                                    }}
-                                />
+                                <div className="relative">
+                                    <img
+                                        src={gadget.thumbnailUrl}
+                                        alt={gadget.name}
+                                        className="w-32 h-32 object-contain rounded"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = '/placeholder-image.png';
+                                        }}
+                                    />
+                                    <button
+                                        onClick={() => handleUpdateGadget(gadget.id)}
+                                        className="absolute top-0 left-0 bg-white p-1 rounded-full shadow-md border-x-2"
+                                        title="Cập nhật sản phẩm"
+                                    >
+                                        <Edit className="h-4 w-4 text-primary/100" />
+                                    </button>
+                                </div>
                             </td>
                             <td className="p-4">{gadget.name}</td>
                             <td className="p-4">{`${gadget.price.toLocaleString()}₫`}</td>
@@ -267,11 +280,11 @@ const GadgetManagement = ({ categoryId }) => {
                             </td>
                             <td className="p-4">
                                 <button
-                                     onClick={() => navigate(`/gadget/detail-seller/${slugify(gadget.name)}`, {
+                                    onClick={() => navigate(`/gadget/detail-seller/${slugify(gadget.name)}`, {
                                         state: {
-                                          gadgetId: gadget.id,
+                                            gadgetId: gadget.id,
                                         }
-                                      })}
+                                    })}
                                     className="flex items-center space-x-1 text-primary/80 hover:text-primary"
                                     disabled={isLoading}
                                 >
@@ -384,7 +397,7 @@ const GadgetManagement = ({ categoryId }) => {
                                     className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
                                     disabled={isLoading}
                                 >
-                                    Hủy 
+                                    Hủy
                                 </button>
                                 <button
                                     type="submit"

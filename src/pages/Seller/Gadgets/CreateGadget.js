@@ -227,7 +227,7 @@ const CreateGadget = () => {
 
   // Render form
   return (
-    <form onSubmit={handleSubmit} className="p-6 bg-white rounded-lg shadow-lg  mx-auto">
+    <form onSubmit={handleSubmit} className="p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto">
     <ToastContainer />
     <h2 className="text-2xl font-bold mb-6">Tạo Sản Phẩm Mới</h2>
 

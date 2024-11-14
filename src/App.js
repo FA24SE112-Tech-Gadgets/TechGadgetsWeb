@@ -48,6 +48,7 @@ import SellerGadgetManagement from "./pages/Seller/Gadgets/GadgetManagement";
 import GadgetManagementPage from "./pages/Seller/Gadgets/GadgetManagementPage";
 import GadgetDetailSeller from "./pages/Seller/Gadgets/GadgetDetailSeller";
 import CreateGadget from "./pages/Seller/Gadgets/CreateGadget";
+import UpdateGadget from "./pages/Seller/Gadgets/UpdateGadget";
 
 
 function App() {
@@ -133,6 +134,7 @@ function App() {
       </Route>
       {/* Search by AI */}
       <Route path="/search-by-natural-language" element={<NaturalLanguageSearch />} />
+      
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
         <Route path='/seller/Order-management' element={<OrderHistorySeller />} />
@@ -157,6 +159,9 @@ function App() {
       </Route>
       <Route element={<SellerLayout />}>
         <Route path='/seller/gadgets/create' element={<CreateGadget />} />
+      </Route>
+      <Route element={<SellerLayout />}>
+        <Route path='/seller/gadgets/update/:gadgetId' element={<UpdateGadget />} />
       </Route>
       <Route path="/sellerProfile" element={
         <AuthRoute>

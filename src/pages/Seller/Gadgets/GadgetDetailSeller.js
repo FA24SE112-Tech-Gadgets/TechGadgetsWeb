@@ -74,8 +74,8 @@ const GadgetDetailSeller = () => {
                             <div className="space-y-4">
                                 {gadget.specificationValues.sort((a, b) => a.index - b.index).map((spec) => (
                                     <div key={spec.id} className="flex items-start text-sm border-b border-gray-200 py-3 last:border-0">
-                                        <div className="w-1/3 text-gray-600">{spec.specificationKey || 'N/A'}</div>
-                                        <div className="w-2/3 font-medium text-gray-900">{spec.value || 'N/A'} {spec.specificationUnit || ''}</div>
+                                        <div className="w-1/3 text-gray-600">{spec.specificationKey?.name || 'N/A'}</div>
+                                        <div className="w-2/3 font-medium text-gray-900">{spec.value || 'N/A'} {spec.specificationUnit?.name || ''}</div>
                                     </div>
                                 ))}
                             </div>
