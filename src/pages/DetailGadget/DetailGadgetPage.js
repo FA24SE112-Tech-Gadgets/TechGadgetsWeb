@@ -274,7 +274,7 @@ const DetailGadgetPage = () => {
                 ]}
             />
 
-            <ToastContainer />
+            <ToastContainer autoClose={3000}/>
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Left column */}
                 <div className="lg:w-2/3">
@@ -322,24 +322,38 @@ const DetailGadgetPage = () => {
                             </button>
                         </div>
                         {activeTab === 'specifications' && (
-                            <div className="space-y-4">
-                                {product.specificationValues &&
-                                    product.specificationValues
-                                        .sort((a, b) => a.index - b.index)
-                                        .map((spec) => (
-                                            <div key={spec.id}
-                                                className="flex items-start text-sm border-b border-gray-200 py-3 last:border-0"
-                                            >
-                                                <div className="w-1/3 text-gray-600">
-                                                    {spec.specificationKey || 'N/A'}
-                                                </div>
-                                                <div className="w-2/3 font-medium text-gray-900">
-                                                    {spec.value || 'N/A'} {spec.specificationUnit || ''}
-                                                </div>
-                                            </div>
-                                        ))
-                                }
-                            </div>
+                              <div className="space-y-4">
+                              {product.specificationValues && (() => {
+                                  // Group specifications by their keys
+                                  const groupedSpecs = product.specificationValues.reduce((acc, spec) => {
+                                      const keyName = spec.specificationKey?.name || 'N/A';
+                                      if (!acc[keyName]) {
+                                          acc[keyName] = [];
+                                      }
+                                      acc[keyName].push(spec);
+                                      return acc;
+                                  }, {});
+
+                                  // Render grouped specifications
+                                  return Object.entries(groupedSpecs).map(([keyName, specs]) => (
+                                      <div key={keyName}
+                                          className="flex items-start text-sm border-b border-gray-200 py-3 last:border-0"
+                                      >
+                                          <div className="w-1/3 text-gray-600">
+                                              {keyName}
+                                          </div>
+                                          <div className="w-2/3 font-medium text-gray-900">
+                                              {specs.map((spec, index) => (
+                                                  <div key={spec.id}>
+                                                      {spec.value || 'N/A'} {spec.specificationUnit?.name || ''}
+                                                  </div>
+                                              ))}
+                                          </div>
+                                      </div>
+                                  ));
+                              })()}
+                          </div>
+                        
                         )}
                         {activeTab === 'review' && (
                             <div className="space-y-4">

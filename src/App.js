@@ -50,6 +50,8 @@ import GadgetDetailSeller from "./pages/Seller/Gadgets/GadgetDetailSeller";
 import CreateGadget from "./pages/Seller/Gadgets/CreateGadget";
 import SellerPage from "./pages/SellerPage/SellerPage";
 import ManageGadgetPage from "./pages/Manager/Gadget/ManageGadgetPage";
+import AdminLayout from "./components/layout/AdminLayout";
+import AdminPage from "./pages/Admin/AdminPage";
 
 
 function App() {
@@ -186,7 +188,7 @@ function App() {
         <Route path='/payment-history' element={<PaymentHistory />} />
       </Route>
 
-      {/* Admin Route */}
+      {/* Manager Route */}
       <Route element={<ManagerLayout />}>
         <Route path='/dashboard' element={
           <div className="flex overflow-scroll">
@@ -213,6 +215,13 @@ function App() {
         } />
           <Route path='/gadget/detail-manager/:name' element={
           <GadgetDetailSeller/>
+        } />
+      </Route>
+
+      {/* Admin Route */}
+      <Route element={<AdminLayout />}>
+          <Route path='/admin/manage-users' element={
+         <AdminPage/>
         } />
       </Route>
     </Routes>
