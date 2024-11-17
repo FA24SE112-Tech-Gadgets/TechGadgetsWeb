@@ -22,7 +22,6 @@ const AdminSideBar = ({ minHeight = 'min-h-screen' }) => {
         <div className="h-[80px] w-[80px] rounded-full cursor-pointer flex items-center justify-center relative z-40 mb-3">
           <img src={icon} alt="" className="h-full w-full rounded-full object-cover" />
         </div>
-        <h1 className="text-xl font-bold text-black">Admin Panel</h1>
       </div>
 
       <div className='py-[30px] border-b-[1px] border-black'>

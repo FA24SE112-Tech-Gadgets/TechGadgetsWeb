@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { Search, ChevronLeft, ChevronRight, Mic, MicOff } from 'lucide-react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import GadgetSearchHistory from './GadgetSearchHistory';
 import Logo from "~/assets/logo.png";
@@ -21,6 +22,31 @@ const NaturalLanguageSearch = () => {
     const [sellers, setSellers] = useState([]);
     const [resultType, setResultType] = useState('gadget');
     const [selectedSeller, setSelectedSeller] = useState(null);
+    const [isListening, setIsListening] = useState(false);
+    
+    const {
+        transcript,
+        listening,
+        resetTranscript,
+        browserSupportsSpeechRecognition
+    } = useSpeechRecognition();
+
+    useEffect(() => {
+        if (transcript) {
+            setSearchText(transcript);
+        }
+    }, [transcript]);
+
+    const toggleListening = () => {
+        if (listening) {
+            SpeechRecognition.stopListening();
+            setIsListening(false);
+        } else {
+            resetTranscript();
+            SpeechRecognition.startListening({ continuous: true, language: 'vi-VN' });
+            setIsListening(true);
+        }
+    };
 
     const fetchGadgets = async () => {
         setLoading(true);
@@ -271,21 +297,38 @@ const NaturalLanguageSearch = () => {
                     </div>
                 )}
 
-                {/* Search Bar */}
+                {/* Search Bar - Updated version */}
                 <div className="sticky top-0 bg-white p-4">
                     <div className="flex items-center">
                         <input
                             type="text"
-                            placeholder="Nhập thông tin cần tìm"
+                            placeholder="Nhập thông tin cần tìm hoặc nhấn mic để nói"
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                             onKeyDown={handleKeyPress}
-                            className="w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-primary/80 "
+                            className="w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-primary/80"
                         />
-                        <button onClick={handleSearch} className="ml-2 p-2 bg-primary-500 text-gray rounded-md hover:bg-primary-600">
+                        {browserSupportsSpeechRecognition && (
+                            <button
+                                onClick={toggleListening}
+                                className={`ml-2 p-2 rounded-md hover:bg-gray-100 ${listening ? 'text-red-500' : 'text-gray-500'}`}
+                                title={listening ? 'Dừng nhận diện giọng nói' : 'Bắt đầu nhận diện giọng nói'}
+                            >
+                                {listening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                            </button>
+                        )}
+                        <button 
+                            onClick={handleSearch} 
+                            className="ml-2 p-2 bg-primary-500 text-gray rounded-md hover:bg-primary-600"
+                        >
                             {loading ? <LoadingOutlined className="w-5 h-5 text-primary/80" /> : <SendOutlined className="w-5 h-5 text-primary/80" />}
                         </button>
                     </div>
+                    {listening && (
+                        <div className="mt-2 text-sm text-gray-500 animate-pulse">
+                            Đang nghe...
+                        </div>
+                    )}
                 </div>
             </div>
             {selectedGadget && (
