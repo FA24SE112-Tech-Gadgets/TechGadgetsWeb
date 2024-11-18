@@ -24,6 +24,11 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
     setCurrentPage(pageNumber);
   };
 
+  // Add this useEffect to reset pagination when orders change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [orders]);
+
   // Function to open the cancel modal and set the selected order ID
   const openCancelModal = (orderId) => {
     setSelectedOrderId(orderId);

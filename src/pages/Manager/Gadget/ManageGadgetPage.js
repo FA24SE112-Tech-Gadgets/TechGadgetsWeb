@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Laptop, Headphones, Speaker, Smartphone } from 'lucide-react';
-import GadgetManagement from './GadgetManagement';
+
 import { ToastContainer } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
+import ManageGadget from './ManageGadget';
 
 const categoryIds = {
   laptop: "458d7752-e45e-444a-adf9-f7201c07acd1",
@@ -18,7 +19,7 @@ const categoryNames = {
   "ea4183e8-5a94-401c-865d-e000b5d2b72d": "Điện thoại"
 };
 
-const GadgetManagementPage = () => {
+const ManageGadgetPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(categoryIds.laptop);
   const navigate = useNavigate();
 
@@ -35,41 +36,37 @@ const GadgetManagementPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto ">
       <ToastContainer />
       <div className="flex flex-col space-y-4 mb-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Quản lý sản phẩm</h1>
-          <button 
-            onClick={()=>navigate("/seller/gadgets/create")} 
-            className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary transition duration-200"
-          >
-            Tạo sản phẩm
-          </button>
         </div>
-        <div className="flex space-x-4">
-          {Object.entries(categoryIds).map(([key, id]) => {
-            const IconComponent = categoryIcons[id];
-            return (
-              <button
-                key={key}
-                onClick={() => handleCategoryChange(id)}
-                className={`px-4 py-2 rounded flex items-center transition duration-200 ${
-                  selectedCategory === id 
-                    ? "bg-primary/80 text-white" 
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                <IconComponent className="inline-block mr-2" />
-                {categoryNames[id]}
-              </button>
-            );
-          })}
+        <div className="flex justify-between items-center">
+          <div className="flex space-x-4">
+            {Object.entries(categoryIds).map(([key, id]) => {
+              const IconComponent = categoryIcons[id];
+              return (
+                <button
+                  key={key}
+                  onClick={() => handleCategoryChange(id)}
+                  className={`px-4 py-2 rounded flex items-center transition duration-200 ${
+                    selectedCategory === id 
+                      ? "bg-primary/80 text-white" 
+                      : "bg-gray-100 hover:bg-gray-200"
+                  }`}
+                >
+                  <IconComponent className="inline-block mr-2" />
+                  {categoryNames[id]}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
-      <GadgetManagement categoryId={selectedCategory} />
+      <ManageGadget categoryId={selectedCategory} />
     </div>
   );
 };
 
-export default GadgetManagementPage;
+export default ManageGadgetPage;

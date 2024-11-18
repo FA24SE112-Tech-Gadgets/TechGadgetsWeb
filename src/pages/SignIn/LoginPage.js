@@ -6,11 +6,12 @@ import useAuth from '~/context/auth/useAuth';
 import { useGoogleLogin } from '@react-oauth/google';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { requestForToken } from '~/ultis/firebase';
+import { useDeviceToken } from '~/context/auth/Noti';
 
 function LogIn() {
   const { login, error } = useAuth();
   const { googleLogin } = useAuth();
+  const { requestAndUpdateToken } = useDeviceToken();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deviceToken, setDeviceToken] = useState("");
@@ -21,15 +22,12 @@ function LogIn() {
   });
 
   useEffect(() => {
-    requestForToken()
-    .then((token) => {
+    requestAndUpdateToken().then(token => {
       if (token) {
         setDeviceToken(token);
-        setUser((prevUser) => ({ ...prevUser, deviceToken: token }));
+        setUser(prevUser => ({ ...prevUser, deviceToken: token }));
       }
-      console.log("device Token", token);
     });
-    
   }, []);
 
   const handleSubmit = async (event) => {

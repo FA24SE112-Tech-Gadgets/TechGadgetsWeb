@@ -151,9 +151,7 @@ const OrderDetailSeller = () => {
                         <h3 className="font-semibold text-red-700 ">Đơn hàng của bạn đã bị hủy</h3>
                         <p className="text-sm text-gray-600">
                         Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
-                            <span className={`px-2 py-1 rounded ${getStatusClass(orderDetails.status)}`}>
-                                {translateStatus(orderDetails.status)}
-                            </span>
+                        
                         </p>
 
                     </div>
@@ -168,9 +166,7 @@ const OrderDetailSeller = () => {
                         <h3 className="font-semibold text-green-700 ">Đơn hàng của bạn đã được xác nhận</h3>
                         <p className="text-sm text-gray-600">
                         Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
-                            <span className={`px-2 py-1 rounded ${getStatusClass(orderDetails.status)}`}>
-                                {translateStatus(orderDetails.status)}
-                            </span>
+                         
                         </p>
                     </div>
                     <p>Thời gian hoàn thành đơn hàng: {formatDate(orderDetails.sellerOrderUpdatedAt)}</p>
@@ -184,9 +180,7 @@ const OrderDetailSeller = () => {
                         <h3 className="font-semibold text-yellow-700 ">Đơn hàng của bạn đang chờ xử lý</h3>
                         <p className="text-sm text-gray-600">
                             Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
-                            <span className={`px-2 py-1 rounded ${getStatusClass(orderDetails.status)}`}>
-                                {translateStatus(orderDetails.status)}
-                            </span>
+                      
                         </p>
                     </div>
                 </div>

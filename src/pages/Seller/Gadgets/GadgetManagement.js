@@ -3,8 +3,8 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { toast, ToastContainer } from "react-toastify";
-import { Eye, X, Percent, Plus, Edit  } from 'lucide-react';
-import { Switch } from 'antd';
+import { Eye, X, Percent, Plus, Box, ShoppingBag, Pause, Search, Edit, Loader } from 'lucide-react'; 
+
 import slugify from '~/ultis/config';
 
 const formatDate = (dateString) => {
@@ -25,6 +25,10 @@ const GadgetManagement = ({ categoryId }) => {
     const [selectedGadget, setSelectedGadget] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [formattedDate, setFormattedDate] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput, setSearchInput] = useState('');
+    const [loadingStates, setLoadingStates] = useState({}); // Add this state
+    const [isEditing, setIsEditing] = useState(false);
     const itemsPerPage = 5;
     const navigate = useNavigate();
     const formRef = React.useRef(null);
@@ -39,7 +43,16 @@ const GadgetManagement = ({ categoryId }) => {
     const fetchGadgets = async () => {
         try {
             setIsLoading(true);
-            const response = await AxiosInterceptor.get(`/api/gadgets/category/${categoryId}/current-seller?Page=1&PageSize=100`);
+            let url = `/api/gadgets/category/${categoryId}/current-seller?Page=1&PageSize=100`;
+            
+            // Add search parameter if exists
+            if (searchTerm) {
+                url += `&Name=${encodeURIComponent(searchTerm)}`;
+            }
+            
+            // Remove sort parameter logic
+
+            const response = await AxiosInterceptor.get(url);
             setGadgets(response.data.items);
         } catch (error) {
             console.error("Error fetching products:", error);
@@ -51,6 +64,11 @@ const GadgetManagement = ({ categoryId }) => {
 
     useEffect(() => {
         fetchGadgets();
+    }, [categoryId, searchTerm]); // Remove sortOrder from dependencies
+
+    useEffect(() => {
+        setCurrentPage(1); // Reset to page 1 when category changes
+        fetchGadgets();
     }, [categoryId]);
 
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -59,14 +77,21 @@ const GadgetManagement = ({ categoryId }) => {
     const totalPages = Math.ceil(gadgets.length / itemsPerPage);
 
     const handleSaleToggle = async (id, isForSale) => {
+        setLoadingStates(prev => ({ ...prev, [id]: true }));
         try {
-            setIsLoading(true);
-            if (isForSale) {
-                await AxiosInterceptor.put(`/api/gadgets/${id}/set-not-for-sale`);
-            } else {
-                await AxiosInterceptor.put(`/api/gadgets/${id}/set-for-sale`);
-            }
-            await fetchGadgets();
+            const endpoint = isForSale 
+                ? `/api/gadgets/${id}/set-not-for-sale` 
+                : `/api/gadgets/${id}/set-for-sale`;
+            
+            // Send the API request without awaiting a response for `fetchGadgets`
+            await AxiosInterceptor.put(endpoint);
+            
+            // Update the local state to reflect the new sale status without refetching
+            setGadgets(prevGadgets =>
+                prevGadgets.map(gadget =>
+                    gadget.id === id ? { ...gadget, isForSale: !isForSale } : gadget
+                )
+            );
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
                 const reasons = error.response.data.reasons;
@@ -78,9 +103,10 @@ const GadgetManagement = ({ categoryId }) => {
                 }
             }
         } finally {
-            setIsLoading(false);
+            setLoadingStates(prev => ({ ...prev, [id]: false }));
         }
     };
+    
 
     const handleChangePage = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -89,11 +115,25 @@ const GadgetManagement = ({ categoryId }) => {
     const showDiscountModal = (gadget) => {
         setSelectedGadget(gadget);
         setIsModalVisible(true);
+        setIsEditing(gadget.discountPercentage > 0);
+
+        // Pre-fill form if discount exists
+        if (gadget.discountPercentage > 0) {
+            setFormattedDate(moment(gadget.discountExpiredDate).format('DD/MM/YYYY'));
+            setTimeout(() => {
+                if (formRef.current) {
+                    formRef.current.discountPercentage.value = gadget.discountPercentage;
+                    formRef.current.discountExpiredDate.value = moment(gadget.discountExpiredDate).format('YYYY-MM-DD');
+                    formRef.current.discountExpiredTime.value = moment(gadget.discountExpiredDate).format('HH:mm');
+                }
+            }, 0);
+        }
     };
 
     const handleCancel = () => {
         setIsModalVisible(false);
         setSelectedGadget(null);
+        setIsEditing(false);
         resetForm();
     };
 
@@ -181,6 +221,21 @@ const GadgetManagement = ({ categoryId }) => {
         }
     };
 
+    const handleSearchInputChange = (e) => {
+        setSearchInput(e.target.value);
+    };
+
+    const executeSearch = () => {
+        setSearchTerm(searchInput);
+        setCurrentPage(1);
+    };
+
+    const handleSearchKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            executeSearch();
+        }
+    };
+
     if (isLoading) return (
         <div className="flex items-center justify-center min-h-screen">
             <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
@@ -199,6 +254,83 @@ const GadgetManagement = ({ categoryId }) => {
     return (
         <div className="p-6">
             <ToastContainer position="top-right" autoClose={3000} />
+            
+            {/* Statistics Section with improved layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-gray-500">Tổng sản phẩm</p>
+                            <p className="text-2xl font-bold text-primary/80">{gadgets.length}</p>
+                        </div>
+                        <div className="p-3 bg-primary/10 rounded-full">
+                            <Box className="w-6 h-6 text-primary/80" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-gray-500">Đang giảm giá</p>
+                            <p className="text-2xl font-bold text-primary/80">
+                                {gadgets.filter(g => g.discountPercentage > 0).length}
+                            </p>
+                        </div>
+                        <div className="p-3 bg-primary/10 rounded-full">
+                            <Percent className="w-6 h-6 text-primary/80" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-gray-500">Đang bán</p>
+                            <p className="text-2xl font-bold text-primary/80">
+                                {gadgets.filter(g => g.isForSale).length}
+                            </p>
+                        </div>
+                        <div className="p-3 bg-primary/10 rounded-full">
+                            <ShoppingBag className="w-6 h-6 text-primary/80" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-gray-500">Ngừng kinh doanh</p>
+                            <p className="text-2xl font-bold text-primary/80">
+                                {gadgets.filter(g => !g.isForSale).length}
+                            </p>
+                        </div>
+                        <div className="p-3 bg-primary/10 rounded-full">
+                            <Pause className="w-6 h-6 text-primary/80" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Add search and sort controls */}
+            <div className="mb-4 flex gap-4">
+                <div className="relative flex-1 max-w-xs">
+                    <input
+                        type="text"
+                        placeholder="Tìm kiếm sản phẩm..."
+                        value={searchInput}
+                        onChange={handleSearchInputChange}
+                        onKeyPress={handleSearchKeyPress}
+                        className="p-2 pr-10 border border-gray-300 rounded-md w-full focus:ring-primary/80 focus:border-primary/80"
+                    />
+                    <button
+                        onClick={executeSearch}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary/80"
+                    >
+                        <Search className="h-5 w-5" />
+                    </button>
+                </div>
+            </div>
 
             <table className="min-w-full bg-white rounded-md shadow-lg">
                 <thead>
@@ -229,26 +361,30 @@ const GadgetManagement = ({ categoryId }) => {
                                     />
                                     <button
                                         onClick={() => handleUpdateGadget(gadget.id)}
-                                        className="absolute top-0 left-0 bg-white p-1 rounded-full shadow-md border-x-2"
+                                        className="absolute top-0 left-0 bg-white p-1 rounded-full shadow-md border-x-2 mt-2"
                                         title="Cập nhật sản phẩm"
                                     >
                                         <Edit className="h-4 w-4 text-primary/100" />
                                     </button>
                                 </div>
                             </td>
-                            <td className="p-4">{gadget.name}</td>
+                            <td className="p-4">
+                                {gadget.name.length > 20 ? `${gadget.name.slice(0, 20)}...` : gadget.name}
+                            </td>
                             <td className="p-4">{`${gadget.price.toLocaleString()}₫`}</td>
                             <td className="p-4">
                                 {gadget.discountPercentage > 0 ? (
-                                    <>
-                                        {/* <span className="text-red-500">{`${gadget.discountPrice.toLocaleString()} đ`}</span> */}
+                                    <button
+                                        onClick={() => showDiscountModal(gadget)}
+                                        className="text-sm text-blue-600 hover:text-blue-800"
+                                    >
                                         <span className="block text-sm text-gray-600">{`-${gadget.discountPercentage}%`}</span>
                                         {gadget.discountExpiredDate && (
                                             <span className="block text-xs text-gray-500">
                                                 {`HSD: ${formatDate(gadget.discountExpiredDate)}`}
                                             </span>
                                         )}
-                                    </>
+                                    </button>
                                 ) : (
                                     <button
                                         onClick={() => showDiscountModal(gadget)}
@@ -268,15 +404,22 @@ const GadgetManagement = ({ categoryId }) => {
 
                             </td>
                             <td className="p-4">
-                                <Switch
-                                    checked={gadget.isForSale}
-                                    onChange={() => handleSaleToggle(gadget.id, gadget.isForSale)}
-                                    disabled={isLoading}
-                                    style={{
-                                        backgroundColor: gadget.isForSale ? 'rgba(59, 130, 246, 0.8)' : 'gray', // Set `primary/80` color when checked
-                                    }}
-                                />
-
+                                <div className="flex items-center gap-2">
+                                    {loadingStates[gadget.id] ? (
+                                        <Loader className="h-5 w-5 animate-spin text-primary" />
+                                    ) : (
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={gadget.isForSale}
+                                                onChange={() => handleSaleToggle(gadget.id, gadget.isForSale)}
+                                                disabled={loadingStates[gadget.id]}
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    )}
+                                </div>
                             </td>
                             <td className="p-4">
                                 <button
@@ -324,7 +467,9 @@ const GadgetManagement = ({ categoryId }) => {
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm space-y-4">
                         <div
                             className="flex justify-between items-center">
-                            <h2 className="text-lg font-semibold">Thêm giảm giá</h2>
+                            <h2 className="text-lg font-semibold">
+                                {isEditing ? 'Cập nhật giảm giá' : 'Thêm giảm giá'}
+                            </h2>
                             <button
                                 onClick={handleCancel}
                                 className="text-gray-500 hover:text-gray-700"
@@ -404,7 +549,7 @@ const GadgetManagement = ({ categoryId }) => {
                                     className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary"
                                     disabled={isLoading}
                                 >
-                                    Xác nhận
+                                    {isEditing ? 'Cập nhật' : 'Xác nhận'}
                                 </button>
                             </div>
                         </form>

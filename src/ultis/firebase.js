@@ -16,6 +16,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
+let currentDeviceToken = null;  // Add this line at the top level
+
 // Request permission to send notifications and retrieve the device token
 export const requestForToken = async () => {
   try {
@@ -24,6 +26,7 @@ export const requestForToken = async () => {
     });
     if (currentToken) {
       console.log("Current token for client: ", currentToken);
+      currentDeviceToken = currentToken;  // Store token in variable
       return currentToken;
       // You can send this token to your server and store it to send notifications later
     } else {
@@ -32,8 +35,16 @@ export const requestForToken = async () => {
     }
   } catch (err) {
     console.log("An error occurred while retrieving token. ", err);
-    return;
+    return null;
   }
+};
+
+export const getCurrentToken = () => currentDeviceToken;  // Add this export
+
+export const clearDeviceToken = () => {
+  const token = currentDeviceToken;
+  currentDeviceToken = null;
+  return token;
 };
 
 // Listen for foreground messages
