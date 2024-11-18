@@ -20,43 +20,57 @@ function BrandGadgetPage() {
   const [loading, setLoading] = useState(true);
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({});
+  const [reviewData, setReviewData] = useState({});
   const apiBaseUrl = process.env.NODE_ENV === "development"
     ? process.env.REACT_APP_DEV_API
     : process.env.REACT_APP_PRO_API;
 
   // Fetch products based on brand, category, and applied filters
-const fetchBrandProducts = async () => {
-  setLoading(true);
-  const apiClient = isAuthenticated ? AxiosInterceptor : axios;
+  const fetchBrandProducts = async () => {
+    setLoading(true);
+    const apiClient = isAuthenticated ? AxiosInterceptor : axios;
 
-  // Prepare GadgetFilters as a query string
-  const gadgetFilters = appliedFilters.GadgetFilters
-    ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
-    : '';
+    // Prepare GadgetFilters as a query string
+    const gadgetFilters = appliedFilters.GadgetFilters
+      ? appliedFilters.GadgetFilters.map(filter => `GadgetFilters=${filter}`).join('&')
+      : '';
 
-  // Add MinPrice and MaxPrice to the query if they exist in appliedFilters
-  const minPrice = appliedFilters.MinPrice ? `MinPrice=${appliedFilters.MinPrice}` : '';
-  const maxPrice = appliedFilters.MaxPrice ? `MaxPrice=${appliedFilters.MaxPrice}` : '';
+    // Add MinPrice and MaxPrice to the query if they exist in appliedFilters
+    const minPrice = appliedFilters.MinPrice ? `MinPrice=${appliedFilters.MinPrice}` : '';
+    const maxPrice = appliedFilters.MaxPrice ? `MaxPrice=${appliedFilters.MaxPrice}` : '';
 
-  // Combine all query parameters
-  const queryString = [gadgetFilters, minPrice, maxPrice].filter(Boolean).join('&');
+    // Combine all query parameters
+    const queryString = [gadgetFilters, minPrice, maxPrice].filter(Boolean).join('&');
 
-  const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}&Page=1&PageSize=100`;
+    const apiUrl = `${apiBaseUrl}/api/gadgets/category/${categoryId}?Brands=${brandId}&${queryString}&Page=1&PageSize=100`;
 
-  console.log("API URL:", apiUrl);
+    console.log("API URL:", apiUrl);
 
-  try {
-    const response = await apiClient.get(apiUrl);
-    const activeProducts = response.data.items.filter(
-      (product) => product.sellerStatus === 'Active' && product.gadgetStatus === 'Active'
-    );
-    setProducts(activeProducts);
-  } catch (error) {
-    console.error("Error fetching brand products:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const response = await apiClient.get(apiUrl);
+      const activeProducts = response.data.items.filter(
+        (product) => product.sellerStatus === 'Active' && product.gadgetStatus === 'Active'
+      );
+
+      // Fetch review data for products
+      const reviewPromises = activeProducts.map(gadget =>
+        AxiosInterceptor.get(`${apiBaseUrl}/api/reviews/summary/gadgets/${gadget.id}`)
+      );
+      
+      const reviewResponses = await Promise.all(reviewPromises);
+      const reviewMap = {};
+      activeProducts.forEach((gadget, index) => {
+        reviewMap[gadget.id] = reviewResponses[index].data;
+      });
+
+      setReviewData(reviewMap);
+      setProducts(activeProducts);
+    } catch (error) {
+      console.error("Error fetching brand products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchBrandProducts();
@@ -159,7 +173,7 @@ const fetchBrandProducts = async () => {
                     {product.discountPercentage > 0 ? (
                       <>
                         <div className="text-red-500 font-semibold text-sm mr-2">
-                         {product.discountPrice.toLocaleString()}₫
+                          {product.discountPrice.toLocaleString()}₫
                         </div>
                         <span className="line-through text-gray-500">
                           {product.price.toLocaleString()}₫
@@ -172,8 +186,22 @@ const fetchBrandProducts = async () => {
                     )}
                   </div>
                 </div>
-                <div className="p-2">
-                  <div className='w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500'>
+                <div className="flex items-center justify-between p-2">
+                  {/* Add review display */}
+                  {reviewData[product.id] && reviewData[product.id].numOfReview > 0 ? (
+                    <div className="flex items-center text-xs text-gray-600">
+                      <span className="flex items-center">
+                        <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        {reviewData[product.id].avgReview} ({reviewData[product.id].numOfReview})
+                      </span>
+                    </div>
+                  ) : (
+                    // Placeholder to maintain spacing when no reviews exist
+                    <div className="w-16"></div>
+                  )}
+                  <div className="flex items-center text-sm text-gray-500">
                     <span className="mr-2">Yêu thích</span>
                     <span
                       onClick={(e) => {

@@ -4,7 +4,7 @@ import axios from 'axios';
 import useAuth from '~/context/auth/useAuth';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from 'react-toastify';
-import { Breadcrumb } from 'antd';
+import { Breadcrumb, Modal } from 'antd';
 import { CheckCircleOutlined, HomeFilled, InfoCircleFilled, LoadingOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import slugify from '~/ultis/config';
 import StarRatings from 'react-star-ratings';
@@ -133,6 +133,28 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
     );
 };
 
+// const ProfileWarningModal = ({ isOpen, onClose }) => {
+//     const navigate = useNavigate();
+    
+//     return (
+//         <Modal
+//             title="Thông tin cá nhân chưa đầy đủ"
+//             open={isOpen}
+//             onCancel={onClose}
+//             footer={[
+//                 <button
+//                     key="profile"
+//                     onClick={() => navigate('/profile')}
+//                     className="px-4 py-2 bg-primary/80 text-white rounded-lg hover:bg-secondary/90"
+//                 >
+//                     Cập nhật thông tin
+//                 </button>
+//             ]}
+//         >
+//             <p>Vui lòng cập nhật địa chỉ và số điện thoại trong hồ sơ của bạn trước khi tiếp tục mua hàng.</p>
+//         </Modal>
+//     );
+// };
 
 const DetailGadgetPage = () => {
     const { isAuthenticated } = useAuth();
@@ -149,7 +171,26 @@ const DetailGadgetPage = () => {
     const [quantity, setQuantity] = useState(1);
     const [price, setPrice] = useState(0);
     const [showConfirmation, setShowConfirmation] = useState(false);
+    const [showProfileWarning, setShowProfileWarning] = useState(false);
     const navigate = useNavigate();
+    // const {user} = useAuth()
+    const [isOpen, setIsOpen] = useState(false); 
+const [user, setUser] = useState(null);
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await AxiosInterceptor.get('/api/users/current');
+                setUser(response.data.customer);
+                console.log("data nè", response.data.customer);
+                
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
     useEffect(() => {
         const apiClient = isAuthenticated ? AxiosInterceptor : axios;
         const fetchProduct = async () => {
@@ -229,9 +270,17 @@ const DetailGadgetPage = () => {
     };
 
     const handleBuyNow = () => {
+        if (!user?.address || !user?.phoneNumber) {
+            setIsOpen(true);
+            return;
+        }
         setShowConfirmation(true);
     };
 
+    const onClose = () => {
+        setIsOpen(false);
+    };
+    
     const handleCancelOrder = () => {
         setShowConfirmation(false);
     };
@@ -275,6 +324,22 @@ const DetailGadgetPage = () => {
             />
 
             <ToastContainer autoClose={3000}/>
+            <Modal
+                title="Thông tin cá nhân chưa đầy đủ"
+                open={isOpen}
+                onCancel={onClose}
+                footer={[
+                    <button
+                        key="profile"
+                        onClick={() => navigate('/profile')}
+                        className="px-4 py-2 bg-primary/80 text-white rounded-lg hover:bg-secondary/90"
+                    >
+                        Cập nhật thông tin
+                    </button>
+                ]}
+            >
+                <p>Vui lòng cập nhật địa chỉ và số điện thoại trong hồ sơ của bạn trước khi tiếp tục mua hàng.</p>
+            </Modal>
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Left column */}
                 <div className="lg:w-2/3">
@@ -581,6 +646,10 @@ const DetailGadgetPage = () => {
                     onCancel={handleCancelOrder}
                 />
             )}
+            {/* <ProfileWarningModal 
+                isOpen={showProfileWarning}
+                onClose={() => setShowProfileWarning(false)}
+            /> */}
         </div>
     );
 };

@@ -76,12 +76,13 @@ const GadgetHistoryDetail = () => {
                   ) : (
                     <span className="text-xs font-bold">{gadget.price.toLocaleString()}₫</span>
                   )}
-                </div>
-                {!gadget.isForSale && (
+                    {/* {!gadget.isForSale && (
                     <div className="text-red-500 font-bold text-sm">
                       Ngừng kinh doanh
                     </div>
-                  )}
+                  )} */}
+                </div>
+              
               </div>
             </div>
           ))

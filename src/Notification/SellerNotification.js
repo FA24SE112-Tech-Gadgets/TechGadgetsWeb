@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bell, Circle } from 'lucide-react';
+import { Bell, Circle, ShoppingCart, Wallet, BellRing, Clock, MessageSquare } from 'lucide-react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { onMessageListener } from '~/ultis/firebase';
 import { useNavigate } from 'react-router-dom';
@@ -128,31 +128,42 @@ const SellerNotification = () => {
             navigate('/seller/transaction-history');
         }
     };
+
+    const getNotificationIcon = (type) => {
+        const iconClass = "w-10 h-10 p-2.5";
+        switch (type) {
+            case 'SellerOrder':
+                return <ShoppingCart className={`${iconClass} bg-blue-100 text-blue-600 rounded-full flex-shrink-0`} />;
+            case 'WalletTracking':
+                return <Wallet className={`${iconClass} bg-green-100 text-green-600 rounded-full flex-shrink-0`} />;
+            default:
+                return <BellRing className={`${iconClass} bg-gray-100 text-gray-600 rounded-full flex-shrink-0`} />;
+        }
+    };
+
     return (
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={toggleDropdown}
-                className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="relative p-2 rounded-full hover:bg-gray-200 transition-all"
             >
-                <Bell className="text-gray-700 hover:text-indigo-900" />
+                <Bell className="w-6 h-6 text-gray-700 hover:text-indigo-900" />
                 {unreadCount > 0 && (
-                    <span className="absolute top-0 right-0 w-5 h-5 bg-red-600 text-white text-xs font-medium rounded-full flex items-center justify-center">
+                    <span className="absolute top-0 right-0 w-5 h-5 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
             </button>
 
             {showDropdown && (
-                <div
-                    className="absolute right-0 mt-2 w-96 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-[80vh] flex flex-col"
-                >
-                    <div className="p-4 border-b flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Thông báo</h3>
+                <div className="absolute right-0 mt-2 w-[380px] bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-[85vh] flex flex-col">
+                    <div className="p-4 border-b flex justify-between items-center bg-white sticky top-0 z-10">
+                        <h3 className="text-xl font-bold text-gray-800">Thông báo</h3>
                         <button
                             onClick={markAllAsRead}
-                            className="text-sm text-blue-600 hover:underline"
+                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                         >
-                            Đánh dấu tất cả
+                            Đánh dấu tất cả đã đọc
                         </button>
                     </div>
 
@@ -170,23 +181,31 @@ const SellerNotification = () => {
                             notifications.map((notification) => (
                                 <div
                                     key={notification.id}
-
-                                    className={`p-4 border-b hover:bg-gray-100 cursor-pointer transition-colors
-                    ${notification.isRead ? 'bg-white' : 'bg-gray-200'}`}
+                                    className={`p-3 cursor-pointer hover:bg-gray-50 transition-all 
+                                    ${notification.isRead ? 'bg-white' : 'bg-blue-50'}`}
                                     onClick={() => handleNotificationClick(notification)}
                                 >
-                                    <div className="flex items-center">
+                                    <div className="flex items-start space-x-3">
+                                        {getNotificationIcon(notification.type)}
                                         <div className="flex-grow">
-                                            <p className="text-sm font-semibold">{notification.title}</p>
-                                            <p className="text-xs text-gray-500 mt-1">{notification.content}</p>
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                {new Date(notification.createdAt).toLocaleString('vi-VN')}
-                                            </p>
+                                            <div className="flex items-center space-x-2">
+                                                <p className={`text-xs ${notification.isRead ? 'text-gray-800' : 'text-gray-900 font-semibold'}`}>
+                                                    {notification.title}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center space-x-2 mt-1">
+                                                <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                <p className="text-xs text-gray-500">{notification.content}</p>
+                                            </div>
+                                            <div className="flex items-center space-x-2 mt-1">
+                                                <Clock className="w-4 h-4 text-gray-400" />
+                                                <p className="text-xs text-gray-400">
+                                                    {new Date(notification.createdAt).toLocaleString('vi-VN')}
+                                                </p>
+                                            </div>
                                         </div>
                                         {!notification.isRead && (
-                                            <span className="text-blue-500">
-                                                <Circle fill="currentColor" className="w-4 h-4" />
-                                            </span>
+                                            <Circle fill="currentColor" className="w-3 h-3 text-blue-600 flex-shrink-0" />
                                         )}
                                     </div>
                                 </div>

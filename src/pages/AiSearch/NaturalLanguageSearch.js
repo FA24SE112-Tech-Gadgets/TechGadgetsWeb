@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import { Search, ChevronLeft, ChevronRight, Mic, MicOff } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Mic, MicOff, AudioLines } from 'lucide-react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import GadgetSearchHistory from './GadgetSearchHistory';
 import Logo from "~/assets/logo.png";
@@ -23,6 +23,7 @@ const NaturalLanguageSearch = () => {
     const [resultType, setResultType] = useState('gadget');
     const [selectedSeller, setSelectedSeller] = useState(null);
     const [isListening, setIsListening] = useState(false);
+    const [searchTimeout, setSearchTimeout] = useState(null);
     
     const {
         transcript,
@@ -34,7 +35,28 @@ const NaturalLanguageSearch = () => {
     useEffect(() => {
         if (transcript) {
             setSearchText(transcript);
+            
+            // Clear any existing timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout to trigger search after 1.5 seconds of no new speech
+            const timeout = setTimeout(() => {
+                if (transcript.trim() !== '') {
+                    handleSearch();
+                }
+            }, 1500);
+
+            setSearchTimeout(timeout);
         }
+
+        // Cleanup timeout on component unmount
+        return () => {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+        };
     }, [transcript]);
 
     const toggleListening = () => {
@@ -73,9 +95,16 @@ const NaturalLanguageSearch = () => {
         fetchGadgets();
     }, []);
 
-    const handleSearch = () => {
+    const handleSearch = async () => {
+        // Stop speech recognition if it's active
+        if (listening) {
+            SpeechRecognition.stopListening();
+            setIsListening(false);
+            resetTranscript();
+        }
+        
         setCurrentPage(1);
-        fetchGadgets();
+        await fetchGadgets();
     };
 
     const handlePageChange = (direction) => {
@@ -299,22 +328,30 @@ const NaturalLanguageSearch = () => {
 
                 {/* Search Bar - Updated version */}
                 <div className="sticky top-0 bg-white p-4">
+               
                     <div className="flex items-center">
                         <input
                             type="text"
-                            placeholder="Nhập thông tin cần tìm hoặc nhấn mic để nói"
+                            placeholder={listening ? "Đang nghe..." : "Nhập thông tin cần tìm hoặc nhấn mic để nói"}
+                           
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                             onKeyDown={handleKeyPress}
+                            
                             className="w-full p-2 border rounded-md focus:outline-none focus:ring focus:ring-primary/80"
                         />
+                         {/* {listening && (
+                                <div className="mt-2 text-sm text-gray-500 animate-pulse">
+                                    Đang nghe...
+                                </div>
+                            )} */}
                         {browserSupportsSpeechRecognition && (
                             <button
                                 onClick={toggleListening}
                                 className={`ml-2 p-2 rounded-md hover:bg-gray-100 ${listening ? 'text-red-500' : 'text-gray-500'}`}
                                 title={listening ? 'Dừng nhận diện giọng nói' : 'Bắt đầu nhận diện giọng nói'}
                             >
-                                {listening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                                {listening ? <AudioLines className="animate-spin w-5 h-5" /> : <AudioLines className="w-5 h-5" />}
                             </button>
                         )}
                         <button 
@@ -324,11 +361,7 @@ const NaturalLanguageSearch = () => {
                             {loading ? <LoadingOutlined className="w-5 h-5 text-primary/80" /> : <SendOutlined className="w-5 h-5 text-primary/80" />}
                         </button>
                     </div>
-                    {listening && (
-                        <div className="mt-2 text-sm text-gray-500 animate-pulse">
-                            Đang nghe...
-                        </div>
-                    )}
+                 
                 </div>
             </div>
             {selectedGadget && (
