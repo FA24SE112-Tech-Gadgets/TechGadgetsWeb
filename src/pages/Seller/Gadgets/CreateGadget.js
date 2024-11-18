@@ -35,6 +35,7 @@ const CreateGadget = () => {
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [gadgetImagePreviews, setGadgetImagePreviews] = useState([]);
   const [gadgetDescriptionPreviews, setGadgetDescriptionPreviews] = useState([]);
+  const [hasDiscount, setHasDiscount] = useState(false);
 
   const inputClassName = "mt-1 block w-full rounded-md border-gray-200 bg-gray-100 shadow-sm focus:border-indigo-300 focus:ring focus:ring-gray-400 focus:ring-opacity-50 px-2 py-2";
 
@@ -44,8 +45,10 @@ const CreateGadget = () => {
       try {
         const categoriesRes = await AxiosInterceptor.get("/api/categories");
         setCategories(categoriesRes.data.items);
+
       } catch (error) {
         console.error("Error fetching categories", error);
+
       }
     };
     fetchCategories();
@@ -54,7 +57,7 @@ const CreateGadget = () => {
   // Fetch brands when a category is selected
   useEffect(() => {
     if (gadgetData.categoryId) {
-      AxiosInterceptor.get(`/api/brands/categories/${gadgetData.categoryId}`)
+      AxiosInterceptor.get(`/api/brands/categories/${gadgetData.categoryId}?Page=1&PageSize=100`)
         .then((res) => {
           setBrands(res.data.items);
         })
@@ -65,7 +68,7 @@ const CreateGadget = () => {
   // Fetch specification keys when a category is selected
   useEffect(() => {
     if (gadgetData.categoryId) {
-      AxiosInterceptor.get(`/api/specification-keys/categories/${gadgetData.categoryId}`)
+      AxiosInterceptor.get(`/api/specification-keys/categories/${gadgetData.categoryId}?Page=1&PageSize=100`)
         .then((res) => {
           setSpecificationKeys(res.data.items);
           const units = res.data.items.reduce((acc, item) => {
@@ -80,6 +83,7 @@ const CreateGadget = () => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
+    setIsLoading(true);
     if (e) {
       e.preventDefault();
     }
@@ -104,37 +108,48 @@ const CreateGadget = () => {
     formData.append('categoryId', gadgetData.categoryId);
     formData.append('condition', gadgetData.condition);
     formData.append('quantity', gadgetData.quantity);
-    formData.append('discount.discountPercentage', gadgetData.discount.discountPercentage);
-    formData.append('discount.discountExpiredDate', gadgetData.discount.discountExpiredDate);
-    
+
+    // Only append discount fields if discount is enabled and values exist
+    if (hasDiscount) {
+      if (gadgetData.discount.discountPercentage) {
+        formData.append('discount.discountPercentage', gadgetData.discount.discountPercentage);
+      }
+      if (gadgetData.discount.discountExpiredDate) {
+        formData.append('discount.discountExpiredDate', gadgetData.discount.discountExpiredDate);
+      }
+    }
+
     // Xử lý GadgetImages
     gadgetData.gadgetImages.forEach((image, index) => {
       formData.append(`GadgetImages`, image);
     });
     gadgetData.gadgetDescriptions.forEach((desc, index) => {
       if (desc.id) {
-          formData.append(`GadgetDescriptions[${index}].id`, desc.id);
+        formData.append(`GadgetDescriptions[${index}].id`, desc.id);
       }
       formData.append(`GadgetDescriptions[${index}].type`, desc.type);
       if (desc.type === 'Image') {
-          if (desc.file instanceof File) {
-              formData.append(`GadgetDescriptions[${index}].id`, null);
-              formData.append(`GadgetDescriptions[${index}].image`, desc.file);
-          } else if (desc.value) {
-              formData.append(`GadgetDescriptions[${index}].value`, desc.value);
-          }
+        if (desc.file instanceof File) {
+          formData.append(`GadgetDescriptions[${index}].id`, null);
+          formData.append(`GadgetDescriptions[${index}].image`, desc.file);
+        } else if (desc.value) {
+          formData.append(`GadgetDescriptions[${index}].value`, desc.value);
+        }
       } else {
-          formData.append(`GadgetDescriptions[${index}].text`, desc.value || '');
+        formData.append(`GadgetDescriptions[${index}].text`, desc.value || '');
       }
-  });
-    gadgetData.specificationValues.forEach((spec, index) => {
-      spec.values.forEach((value, valueIndex) => {
-        formData.append(`specificationValues[${index}].specificationKeyId`, spec.specificationKeyId);
-        formData.append(`specificationValues[${index}].specificationUnitId`, spec.specificationUnitId);
-        formData.append(`specificationValues[${index}].value`, value);
-      });
     });
 
+    let specIndex = 0;
+    gadgetData.specificationValues.forEach((spec) => {
+      spec.values.forEach((value) => {
+        formData.append(`SpecificationValues[${specIndex}].id`, '');
+        formData.append(`SpecificationValues[${specIndex}].specificationKeyId`, spec.specificationKeyId || '');
+        formData.append(`SpecificationValues[${specIndex}].specificationUnitId`, spec.specificationUnitId || '');
+        formData.append(`SpecificationValues[${specIndex}].value`, value);
+        specIndex++;
+      });
+    });
     console.log("Submitting gadget data:", gadgetData);
 
     try {
@@ -144,7 +159,9 @@ const CreateGadget = () => {
         },
       });
       toast.success("Tạo sản phẩm thành công!");
-      navigate('/all-products');
+      setTimeout(() => {
+        navigate('/all-products');
+      }, 3500);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.reasons) {
         const reasons = error.response.data.reasons;
@@ -155,6 +172,9 @@ const CreateGadget = () => {
           toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
         }
       }
+    } 
+    finally {
+      setIsLoading(false);
     }
   };
 
@@ -208,7 +228,7 @@ const CreateGadget = () => {
   const handleImageUpload = (e, type) => {
     const files = e.target.files;
     if (!files) return;
-  
+
     if (type === 'thumbnail') {
       const file = files[0];
       if (file instanceof Blob) {
@@ -222,7 +242,7 @@ const CreateGadget = () => {
       }));
     }
   };
-  
+
   const handleRemoveImage = (index) => {
     setGadgetData(prev => ({
       ...prev,
@@ -234,42 +254,42 @@ const CreateGadget = () => {
   const handleDescriptionChange = (index, field, value) => {
     const newDescriptions = [...gadgetData.gadgetDescriptions];
     if (field === 'type' && value === 'Image') {
-        newDescriptions[index] = { ...newDescriptions[index], type: value, value: '', file: null };
+      newDescriptions[index] = { ...newDescriptions[index], type: value, value: '', file: null };
     } else {
-        newDescriptions[index] = { ...newDescriptions[index], [field]: value || '' };
+      newDescriptions[index] = { ...newDescriptions[index], [field]: value || '' };
     }
     setGadgetData(prev => ({ ...prev, gadgetDescriptions: newDescriptions }));
-};
+  };
 
-  
+
   const handleDescriptionImageChange = (e, index) => {
     const file = e.target.files?.[0];
     if (file) {
-        const newDescriptions = [...gadgetData.gadgetDescriptions];
-        newDescriptions[index] = {
-            ...newDescriptions[index],
-            type: 'Image',
-            value: URL.createObjectURL(file),
-            file: file
-        };
-        setGadgetData(prev => ({ ...prev, gadgetDescriptions: newDescriptions }));
+      const newDescriptions = [...gadgetData.gadgetDescriptions];
+      newDescriptions[index] = {
+        ...newDescriptions[index],
+        type: 'Image',
+        value: URL.createObjectURL(file),
+        file: file
+      };
+      setGadgetData(prev => ({ ...prev, gadgetDescriptions: newDescriptions }));
     }
-};
+  };
 
   const handleAddDescription = (index) => {
     setGadgetData(prev => {
-        const newDescriptions = [...prev.gadgetDescriptions];
-        newDescriptions.splice(index + 1, 0, { type: 'NormalText', value: '' });
-        return { ...prev, gadgetDescriptions: newDescriptions };
+      const newDescriptions = [...prev.gadgetDescriptions];
+      newDescriptions.splice(index + 1, 0, { type: 'NormalText', value: '' });
+      return { ...prev, gadgetDescriptions: newDescriptions };
     });
-};
+  };
 
   const handleRemoveDescription = (index) => {
     setGadgetData(prev => ({
-        ...prev,
-        gadgetDescriptions: prev.gadgetDescriptions.filter((_, i) => i !== index)
+      ...prev,
+      gadgetDescriptions: prev.gadgetDescriptions.filter((_, i) => i !== index)
     }));
-};
+  };
   const handleSpecificationChange = (index, field, value) => {
     const newSpecs = [...gadgetData.specificationValues];
     if (field === 'specificationKey') {
@@ -291,7 +311,7 @@ const CreateGadget = () => {
     }
     setGadgetData(prev => ({ ...prev, specificationValues: newSpecs }));
   };
-  
+
   const handleValueChange = (specIndex, valueIndex, value) => {
     const newSpecs = [...gadgetData.specificationValues];
     if (!newSpecs[specIndex].values) {
@@ -307,31 +327,31 @@ const CreateGadget = () => {
     }
     newSpecs[specIndex].values.push('');
     setGadgetData(prev => ({ ...prev, specificationValues: newSpecs }));
-};
+  };
   const handleRemoveValue = (specIndex, valueIndex) => {
     const newSpecs = [...gadgetData.specificationValues];
     newSpecs[specIndex].values.splice(valueIndex, 1);
     setGadgetData(prev => ({ ...prev, specificationValues: newSpecs }));
-};
+  };
 
-/* Add a new specification */
-const handleAddSpecification = () => {
+  /* Add a new specification */
+  const handleAddSpecification = () => {
     setGadgetData(prev => ({
-        ...prev,
-        specificationValues: [
-            ...prev.specificationValues,
-            { specificationKeyId: '', specificationUnitId: '', values: [''] }
-        ]
+      ...prev,
+      specificationValues: [
+        ...prev.specificationValues,
+        { specificationKeyId: '', specificationUnitId: '', values: [''] }
+      ]
     }));
-};
+  };
 
-/* Remove a specification */
-const handleRemoveSpecification = (index) => {
+  /* Remove a specification */
+  const handleRemoveSpecification = (index) => {
     setGadgetData(prev => ({
-        ...prev,
-        specificationValues: prev.specificationValues.filter((_, i) => i !== index)
+      ...prev,
+      specificationValues: prev.specificationValues.filter((_, i) => i !== index)
     }));
-};
+  };
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -417,33 +437,65 @@ const handleRemoveSpecification = (index) => {
                 placeholder="Nhập số lượng"
               />
             </div>
-            <div>
-              <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700">Phần trăm giảm giá</label>
-              <input
-                id="discountPercentage"
-                type="number"
-                value={gadgetData.discount.discountPercentage}
-                onChange={(e) => setGadgetData({ ...gadgetData, discount: { ...gadgetData.discount, discountPercentage: e.target.value } })}
-                className={inputClassName}
-                placeholder="Nhập phần trăm giảm giá"
-              />
-            </div>
-            <div>
-              <label htmlFor="discountExpiredDate" className="block text-sm font-medium text-gray-700">Ngày hết hạn giảm giá</label>
-              <div className="flex items-center">
-                <DatePicker
-                  selected={gadgetData.discount.discountExpiredDate ? new Date(gadgetData.discount.discountExpiredDate) : null}
-                  onChange={handleDateChange}
-                  showTimeSelect
-                  timeFormat="HH:mm"
-                  timeIntervals={15}
-                  dateFormat="dd/MM/yyyy HH:mm"
-                  minDate={new Date()}
-                  className={inputClassName}
-                  placeholderText="Chọn ngày và giờ"
-                />
-                <Calendar className="ml-2" />
+
+            {/* New discount section */}
+            <div className="border-t pt-4 mt-4">
+              <div className="flex items-center justify-between mb-4">
+                <label className="text-sm font-medium text-gray-700">Áp dụng giảm giá</label>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hasDiscount}
+                    onChange={(e) => {
+                      setHasDiscount(e.target.checked);
+                      if (!e.target.checked) {
+                        // Clear discount values when disabled
+                        setGadgetData(prev => ({
+                          ...prev,
+                          discount: { discountPercentage: '', discountExpiredDate: '' }
+                        }));
+                      }
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
               </div>
+
+              {hasDiscount && (
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700">Phần trăm giảm giá</label>
+                    <input
+                      id="discountPercentage"
+                      type="number"
+                      value={gadgetData.discount.discountPercentage}
+                      onChange={(e) => setGadgetData({ ...gadgetData, discount: { ...gadgetData.discount, discountPercentage: e.target.value } })}
+                      className={inputClassName}
+                      placeholder="Nhập phần trăm giảm giá"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="discountExpiredDate" className="block text-sm font-medium text-gray-700">Ngày hết hạn giảm giá</label>
+                    <div className="flex items-center">
+                      <DatePicker
+                        selected={gadgetData.discount.discountExpiredDate ? new Date(gadgetData.discount.discountExpiredDate) : null}
+                        onChange={handleDateChange}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        dateFormat="dd/MM/yyyy HH:mm"
+                        minDate={new Date()}
+                        className={inputClassName}
+                        placeholderText="Chọn ngày và giờ"
+                      />
+                      <Calendar className="ml-2" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -642,9 +694,9 @@ const handleRemoveSpecification = (index) => {
                     <select
                       value={spec.specificationUnitId || ''}
                       onChange={(e) => handleSpecificationChange(index, 'specificationUnit', e.target.value)}
-                      className={`${inputClassName} ${!specificationUnits[spec.specificationKeyId] || 
-                        specificationUnits[spec.specificationKeyId].length === 0 
-                        ? 'text-gray-800' 
+                      className={`${inputClassName} ${!specificationUnits[spec.specificationKeyId] ||
+                        specificationUnits[spec.specificationKeyId].length === 0
+                        ? 'text-gray-800'
                         : ''}`}
                       disabled={!specificationUnits[spec.specificationKeyId] || specificationUnits[spec.specificationKeyId].length === 0}
                     >
@@ -721,7 +773,14 @@ const handleRemoveSpecification = (index) => {
         return null;
     }
   };
-
+  
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+            <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-primary/85"></div>
+        </div>
+    );
+}
   return (
     <div className="max-w-4xl mx-auto p-6">
       <ToastContainer />
@@ -735,11 +794,11 @@ const handleRemoveSpecification = (index) => {
                   {s}
                 </div>
                 <span className={`mt-2 text-sm ${s === step ? 'font-semibold text-secondary/100' : 'text-gray-500'}`}>
-                  {s === 1 ? 'Thông tin cơ bản' : 
-                   s === 2 ? 'Giá & Khuyến mãi' : 
-                   s === 3 ? 'Hình ảnh' : 
-                   s === 4 ? 'Mô tả' : 
-                   'Thông số kỹ thuật'}
+                  {s === 1 ? 'Thông tin cơ bản' :
+                    s === 2 ? 'Giá & Khuyến mãi' :
+                      s === 3 ? 'Hình ảnh' :
+                        s === 4 ? 'Mô tả' :
+                          'Thông số kỹ thuật'}
                 </span>
               </div>
               {index < 4 && (

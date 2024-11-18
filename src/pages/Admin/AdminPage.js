@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
-import { Eye, X, Loader } from "lucide-react";
+import { Eye, X, Loader, User } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 
 const AdminPage = () => {
@@ -71,6 +71,13 @@ const AdminPage = () => {
     }
   };
 
+  const getFileType = (url) => {
+    const extension = url.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) return 'image';
+    if (extension === 'pdf') return 'pdf';
+    return 'unknown';
+  };
+
   const renderUserInfo = (user) => {
     const renderField = (label, value) => {
       if (!value) return null; // Don't render if value is null/undefined/empty
@@ -93,7 +100,6 @@ const AdminPage = () => {
       case "Seller":
         return (
           <div className="space-y-4">
-      
             {user.seller?.companyName && renderField("Tên công ty", user.seller.companyName)}
             {user.seller?.shopName && renderField("Tên cửa hàng", user.seller.shopName)}
             {user.seller?.shopAddress && renderField("Địa chỉ cửa hàng", user.seller.shopAddress)}
@@ -103,11 +109,25 @@ const AdminPage = () => {
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-2">Giấy phép kinh doanh:</p>
                 <div className="flex justify-center">
-                  <img
-                    src={user.seller.businessRegistrationCertificateUrl}
-                    alt="Business Registration Certificate"
-                    className="max-w-full h-auto rounded-lg border border-gray-200"
-                  />
+                  {getFileType(user.seller.businessRegistrationCertificateUrl) === 'image' ? (
+                    <img
+                      src={user.seller.businessRegistrationCertificateUrl}
+                      alt="Business Registration Certificate"
+                      className="max-w-full h-auto rounded-lg border border-gray-200 cursor-pointer"
+                      onClick={() => {
+                        setSelectedImage(user.seller.businessRegistrationCertificateUrl);
+                        setIsImageModalOpen(true);
+                      }}
+                    />
+                  ) : getFileType(user.seller.businessRegistrationCertificateUrl) === 'pdf' ? (
+                    <iframe
+                      src={user.seller.businessRegistrationCertificateUrl}
+                      title="Business Registration Certificate"
+                      className="w-full h-96 rounded-lg shadow-md"
+                    />
+                  ) : (
+                    <p>Không thể hiển thị file. <a href={user.seller.businessRegistrationCertificateUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Tải xuống</a></p>
+                  )}
                 </div>
               </div>
             )}
@@ -325,36 +345,45 @@ const AdminPage = () => {
       </div>
 
       {isModalOpen && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40"
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
              onClick={() => setIsModalOpen(false)}>
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col"
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
                onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800">Chi tiết người dùng</h2>
-                <p className="text-sm text-gray-500 mt-1">Vai trò: {getRoleInVietnamese(selectedUser.role)}</p>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
-              >
+            <div className="sticky top-0 bg-white z-10 flex justify-between items-center p-6 border-b">
+              <h2 className="text-2xl font-bold text-gray-800">Chi Tiết Người Dùng</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700 transition-colors">
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <div className="px-6 py-4 overflow-y-auto flex-1">
-              {renderUserInfo(selectedUser)}
+            
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <User className="h-5 w-5 text-primary/80" />
+                    <h3 className="text-lg font-semibold text-gray-800">Thông Tin {getRoleInVietnamese(selectedUser.role)}</h3>
+                  </div>
+                  <div className="bg-gray-100 rounded-lg p-4">
+                    {renderUserInfo(selectedUser)}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end border-t border-gray-200">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors duration-200"
-              >
-                Đóng
-              </button>
+
+            <div className="p-6 border-t">
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors duration-200"
+                >
+                  Đóng
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
       {isImageModalOpen && selectedImage && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
              onClick={() => setIsImageModalOpen(false)}>
