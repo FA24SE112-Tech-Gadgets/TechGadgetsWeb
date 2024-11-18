@@ -24,7 +24,7 @@ const NaturalLanguageSearch = () => {
     const [selectedSeller, setSelectedSeller] = useState(null);
     const [isListening, setIsListening] = useState(false);
     const [searchTimeout, setSearchTimeout] = useState(null);
-    
+    const [reviewData, setReviewData] = useState({});
     const {
         transcript,
         listening,
@@ -78,6 +78,17 @@ const NaturalLanguageSearch = () => {
             });
             setResultType(response.data.type);
             if (response.data.type === 'gadget') {
+                // Fetch reviews for each gadget
+                const reviewPromises = response.data.gadgets.map(gadget =>
+                    AxiosInterceptor.get(`/api/reviews/summary/gadgets/${gadget.id}`)
+                );
+                const reviewResponses = await Promise.all(reviewPromises);
+                
+                const reviewMap = {};
+                response.data.gadgets.forEach((gadget, index) => {
+                    reviewMap[gadget.id] = reviewResponses[index].data;
+                });
+                setReviewData(reviewMap);
                 setGadgets(response.data.gadgets);
                 setSellers([]);
             } else {
@@ -222,32 +233,58 @@ const NaturalLanguageSearch = () => {
                                                     </div>
                                                 )}
                                             </div>
+                                            
                                         </div>
-                                        <div className="absolute bottom-2 right-1 flex items-center">
-                                            <div className='w-full text-sm flex items-center justify-end px-2 py-1 text-gray-500'>
-                                                <span className="mr-2">Yêu thích</span>
-                                                <span
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        toggleFavorite(gadget.id, gadget.isFavorite);
-                                                    }}
-                                                    className="cursor-pointer flex items-center"
-                                                >
-                                                    {gadget.isFavorite ? (
-                                                        <svg
-                                                            className="h-8 w-5 text-red-500"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 24 24"
-                                                            fill="currentColor"
-                                                        >
-                                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                                        </svg>
-                                                    ) : (
-                                                        <CiHeart className="h-8 w-5 text-gray-500" />
-                                                    )}
-                                                </span>
-                                            </div>
-                                        </div>
+                                        {/* <div className="flex items-center justify-between p-2"> */}
+                                        <div className="absolute bottom-2 right-1 flex items-center justify-between w-full">
+  {/* Add review display */}
+  {reviewData[gadget.id] && reviewData[gadget.id].numOfReview > 0 ? (
+    <div className="flex items-center text-xs text-gray-600 ml-3">
+      <span className="flex items-center">
+        <svg
+          className="w-4 h-4 text-yellow-400"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+        <span className="ml-1">
+          {reviewData[gadget.id].avgReview} (
+          {reviewData[gadget.id].numOfReview})
+        </span>
+      </span>
+    </div>
+  ) : (
+    // Placeholder to maintain spacing when no reviews exist
+    <div className="w-16"></div>
+  )}
+
+  {/* Favorite Button */}
+  <div className="flex items-center text-sm text-gray-500 ml-auto">
+    <span className="mr-2">Yêu thích</span>
+    <span
+      onClick={(e) => {
+        e.stopPropagation();
+        toggleFavorite(gadget.id, gadget.isFavorite);
+      }}
+      className="cursor-pointer flex items-center"
+    >
+      {gadget.isFavorite ? (
+        <svg
+          className="h-5 w-5 text-red-500"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+      ) : (
+        <CiHeart className="h-5 w-5 text-gray-500" />
+      )}
+    </span>
+  </div>
+</div>
+
                                     </div>
                                 ))}
                             </div>

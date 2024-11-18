@@ -27,6 +27,7 @@ const GadgetManagement = ({ categoryId }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchInput, setSearchInput] = useState('');
     const [loadingStates, setLoadingStates] = useState({}); // Add this state
+    const [isEditing, setIsEditing] = useState(false);
     const itemsPerPage = 5;
     const navigate = useNavigate();
     const formRef = React.useRef(null);
@@ -113,11 +114,25 @@ const GadgetManagement = ({ categoryId }) => {
     const showDiscountModal = (gadget) => {
         setSelectedGadget(gadget);
         setIsModalVisible(true);
+        setIsEditing(gadget.discountPercentage > 0);
+
+        // Pre-fill form if discount exists
+        if (gadget.discountPercentage > 0) {
+            setFormattedDate(moment(gadget.discountExpiredDate).format('DD/MM/YYYY'));
+            setTimeout(() => {
+                if (formRef.current) {
+                    formRef.current.discountPercentage.value = gadget.discountPercentage;
+                    formRef.current.discountExpiredDate.value = moment(gadget.discountExpiredDate).format('YYYY-MM-DD');
+                    formRef.current.discountExpiredTime.value = moment(gadget.discountExpiredDate).format('HH:mm');
+                }
+            }, 0);
+        }
     };
 
     const handleCancel = () => {
         setIsModalVisible(false);
         setSelectedGadget(null);
+        setIsEditing(false);
         resetForm();
     };
 
@@ -345,15 +360,17 @@ const GadgetManagement = ({ categoryId }) => {
                             <td className="p-4">{`${gadget.price.toLocaleString()}₫`}</td>
                             <td className="p-4">
                                 {gadget.discountPercentage > 0 ? (
-                                    <>
-                                        {/* <span className="text-red-500">{`${gadget.discountPrice.toLocaleString()} đ`}</span> */}
+                                    <button
+                                        onClick={() => showDiscountModal(gadget)}
+                                        className="text-sm text-blue-600 hover:text-blue-800"
+                                    >
                                         <span className="block text-sm text-gray-600">{`-${gadget.discountPercentage}%`}</span>
                                         {gadget.discountExpiredDate && (
                                             <span className="block text-xs text-gray-500">
                                                 {`HSD: ${formatDate(gadget.discountExpiredDate)}`}
                                             </span>
                                         )}
-                                    </>
+                                    </button>
                                 ) : (
                                     <button
                                         onClick={() => showDiscountModal(gadget)}
@@ -436,7 +453,9 @@ const GadgetManagement = ({ categoryId }) => {
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm space-y-4">
                         <div
                             className="flex justify-between items-center">
-                            <h2 className="text-lg font-semibold">Thêm giảm giá</h2>
+                            <h2 className="text-lg font-semibold">
+                                {isEditing ? 'Cập nhật giảm giá' : 'Thêm giảm giá'}
+                            </h2>
                             <button
                                 onClick={handleCancel}
                                 className="text-gray-500 hover:text-gray-700"
@@ -516,7 +535,7 @@ const GadgetManagement = ({ categoryId }) => {
                                     className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary"
                                     disabled={isLoading}
                                 >
-                                    Xác nhận
+                                    {isEditing ? 'Cập nhật' : 'Xác nhận'}
                                 </button>
                             </div>
                         </form>

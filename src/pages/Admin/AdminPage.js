@@ -42,6 +42,11 @@ const AdminPage = () => {
       });
   }, [roleFilter, statusFilter, page, pageSize]);
 
+  // Add new useEffect to reset currentPage when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [roleFilter, statusFilter]);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Active":
@@ -50,6 +55,19 @@ const AdminPage = () => {
         return "bg-red-500";
       default:
         return "bg-yellow-500";
+    }
+  };
+
+  const getRoleInVietnamese = (role) => {
+    switch (role) {
+      case "Customer":
+        return "Khách hàng";
+      case "Seller":
+        return "Người bán";
+      case "Manager":
+        return "Quản lý";
+      default:
+        return role;
     }
   };
 
@@ -70,14 +88,17 @@ const AdminPage = () => {
           <div className="space-y-4">
             {user.manager?.fullName && renderField("Tên quản lý", user.manager.fullName)}
             {renderField("Email", user.email)}
-            <span className={`px-2 py-1 rounded-full text-white text-sm ${getStatusColor(user.status)}`}>
-              {user.status}
-            </span>
           </div>
         );
       case "Seller":
         return (
           <div className="space-y-4">
+      
+            {user.seller?.companyName && renderField("Tên công ty", user.seller.companyName)}
+            {user.seller?.shopName && renderField("Tên cửa hàng", user.seller.shopName)}
+            {user.seller?.shopAddress && renderField("Địa chỉ cửa hàng", user.seller.shopAddress)}
+            {user.seller?.businessModel && renderField("Mô hình kinh doanh", user.seller.businessModel)}
+            {renderField("Email", user.email)}
             {user.seller?.businessRegistrationCertificateUrl && (
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-2">Giấy phép kinh doanh:</p>
@@ -90,14 +111,6 @@ const AdminPage = () => {
                 </div>
               </div>
             )}
-            {user.seller?.companyName && renderField("Tên công ty", user.seller.companyName)}
-            {user.seller?.shopName && renderField("Tên cửa hàng", user.seller.shopName)}
-            {user.seller?.shopAddress && renderField("Địa chỉ cửa hàng", user.seller.shopAddress)}
-            {user.seller?.businessModel && renderField("Mô hình kinh doanh", user.seller.businessModel)}
-            {renderField("Email", user.email)}
-            <span className={`px-2 py-1 rounded-full text-white text-sm ${getStatusColor(user.status)}`}>
-              {user.status}
-            </span>
           </div>
         );
       case "Customer":
@@ -119,9 +132,6 @@ const AdminPage = () => {
             {user.customer?.cccd && renderField("CCCD", user.customer.cccd)}
             {user.customer?.gender && renderField("Giới tính", user.customer.gender)}
             {user.customer?.dateOfBirth && renderField("Ngày sinh", new Date(user.customer.dateOfBirth).toLocaleDateString())}
-            <span className={`px-2 py-1 rounded-full text-white text-sm ${getStatusColor(user.status)}`}>
-              {user.status}
-            </span>
           </div>
         );
       default:
@@ -208,13 +218,15 @@ const AdminPage = () => {
         <div className="relative">
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={(e) => {
+              setRoleFilter(e.target.value);
+            }}
             className="w-48 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
           >
-            <option value="all">Tất cả Role</option>
-            <option value="Customer">Customer</option>
-            <option value="Seller">Seller</option>
-            <option value="Manager">Manager</option>
+            <option value="all">Tất cả </option>
+            <option value="Customer">Khách hàng</option>
+            <option value="Seller">Người bán</option>
+            <option value="Manager">Quản lý</option>
           </select>
           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,7 +241,7 @@ const AdminPage = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-48 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
           >
-            <option value="all">Tất cả Status</option>
+            <option value="all">Tất cả </option>
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
             <option value="Pending">Pending</option>
@@ -256,7 +268,7 @@ const AdminPage = () => {
             {currentUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{getRoleInVietnamese(user.role)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     {loadingStates[user.id] ? (
@@ -272,9 +284,9 @@ const AdminPage = () => {
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                       </label>
                     )}
-                    <span className={`px-2 py-1 rounded-full text-white text-sm ${getStatusColor(user.status)}`}>
+                    {/* <span className={`px-2 py-1 rounded-full text-white text-sm ${getStatusColor(user.status)}`}>
                       {user.status}
-                    </span>
+                    </span> */}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -313,12 +325,14 @@ const AdminPage = () => {
       </div>
 
       {isModalOpen && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40"
+             onClick={() => setIsModalOpen(false)}>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col"
+               onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">Chi tiết người dùng</h2>
-                <p className="text-sm text-gray-500 mt-1">Role: {selectedUser.role}</p>
+                <p className="text-sm text-gray-500 mt-1">Vai trò: {getRoleInVietnamese(selectedUser.role)}</p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}

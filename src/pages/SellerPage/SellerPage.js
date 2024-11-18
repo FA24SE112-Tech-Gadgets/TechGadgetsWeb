@@ -29,8 +29,8 @@ const businessModelTypes = {
 };
 
 const apiBaseUrl = process.env.NODE_ENV === "development"
-? process.env.REACT_APP_DEV_API
-: process.env.REACT_APP_PRO_API;
+    ? process.env.REACT_APP_DEV_API
+    : process.env.REACT_APP_PRO_API;
 
 const SellerPage = () => {
     const location = useLocation();
@@ -45,6 +45,7 @@ const SellerPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const navigate = useNavigate();
+    const [reviewData, setReviewData] = useState({});
     const { isAuthenticated } = useAuth();
     const [statistics, setStatistics] = useState({
         total: 0,
@@ -73,7 +74,17 @@ const SellerPage = () => {
             const response = await axios.get(
                 `${apiBaseUrl}/api/gadgets/categories/${categoryIds[activeCategory]}/sellers/${sellerId}?${queryParams}&Page=1&PageSize=100`
             );
-            
+            const reviewPromises = response.data.items.map(gadget =>
+                AxiosInterceptor.get(`/api/reviews/summary/gadgets/${gadget.id}`)
+            );
+            const reviewResponses = await Promise.all(reviewPromises);
+
+            const reviewMap = {};
+            response.data.items.forEach((gadget, index) => {
+                reviewMap[gadget.id] = reviewResponses[index].data;
+            });
+            setReviewData(reviewMap);
+
             const categoryGadgets = response.data.items;
             const stats = {
                 total: categoryGadgets.length,
@@ -103,16 +114,16 @@ const SellerPage = () => {
         }
         try {
             await AxiosInterceptor.post(`/api/favorite-gadgets/${gadgetId}`);
-            
+
             setGadgetsByCategory(prev => {
                 const category = activeCategory;
                 if (!prev[category]) return prev;
-                
+
                 return {
                     ...prev,
                     [category]: prev[category].map(gadget =>
-                        gadget.id === gadgetId 
-                            ? { ...gadget, isFavorite: !isFavorite } 
+                        gadget.id === gadgetId
+                            ? { ...gadget, isFavorite: !isFavorite }
                             : gadget
                     )
                 };
@@ -184,13 +195,13 @@ const SellerPage = () => {
                                 <div className="flex items-center text-gray-600">
                                     <Store className="w-5 h-5 mr-3" />
                                     <span>{businessModelTypes[seller.businessModel] || seller.businessModel}</span>
-                              
-                                {(seller.businessModel === 'Company' || seller.businessModel === 'BusinessHousehold') && (
-                                    <div className="flex items-center text-gray-600 ml-8">
-                                       <Tag className="w-5 h-5 mr-3"/> <span> {seller.companyName}</span>
-                                    </div>
-                                )}
-                                  </div>
+
+                                    {(seller.businessModel === 'Company' || seller.businessModel === 'BusinessHousehold') && (
+                                        <div className="flex items-center text-gray-600 ml-8">
+                                            <Tag className="w-5 h-5 mr-3" /> <span> {seller.companyName}</span>
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="flex items-center text-gray-600">
                                     <Phone className="w-5 h-5 mr-3" />
                                     <span>{seller.phoneNumber}</span>
@@ -262,7 +273,7 @@ const SellerPage = () => {
                         onKeyPress={handleKeyPress}
                         className="w-full px-4 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
-                    <button 
+                    <button
                         onClick={handleSearch}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary"
                     >
@@ -328,31 +339,45 @@ const SellerPage = () => {
                                     )}
                                 </div>
                             </div>
-                            <div className="p-1">
-                                <div className='w-full text-xs flex items-center justify-end px-1 py-0.5 text-gray-500'>
-                                    <span className="mr-1">Yêu thích</span>
-                                    <span
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleFavorite(gadget.id, gadget.isFavorite);
-                                        }}
-                                        className="cursor-pointer flex items-center"
-                                    >
-                                        {gadget.isFavorite ? (
-                                            <svg
-                                                className="h-6 w-4 text-red-500"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 24 24"
-                                                fill="currentColor"
-                                            >
-                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                            </svg>
-                                        ) : (
-                                            <CiHeart className="h-6 w-4 text-gray-500" />
-                                        )}
-                                    </span>
+                            <div className="flex items-center justify-between p-2">
+                                      {/* Add review display */}
+                                      {reviewData[gadget.id] && reviewData[gadget.id].numOfReview > 0 ? (
+                                           <div className="flex items-center text-xs text-gray-600">
+                                            <span className="flex items-center">
+                                                <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                </svg>
+                                                {reviewData[gadget.id].avgReview} ({reviewData[gadget.id].numOfReview})
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        // Placeholder to maintain spacing when no reviews exist
+                                        <div className="w-16"></div>
+                                      )}
+                                  <div className="flex items-center text-sm text-gray-500">
+                                        <span className="mr-2">Yêu thích</span>
+                                        <span
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleFavorite(gadget.id, gadget.isFavorite);
+                                            }}
+                                            className="cursor-pointer flex items-center"
+                                        >
+                                            {gadget.isFavorite ? (
+                                                <svg
+                                                    className="h-8 w-5 text-red-500"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24"
+                                                    fill="currentColor"
+                                                >
+                                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                                </svg>
+                                            ) : (
+                                                <CiHeart className="h-8 w-5 text-gray-500" />
+                                            )}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
                         </div>
                     ))
                 ) : (
@@ -369,11 +394,10 @@ const SellerPage = () => {
                         <button
                             key={i + 1}
                             onClick={() => handleChangePage(i + 1)}
-                            className={`px-4 py-2 rounded-md ${
-                                i + 1 === currentPage
+                            className={`px-4 py-2 rounded-md ${i + 1 === currentPage
                                     ? 'bg-primary/80 text-white'
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
+                                }`}
                             disabled={isLoading}
                         >
                             {i + 1}

@@ -60,7 +60,7 @@ const ManageGadget = ({ categoryId }) => {
         return gadget;
       }));
       
-      toast.success("Cập nhật trạng thái thành công");
+      // toast.success("Cập nhật trạng thái thành công");
     } catch (error) {
       console.error("Error toggling status:", error);
       toast.error("Không thể cập nhật trạng thái");

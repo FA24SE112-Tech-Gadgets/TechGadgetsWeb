@@ -133,7 +133,7 @@ const SellerNotification = () => {
         const iconClass = "w-10 h-10 p-2.5";
         switch (type) {
             case 'SellerOrder':
-                return <ShoppingCart className={`${iconClass} bg-blue-100 text-blue-600 rounded-full flex-shrink-0`} />;
+                return <ShoppingCart className={`${iconClass} text-white bg-primary/75 rounded-full flex-shrink-0`} />;
             case 'WalletTracking':
                 return <Wallet className={`${iconClass} bg-green-100 text-green-600 rounded-full flex-shrink-0`} />;
             default:
@@ -161,7 +161,7 @@ const SellerNotification = () => {
                         <h3 className="text-xl font-bold text-gray-800">Thông báo</h3>
                         <button
                             onClick={markAllAsRead}
-                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                            className="text-sm text-primary/75 hover:text-secondary/85 font-medium"
                         >
                             Đánh dấu tất cả đã đọc
                         </button>
@@ -170,6 +170,7 @@ const SellerNotification = () => {
                     <div
                         className="overflow-y-auto flex-1 scroll-smooth"
                         onScroll={handleScroll}
+                        
                     >
                         {isFetching && currentPage === 1 ? (
                             <div className="flex justify-center p-4">
