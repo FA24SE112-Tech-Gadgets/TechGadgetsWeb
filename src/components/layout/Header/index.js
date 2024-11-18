@@ -10,7 +10,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import Notifications from "~/Notification/Notification";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 import SearchComponent from "~/pages/Search/Search";
-
+import { useDeviceToken } from '~/context/auth/Noti';
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -22,13 +22,15 @@ const Header = () => {
   const dropdownRef = useRef(null);
   const [walletAmount, setWalletAmount] = useState(0); 
   const [showWalletAmount, setShowWalletAmount] = useState(false);
+  const { deleteDeviceToken } = useDeviceToken();
 
   const formatWalletAmount = (amount) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     console.log("Logout clicked");
+    await deleteDeviceToken(); 
     logout();
   };
 
@@ -118,10 +120,13 @@ const Header = () => {
             </button>
 
             {/* Notifications Icon */}
-            {/* <div className="relative">
-              <Notifications onNewNotification={handleNewNotification} />
-            </div> */}
-
+            <div className="relative">
+            {isAuthenticated &&   
+            
+              <Notifications />
+          }
+            </div>
+         
             {/* Darkmode Switch */}
             <DarkMode />
 

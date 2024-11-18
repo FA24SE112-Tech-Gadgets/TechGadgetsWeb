@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bell, Circle, ShoppingCart, Wallet, BellRing, Clock, MessageSquare, Info } from 'lucide-react';
+import { Bell, Circle, ShoppingCart, Wallet, BellRing, Clock, MessageSquare } from 'lucide-react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { onMessageListener } from '~/ultis/firebase';
 import { useNavigate } from 'react-router-dom';
 
-const Notification = () => {
+const SellerNotification = () => {
     const [notifications, setNotifications] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
@@ -14,7 +14,6 @@ const Notification = () => {
     const dropdownRef = useRef(null);
     const pageRef = useRef(currentPage);
     const navigate = useNavigate();
-
     const fetchNotifications = async (page = 1) => {
         if (isFetching || !hasMore) return;
 
@@ -23,10 +22,14 @@ const Notification = () => {
             const response = await AxiosInterceptor.get(`/api/notifications?page=${page}&pageSize=10`);
             const newNotifications = response.data.items;
 
-            setNotifications((prev) => (page === 1 ? newNotifications : [...prev, ...newNotifications]));
+            setNotifications(prev => {
+                if (page === 1) return newNotifications;
+                return [...prev, ...newNotifications];
+            });
+
             const unreadNotifications = page === 1
-                ? newNotifications.filter((notification) => !notification.isRead).length
-                : notifications.concat(newNotifications).filter((notification) => !notification.isRead).length;
+                ? newNotifications.filter(notification => !notification.isRead).length
+                : notifications.concat(newNotifications).filter(notification => !notification.isRead).length;
             setUnreadCount(unreadNotifications);
 
             setHasMore(response.data.hasNextPage);
@@ -54,7 +57,7 @@ const Notification = () => {
 
         onMessageListener()
             .then((payload) => {
-                console.log('Foreground notification received:', payload);
+                console.log("Foreground notification received: ", payload);
                 const newNotification = {
                     id: payload.notification.id,
                     title: payload.notification.title,
@@ -63,15 +66,18 @@ const Notification = () => {
                     type: payload.notification.type,
                     sellerOrderId: payload.notification.sellerOrderId,
                     createdAt: new Date().toISOString(),
+                    customer: payload.notification.customer,
+                    seller: payload.notification.seller,
                 };
 
-                setNotifications((prev) => [newNotification, ...prev]);
-                setUnreadCount((prev) => prev + 1);
+                setNotifications(prev => [newNotification, ...prev]);
+                setUnreadCount(prev => prev + 1);
             })
-            .catch((err) => console.log('Failed to receive message:', err));
+            .catch((err) => console.log("Failed to receive message: ", err));
     }, []);
 
     const toggleDropdown = () => {
+        // Reset unreadCount về 0 khi click vào chuông
         setUnreadCount(0);
         setShowDropdown(!showDropdown);
     };
@@ -79,9 +85,11 @@ const Notification = () => {
     const markAsRead = async (notificationId) => {
         try {
             await AxiosInterceptor.put(`/api/notification/${notificationId}`);
-            setNotifications((prev) =>
-                prev.map((notification) =>
-                    notification.id === notificationId ? { ...notification, isRead: true } : notification
+            setNotifications(prev =>
+                prev.map(notification =>
+                    notification.id === notificationId
+                        ? { ...notification, isRead: true }
+                        : notification
                 )
             );
         } catch (error) {
@@ -92,8 +100,8 @@ const Notification = () => {
     const markAllAsRead = async () => {
         try {
             await AxiosInterceptor.put(`/api/notification/all`);
-            setNotifications((prev) =>
-                prev.map((notification) => ({ ...notification, isRead: true }))
+            setNotifications(prev =>
+                prev.map(notification => ({ ...notification, isRead: true }))
             );
             setUnreadCount(0);
         } catch (error) {
@@ -115,14 +123,14 @@ const Notification = () => {
     const handleNotificationClick = (notification) => {
         markAsRead(notification.id);
         if (notification.type === 'SellerOrder' && notification.sellerOrderId) {
-            navigate(`/order/detail/${notification.sellerOrderId}`);
+            navigate(`/order/detail-seller/${notification.sellerOrderId}`);
         } else if (notification.type === 'WalletTracking') {
-            navigate('/deposit-history');
+            navigate('/seller/transaction-history');
         }
     };
 
     const getNotificationIcon = (type) => {
-        const iconClass = "w-10 h-10 p-2.5"; // Chuẩn hóa kích thước icon
+        const iconClass = "w-10 h-10 p-2.5";
         switch (type) {
             case 'SellerOrder':
                 return <ShoppingCart className={`${iconClass} text-white bg-primary/75 rounded-full flex-shrink-0`} />;
@@ -162,13 +170,14 @@ const Notification = () => {
                     <div
                         className="overflow-y-auto flex-1 scroll-smooth"
                         onScroll={handleScroll}
+                        
                     >
                         {isFetching && currentPage === 1 ? (
                             <div className="flex justify-center p-4">
                                 <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
                             </div>
                         ) : notifications.length === 0 ? (
-                            <p className="p-4 text-center text-gray-500">No notifications</p>
+                            <p className="p-4 text-center text-gray-500">Không có thông báo</p>
                         ) : (
                             notifications.map((notification) => (
                                 <div
@@ -186,7 +195,7 @@ const Notification = () => {
                                                 </p>
                                             </div>
                                             <div className="flex items-center space-x-2 mt-1">
-                                            <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                                 <p className="text-xs text-gray-500">{notification.content}</p>
                                             </div>
                                             <div className="flex items-center space-x-2 mt-1">
@@ -215,4 +224,4 @@ const Notification = () => {
     );
 };
 
-export default Notification;
+export default SellerNotification;

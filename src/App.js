@@ -44,6 +44,15 @@ import NaturalLanguageSearch from "./pages/AiSearch/NaturalLanguageSearch";
 import ReviewSeller from "./pages/Seller/Review/ReviewSeller";
 import OrderDetail from "./pages/Order/OrderDetail";
 import OrderDetailSeller from "./pages/Seller/Order/OrderDetailSeller";
+import GadgetManagementPage from "./pages/Seller/Gadgets/GadgetManagementPage";
+import GadgetDetailSeller from "./pages/Seller/Gadgets/GadgetDetailSeller";
+import CreateGadget from "./pages/Seller/Gadgets/CreateGadget";
+import UpdateGadget from "./pages/Seller/Gadgets/UpdateGadget";
+import SellerPage from "./pages/SellerPage/SellerPage";
+import ManageGadgetPage from "./pages/Manager/Gadget/ManageGadgetPage";
+import AdminLayout from "./components/layout/AdminLayout";
+import AdminPage from "./pages/Admin/AdminPage";
+
 
 
 function App() {
@@ -62,7 +71,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/gadget/detail/:name' element={<DetailGadgetPage />} />
         <Route path='/gadget/detail/:name/reviews' element={<ReviewPage />} />
-       <Route path='/order/detail/:orderId' element={<OrderDetail />} />
+        <Route path='/order/detail/:orderId' element={<OrderDetail />} />
         <Route path='/favorite' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
@@ -93,6 +102,7 @@ function App() {
 
         <Route path="/gadgets/:category/:brand" element={<BrandGadgetPage />} />
         <Route path="/gadgets/:category/" element={<CategoryGadgetPage />} />
+        <Route path="/seller-page/:name" element={<SellerPage />} />
         <Route path='/profile' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
@@ -101,7 +111,7 @@ function App() {
           </AuthRoute>
 
         } />
-          <Route path='/review-gadget' element={
+        <Route path='/review-gadget' element={
           <AuthRoute>
             <RoleBaseRoute accessibleRoles={["Customer"]}>
               <Review />
@@ -129,6 +139,7 @@ function App() {
       </Route>
       {/* Search by AI */}
       <Route path="/search-by-natural-language" element={<NaturalLanguageSearch />} />
+      
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
         <Route path='/seller/Order-management' element={<OrderHistorySeller />} />
@@ -145,7 +156,18 @@ function App() {
       <Route element={<SellerLayout />}>
         <Route path='/order/detail-seller/:orderId' element={<OrderDetailSeller />} />
       </Route>
-
+      <Route element={<SellerLayout />}>
+        <Route path='/gadget/detail-seller/:name' element={<GadgetDetailSeller />} />
+      </Route>
+      <Route element={<SellerLayout />}>
+        <Route path='/all-products' element={<GadgetManagementPage />} />
+      </Route>
+      <Route element={<SellerLayout />}>
+        <Route path='/seller/gadgets/create' element={<CreateGadget />} />
+      </Route>
+      <Route element={<SellerLayout />}>
+        <Route path='/seller/gadgets/update/:gadgetId' element={<UpdateGadget />} />
+      </Route>
       <Route path="/sellerProfile" element={
         <AuthRoute>
           <RoleBaseRoute accessibleRoles={["Seller"]}>
@@ -171,7 +193,7 @@ function App() {
         <Route path='/payment-history' element={<PaymentHistory />} />
       </Route>
 
-      {/* Admin Route */}
+      {/* Manager Route */}
       <Route element={<ManagerLayout />}>
         <Route path='/dashboard' element={
           <div className="flex overflow-scroll">
@@ -192,6 +214,19 @@ function App() {
         } />
         <Route path='/manage-seller-application' element={
           <ManageSellerApplicationPage />
+        } />
+        <Route path='/manage-gadget' element={
+          <ManageGadgetPage />
+        } />
+          <Route path='/gadget/detail-manager/:name' element={
+          <GadgetDetailSeller/>
+        } />
+      </Route>
+
+      {/* Admin Route */}
+      <Route element={<AdminLayout />}>
+          <Route path='/admin/manage-users' element={
+         <AdminPage/>
         } />
       </Route>
     </Routes>

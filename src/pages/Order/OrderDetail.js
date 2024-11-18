@@ -1,3 +1,4 @@
+// orderId = sellerorderId 
 import { CreditCardOutlined, HomeOutlined, ShopOutlined } from "@ant-design/icons";
 import { ArrowBack } from "@mui/icons-material";
 import { AlignLeft } from "lucide-react";
@@ -130,9 +131,7 @@ const OrderDetail = () => {
                         <h3 className="font-semibold text-red-700 ">Đơn hàng của bạn đã bị hủy</h3>
                         <p className="text-sm text-gray-600">
                         Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
-                            <span className={`px-2 py-1 rounded ${getStatusClass(orderDetails.status)}`}>
-                                {translateStatus(orderDetails.status)}
-                            </span>
+                           
                         </p>
 
                     </div>
@@ -147,9 +146,7 @@ const OrderDetail = () => {
                         <h3 className="font-semibold text-green-700 ">Đơn hàng của bạn đã được giao thành công</h3>
                         <p className="text-sm text-gray-600">
                         Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
-                            <span className={`px-2 py-1 rounded ${getStatusClass(orderDetails.status)}`}>
-                                {translateStatus(orderDetails.status)}
-                            </span>
+                   
                         </p>
                     </div>
                 </div>
@@ -162,9 +159,7 @@ const OrderDetail = () => {
                         <h3 className="font-semibold text-yellow-700 ">Đơn hàng của bạn đang chờ xử lý</h3>
                         <p className="text-sm text-gray-600">
                             Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
-                            <span className={`px-2 py-1 rounded ${getStatusClass(orderDetails.status)}`}>
-                                {translateStatus(orderDetails.status)}
-                            </span>
+                     
                         </p>
                     </div>
                 </div>

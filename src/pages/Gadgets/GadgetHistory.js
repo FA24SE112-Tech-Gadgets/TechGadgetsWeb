@@ -18,7 +18,7 @@ const GadgetHistory = () => {
     const fetchGadgetHistory = async () => {
       try {
         const response = await AxiosInterceptor.get('/api/gadget-histories');
-        const fetchedGadgets = response.data.items.map(item => item.gadget).slice(0,4 ); // Show only the first 4 gadgets
+        const fetchedGadgets = response.data.items.map(item => item.gadget).slice(0, 4); // Show only the first 4 gadgets
         setGadgets(fetchedGadgets);
       } catch (error) {
         toast.error('Failed to fetch gadget history');
@@ -66,31 +66,38 @@ const GadgetHistory = () => {
                 className="relative p-4 border rounded-lg shadow-md w-76 cursor-pointer"
               >
                 <div className="flex">
-
-                <img src={gadget.thumbnailUrl} alt={gadget.name} className="w-16 h-16 object-contain rounded mr-4" />
-                <div className="flex flex-col w-48">
-                  <h3
-                    className="font-semibold text-xs overflow-hidden overflow-ellipsis whitespace-nowrap"
-                    style={{
-                      display: '-webkit-box',
-                      WebkitBoxOrient: 'vertical',
-                      WebkitLineClamp: 1, // Only one line visible with ellipsis
-                      whiteSpace: 'normal',
-                    }}
-                  >
-                    {gadget.name}
-                  </h3>
-                  <div className="text-gray-500 text-sm mt-1">
-                    {gadget.discountPercentage > 0 ? (
-                      <>
-                        <span className="text-red-500 font-bold">{gadget.discountPrice.toLocaleString()}₫</span>
-                        <span className="text-gray-500 text-xs ml-2 line-through">{gadget.price.toLocaleString()}₫</span>
-                      </>
-                    ) : (
-                      <span className="text-gray-800 font-semibold text-sm">{gadget.price.toLocaleString()}₫</span>
-                    )}
+            
+                
+                  <img src={gadget.thumbnailUrl} alt={gadget.name} className="w-16 h-16 object-contain rounded mr-4" />
+                  <div className="flex flex-col w-48">
+                    <h3
+                      className="font-semibold text-xs overflow-hidden overflow-ellipsis whitespace-nowrap"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 1, // Only one line visible with ellipsis
+                        whiteSpace: 'normal',
+                      }}
+                    >
+                      {gadget.name}
+                    </h3>
+                    <div className="text-gray-500 text-sm mt-1">
+                      {gadget.discountPercentage > 0 ? (
+                        <>
+                          <span className="text-red-500 font-bold">{gadget.discountPrice.toLocaleString()}₫</span>
+                          <span className="text-gray-500 text-xs ml-2 line-through">{gadget.price.toLocaleString()}₫</span>
+                          <span className="text-gray-500 font-semibold text-xs ml-2">-{gadget.discountPercentage}%</span>
+                        </>
+                      ) : (
+                        <span className="text-gray-800 font-semibold text-sm">{gadget.price.toLocaleString()}₫</span>
+                      )}
+                    </div>
+                    {!gadget.isForSale && (
+                    <div className="text-red-500 font-bold text-sm">
+                      Ngừng kinh doanh
+                    </div>
+                  )}
                   </div>
-                </div>
                 </div>
 
               </div>

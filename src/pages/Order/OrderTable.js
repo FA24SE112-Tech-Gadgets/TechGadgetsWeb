@@ -1,3 +1,4 @@
+// orderId = sellerorderId 
 import { HomeOutlined, PhoneOutlined } from "@ant-design/icons";
 import { Eye } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -22,6 +23,11 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
   const handleChangePage = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
+  // Add this useEffect to reset pagination when orders change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [orders]);
 
   // Function to open the cancel modal and set the selected order ID
   const openCancelModal = (orderId) => {

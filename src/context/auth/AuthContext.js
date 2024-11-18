@@ -116,8 +116,10 @@ const AuthProvider = ({ children }) => {
 						setAuthenticated(true);
 						setError(null);
 						console.log("Login successful, navigating to home...", resData);
-						if (clientRole === "Manager") {
-							navigate("/dashboard");
+						if (clientRole === "Admin") {
+							navigate("/admin/manage-users");
+						} else if (clientRole === "Manager") {
+							navigate("/specification-unit");
 						} else if (clientRole === "Seller") {
 							if (resData.data.seller === null) {
 								console.log('day ne', resData.data.seller);
@@ -126,8 +128,9 @@ const AuthProvider = ({ children }) => {
 								navigate("/seller/Order-management");
 							}
 						} else {
-							navigate("/")
+							navigate("/");
 						}
+						
 					} else {
 						await logout();
 						setError({

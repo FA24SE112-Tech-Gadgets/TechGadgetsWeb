@@ -22,6 +22,13 @@ const DetailApplication = ({ application, onClose }) => {
     Company: 'Công Ty',
   };
 
+  const getFileType = (url) => {
+    const extension = url.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) return 'image';
+    if (extension === 'pdf') return 'pdf';
+    return 'unknown';
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -102,11 +109,21 @@ const DetailApplication = ({ application, onClose }) => {
                 <h3 className="text-lg font-semibold text-gray-800">Giấy Đăng Ký Kinh Doanh</h3>
               </div>
               <div className="bg-gray-100 rounded-lg p-4">
-                <img
-                  src={application.businessRegistrationCertificateUrl}
-                  alt="Giấy Đăng Ký Kinh Doanh"
-                  className="max-w-full h-auto rounded-lg shadow-md"
-                />
+                {getFileType(application.businessRegistrationCertificateUrl) === 'image' ? (
+                  <img
+                    src={application.businessRegistrationCertificateUrl}
+                    alt="Giấy Đăng Ký Kinh Doanh"
+                    className="max-w-full h-auto rounded-lg shadow-md"
+                  />
+                ) : getFileType(application.businessRegistrationCertificateUrl) === 'pdf' ? (
+                  <iframe
+                    src={application.businessRegistrationCertificateUrl}
+                    title="Giấy Đăng Ký Kinh Doanh"
+                    className="w-full h-96 rounded-lg shadow-md"
+                  />
+                ) : (
+                  <p>Không thể hiển thị file.</p>
+                )}
               </div>
             </div>
           )}
