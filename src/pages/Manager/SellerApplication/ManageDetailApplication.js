@@ -11,6 +11,13 @@ const ManageDetailApplication = ({ application, onClose, fetchApplications }) =>
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
 
+  const getFileType = (url) => {
+    const extension = url.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) return 'image';
+    if (extension === 'pdf') return 'pdf';
+    return 'unknown';
+  };
+
   // Định nghĩa baseUrl
   const baseUrl = process.env.NODE_ENV === "development"
     ? `${process.env.REACT_APP_DEV_API}/api/seller-applications`
@@ -95,7 +102,7 @@ const ManageDetailApplication = ({ application, onClose, fetchApplications }) =>
           <button onClick={onCancel} className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
             Hủy
           </button>
-          <button onClick={onConfirm} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          <button onClick={onConfirm} className="px-4 py-2 bg-primary/75 text-white rounded hover:bg-secondary/85">
             Xác nhận
           </button>
         </div>
@@ -183,11 +190,21 @@ const ManageDetailApplication = ({ application, onClose, fetchApplications }) =>
                 <h3 className="text-lg font-semibold text-gray-800">Giấy Đăng Ký Kinh Doanh</h3>
               </div>
               <div className="bg-gray-100 rounded-lg p-4">
-                <img
-                  src={application.businessRegistrationCertificateUrl}
-                  alt="Giấy Đăng Ký Kinh Doanh"
-                  className="max-w-full h-auto rounded-lg shadow-md"
-                />
+                {getFileType(application.businessRegistrationCertificateUrl) === 'image' ? (
+                  <img
+                    src={application.businessRegistrationCertificateUrl}
+                    alt="Giấy Đăng Ký Kinh Doanh"
+                    className="max-w-full h-auto rounded-lg shadow-md"
+                  />
+                ) : getFileType(application.businessRegistrationCertificateUrl) === 'pdf' ? (
+                  <iframe
+                    src={application.businessRegistrationCertificateUrl}
+                    title="Giấy Đăng Ký Kinh Doanh"
+                    className="w-full h-96 rounded-lg shadow-md"
+                  />
+                ) : (
+                  <p>Không thể hiển thị file. <a href={application.businessRegistrationCertificateUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Tải xuống</a></p>
+                )}
               </div>
             </div>
           )}

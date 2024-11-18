@@ -71,11 +71,18 @@ const GadgetHistoryDetail = () => {
                     <>
                       <span className="text-red-500 font-bold">{gadget.discountPrice.toLocaleString()}₫</span>
                       <span className="text-gray-500 text-xs ml-2 line-through">{gadget.price.toLocaleString()}₫</span>
+                      <span className="text-gray-500 font-semibold text-xs ml-2">-{gadget.discountPercentage}%</span>
                     </>
                   ) : (
                     <span className="text-xs font-bold">{gadget.price.toLocaleString()}₫</span>
                   )}
+                    {/* {!gadget.isForSale && (
+                    <div className="text-red-500 font-bold text-sm">
+                      Ngừng kinh doanh
+                    </div>
+                  )} */}
                 </div>
+              
               </div>
             </div>
           ))

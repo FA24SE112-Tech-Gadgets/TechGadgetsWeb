@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { Eye } from 'lucide-react';
 import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
 
 const RefundHistory = () => {
   const [refunds, setRefunds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+const navigate = useNavigate();
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -20,6 +21,8 @@ const RefundHistory = () => {
         setRefunds(response.data.items);
         setTotalItems(response.data.totalItems);
         setLoading(false);
+        console.log("data", response.data.items);
+        
       } catch (err) {
         setError('Không thể lấy lịch sử hoàn tiền');
         setLoading(false);
@@ -72,7 +75,7 @@ const RefundHistory = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
             <tr>
-              {['Số tiền', 'Trạng thái', 'Thời gian hoàn tiền', 'Ngày tạo giao dịch'].map((header) => (
+              {['Mã đơn hàng','Số tiền', 'Trạng thái', 'Thời gian hoàn tiền', 'Ngày tạo giao dịch'].map((header) => (
                 <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {header}
                 </th>
@@ -81,7 +84,10 @@ const RefundHistory = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {refunds.map((refund) => (
-                <tr key={refund.id}>
+                <tr key={refund.id}
+                onClick={() => navigate(`/order/detail/${refund.sellerOrderId}`)}
+                className="cursor-pointer hover:bg-gray-50 transition-colors" >
+                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{refund.sellerOrderId}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(refund.amount)}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -99,7 +105,7 @@ const RefundHistory = () => {
                     {refund.refundedAt ? formatDate(refund.refundedAt) : 'Đang chờ...'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(refund.createdAt)}</td>
-            
+        
                 </tr>
               ))}
             </tbody>

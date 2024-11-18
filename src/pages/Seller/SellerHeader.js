@@ -7,6 +7,8 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import useAuth from '~/context/auth/useAuth';
 import { Wallet } from '@mui/icons-material';
+import SellerNotification from '~/Notification/SellerNotification';
+import { useDeviceToken } from '~/context/auth/Noti';
 
 const { Header } = Layout;
 
@@ -15,7 +17,12 @@ const SellerHeader = () => {
   const navigate = useNavigate();
   const [walletAmount, setWalletAmount] = useState(0);
   const [showWalletAmount, setShowWalletAmount] = useState(false);
-
+  const { deleteDeviceToken } = useDeviceToken();
+  const handleLogout = async () => {
+    console.log("Logout clicked");
+    await deleteDeviceToken(); 
+    logout();
+  };
   const formatWalletAmount = (amount) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
@@ -24,8 +31,8 @@ const SellerHeader = () => {
     try {
       const response = await AxiosInterceptor.get('/api/users/current');
       setWalletAmount(response.data.wallet.amount);
-      console.log("wallet seller",response.data.wallet.amount );
-      
+      console.log("wallet seller", response.data.wallet.amount);
+
     } catch (error) {
       console.error('Error fetching wallet amount:', error);
     }
@@ -41,7 +48,7 @@ const SellerHeader = () => {
     e.stopPropagation(); // Prevent dropdown from closing
     setShowWalletAmount(!showWalletAmount);
     if (!showWalletAmount) {
-      fetchWalletAmount(); 
+      fetchWalletAmount();
     }
   };
 
@@ -51,7 +58,7 @@ const SellerHeader = () => {
       <Menu.Item key="profile" icon={<UserOutlined />} onClick={() => navigate('/sellerProfile')}>
         Thông tin cá nhân
       </Menu.Item>
-      <Menu.Item key="wallet" icon={<Wallet/>}>
+      <Menu.Item key="wallet" icon={<Wallet />}>
         <div className=" rounded-lg w-full">
           <div className="flex justify-between items-center">
             <span>Ví của tôi:</span>
@@ -69,7 +76,7 @@ const SellerHeader = () => {
         </div>
       </Menu.Item>
 
-      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={logout}>
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
         Đăng xuất
       </Menu.Item>
     </Menu>
@@ -88,10 +95,10 @@ const SellerHeader = () => {
       </div>
 
       {/* Right-side icons */}
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div  className="flex justify-center">
         {/* Notification Bell */}
-        <div style={{ marginRight: '20px', cursor: 'pointer' }}>
-          <BellOutlined style={{ fontSize: '20px' }} />
+        <div className="mt-4 mr-5 ">
+          <SellerNotification />
         </div>
 
         {/* User Profile Dropdown */}
@@ -101,6 +108,7 @@ const SellerHeader = () => {
           </div>
         </Dropdown>
       </div>
+
     </Header>
   );
 };
