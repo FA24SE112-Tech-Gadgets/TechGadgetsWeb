@@ -12,22 +12,22 @@ import { Button } from "antd";
 const ImageList = [
   {
     id: 1,
-    img: "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Gadgets/8623597f-d616-4f19-931b-31067193da24.jpg",
-    title: "Giảm giá tới 50% cho các loại tai nghe ",
+    img: "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Gadgets/21fe279f-19c5-4604-9ad5-e30142fe06d2.jpg",
+    title: "Giảm giá tới 20% cho các loại tai nghe ",
     description:
       "Tăng trải nghiệm nghe nhạc của bạn với các loại tai nghe được đánh giá cao với giá không thể tốt hơn. Đừng bỏ lỡ các ưu đãi tốt nhất của năm.",
   },
   {
     id: 2,
     img: "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Gadgets/76f7a00b-6749-45db-b5bc-6377237ee6d5.jpg",
-    title: "Giảm giá 30% cho các Laptop Gaming",
+    title: "Giảm giá 15% cho các Laptop Gaming",
     description:
       "Có những trải nghiệm tốt hơn trong công việc hoặc giải trí với dòng laptop giảm giá của chúng tôi. Ưu đãi có thời hạn!",
   },
   {
     id: 3,
     img: "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Gadgets/b62600ae-ad35-4903-b012-0911dc4cb619.jpg",
-    title: "Giảm giá 70% áp dụng vào thứ 6 tuần này ",
+    title: "Giảm giá 50% áp dụng vào thứ 6 tuần này ",
     description:
       "Đừng bỏ lỡ cơ hội sở hữu những thiết bị công nghệ giá rẻ nhất trong tuần này. Số lượng có hạn!",
   },
