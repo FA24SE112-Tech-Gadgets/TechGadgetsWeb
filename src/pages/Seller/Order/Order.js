@@ -79,52 +79,53 @@ const OrderHistorySeller = () => {
             <option value="ASC">Cũ nhất</option>
           </select>
         </div>
-        <div className="flex space-x-4 mb-6 justify-end">
+        <div className="flex space-x-2 overflow-x-auto bg-primary/10 p-1 rounded-lg mb-6">
           <button
             onClick={() => handleStatusChange("")}
-            className={`px-4 py-2 rounded ${status === "" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center
+              ${status === "" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <ShoppingCart className="inline-block mr-2" /> Tất cả
+            <ShoppingCart className="w-4 h-4 mr-2" /> Tất cả
           </button>
           <button
             onClick={() => handleStatusChange("Pending")}
-            className={`px-4 py-2 rounded ${status === "Pending" ? "bg-blue-500 text-white" : "bg-gray-100"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center
+              ${status === "Pending" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <PendingOutlined className="inline-block mr-2" /> Đang chờ
+            <PendingOutlined className="w-4 h-4 mr-2" /> Đang chờ
           </button>
           <button
             onClick={() => handleStatusChange("Success")}
-            className={`px-4 py-2 rounded ${status === "Success" ? "bg-green-500 text-white" : "bg-gray-100"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center
+              ${status === "Success" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <CheckCircle className="inline-block mr-2" /> Thành công
+            <CheckCircle className="w-4 h-4 mr-2" /> Thành công
           </button>
           <button
             onClick={() => handleStatusChange("Cancelled")}
-            className={`px-4 py-2 rounded ${status === "Cancelled" ? "bg-red-500 text-white" : "bg-gray-100"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center
+              ${status === "Cancelled" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <XCircle className="inline-block mr-2" /> Đã hủy
+            <XCircle className="w-4 h-4 mr-2" /> Đã hủy
           </button>
         </div>
-        </div>
-        {isLoading && (
-            <div className="flex items-center justify-center min-h-screen">
-            <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
-              <div className="h-4 w-4 bg-white rounded-full"></div>
-            </div>
-            <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-              Loading...
-            </span>
+      </div>
+      {isLoading && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+            <div className="h-4 w-4 bg-white rounded-full"></div>
           </div>
+          <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+            Loading...
+          </span>
+        </div>
       )}
-    
 
       {filteredOrders.length === 0 && !isLoading ? (
         <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
       ) : (
         <OrderTableSeller orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} />
       )}
-
-     
     </div>
   );
 };

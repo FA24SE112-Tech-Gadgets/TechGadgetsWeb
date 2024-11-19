@@ -175,12 +175,13 @@ const SellerPage = () => {
 
     if (isLoading) return (
         <div className="flex items-center justify-center min-h-screen">
-            <div className="w-7 h-7 bg-gradient-to-tr from-primary/80 to-primary rounded-full flex items-center justify-center animate-spin">
-                <div className="h-4 w-4 bg-white rounded-full"></div>
-            </div>
-            <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary/80 to-primary">
-                Loading...
-            </span>
+          <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+        <div className="h-4 w-4 bg-white rounded-full"></div>
+      </div>
+      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+        Loading...
+      </span>
+
         </div>
     );
 

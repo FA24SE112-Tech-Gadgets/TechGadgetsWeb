@@ -250,7 +250,16 @@ const GadgetManagement = ({ categoryId }) => {
     const handleUpdateGadget = (gadgetId) => {
         navigate(`/seller/gadgets/update/${gadgetId}`);
     };
-
+    const translateStatus = (status) => {
+        switch (status) {
+            case "Active":
+                return "Khả dụng";
+            case "Inactive":
+                return "Bị khóa";
+            default:
+                return status;
+        }
+    };
     return (
         <div className="p-6">
             <ToastContainer position="top-right" autoClose={3000} />
@@ -385,7 +394,7 @@ const GadgetManagement = ({ categoryId }) => {
                                         </span>
                                         <button
                                             onClick={() => showDiscountModal(gadget)}
-                                            className="absolute top-0 right-0 bg-white p-1 rounded-full shadow-md border mt-2"
+                                            className="absolute top-10 right-10 bg-white p-1 rounded-full shadow-md border mt-2"
                                             title="Cập nhật sản phẩm"
                                         >
                                             <Edit className="h-4 w-4 text-primary/100" />
@@ -404,7 +413,7 @@ const GadgetManagement = ({ categoryId }) => {
                             <td className="p-4">{gadget.quantity}</td>
                             <td className="p-4">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full  ${gadget.gadgetStatus === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                                    {gadget.gadgetStatus}
+                                {translateStatus(gadget.gadgetStatus)}
                                 </span>
 
                             </td>

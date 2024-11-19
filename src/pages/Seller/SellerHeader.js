@@ -85,7 +85,9 @@ const SellerHeader = () => {
   return (
     <Header style={{ background: '#fff', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e8e8e8' }}>
       {/* Logo Section */}
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div 
+        onClick={() => navigate('/seller/Order-management')}
+        style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
         <div style={{ marginRight: '10px' }}>
           <img src={icon} alt="Logo" style={{ height: '40px', width: '40px', borderRadius: '50%' }} />
         </div>
