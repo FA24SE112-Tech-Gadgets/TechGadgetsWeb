@@ -90,7 +90,9 @@ function CategoryGadgetPage() {
         };
         fetchBrandProducts();
     }, [category, categoryId, apiBaseUrl, appliedFilters, isAuthenticated, page]);
-
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
     const toggleFavorite = async (gadgetId, isFavorite) => {
         if (!isAuthenticated) {
             toast.error("Vui lòng đăng nhập để thêm vào yêu thích!");
@@ -126,16 +128,20 @@ function CategoryGadgetPage() {
         setPage(1); // Reset page khi áp dụng bộ lọc
     };
 
-
+    if (loading) return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+            <div className="h-4 w-4 bg-white rounded-full"></div>
+          </div>
+          <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+            Loading...
+          </span>
+        </div>
+      );
     return (
         <div className="bg-white dark:bg-gray-900 dark:text-white">
             <ToastContainer />
 
-            {loading && (
-                <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-                    <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-                </div>
-            )}
             <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                 <Breadcrumb className="w-full">

@@ -137,7 +137,18 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
   const handleChangePage = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+  const getPaginationRange = () => {
+    const maxVisible = 5; // Số lượng nút hiển thị
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(start + maxVisible - 1, totalPages);
 
+    // Điều chỉnh start nếu end đã chạm giới hạn
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   return (
     <div className="container max-w-6xl mx-auto p-4 flex flex-col gap-4">
@@ -226,18 +237,21 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
         </div>
       ))}
       {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
-        <nav className="flex items-center space-x-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => handleChangePage(i + 1)}
-              className={`px-4 py-2 rounded-md ${i + 1 === currentPage ? 'bg-primary/70 text-white' : 'bg-gray-200 text-gray-700'}`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </nav>
+      <div className="flex justify-center mt-6 space-x-2">
+        {getPaginationRange().map((pageNumber) => (
+          <button
+            key={pageNumber}
+            onClick={() => handleChangePage(pageNumber)}
+            className={`px-4 py-2 rounded-md ${
+              pageNumber === currentPage
+                ? 'bg-primary/80 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}
+            // disabled={isLoading}
+          >
+            {pageNumber}
+          </button>
+        ))}
       </div>
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

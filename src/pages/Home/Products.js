@@ -125,7 +125,6 @@ export default function ProductPage() {
         )
 
       }));
-      toast.success(isFavorite ? 'Xóa khỏi yêu thích thành công' : 'Thêm vào yêu thích thành công');
     } catch (error) {
       if (error.response && error.response.data && error.response.data.reasons) {
         const reasons = error.response.data.reasons;

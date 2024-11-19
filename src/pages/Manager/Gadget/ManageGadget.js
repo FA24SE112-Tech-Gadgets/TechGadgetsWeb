@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
-import { Eye, Percent, Plus, X, Box, ShoppingBag, Pause, Loader } from 'lucide-react';
+import { Eye, Percent, Plus, X, Box, ShoppingBag, Pause, Loader, Search } from 'lucide-react';
 import slugify from '~/ultis/config';
 
 const formatDate = (dateString) => {
@@ -23,6 +23,20 @@ const ManageGadget = ({ categoryId }) => {
   const [currentPage, setCurrentPage] = useState(1); // Changed to state
   const itemsPerPage = 3; // Add this constant
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [brands, setBrands] = useState([]);
+  const [selectedBrand, setSelectedBrand] = useState('');
+
+  const fetchBrands = async () => {
+    try {
+      const response = await AxiosInterceptor.get(`/api/brands/categories/${categoryId}?Page=1&PageSize=100`);
+      setBrands(response.data.items);
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+      toast.error("Failed to fetch brands");
+    }
+  };
 
   const fetchGadgets = async () => {
     try {
@@ -30,6 +44,12 @@ const ManageGadget = ({ categoryId }) => {
       let url = `/api/gadgets/category/${categoryId}/managers?Page=1&PageSize=200`;
       if (statusFilter !== 'all') {
         url += `&GadgetStatus=${statusFilter}`;
+      }
+      if (debouncedSearch) {
+        url += `&Name=${encodeURIComponent(debouncedSearch)}`;
+      }
+      if (selectedBrand) {
+        url += `&Brands=${selectedBrand}`;
       }
       const response = await AxiosInterceptor.get(url);
       setGadgets(response.data.items);
@@ -94,11 +114,26 @@ const ManageGadget = ({ categoryId }) => {
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
-  // Update useEffect to reset page when filter changes
+  // Add debounce effect for search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Update useEffect to include debouncedSearch
   useEffect(() => {
     setCurrentPage(1);
     fetchGadgets();
-  }, [categoryId, statusFilter]);
+  }, [categoryId, statusFilter, debouncedSearch, selectedBrand]);
+
+  // Add useEffect for fetching brands when categoryId changes
+  useEffect(() => {
+    fetchBrands();
+    setSelectedBrand(''); // Reset selected brand when category changes
+  }, [categoryId]);
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-screen">
@@ -115,16 +150,45 @@ const ManageGadget = ({ categoryId }) => {
     <div className="">
       <ToastContainer position="top-right" autoClose={3000} />
       
-      <div className="flex justify-end mb-4">
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded focus:outline-none focus:border-blue-500"
-        >
-          <option value="all">Tất cả </option>
-          <option value="Active">Đang hoạt động</option>
-          <option value="Inactive">Không hoạt động</option>
-        </select>
+      <div className="flex justify-between mb-4">
+        {/* Add search input */}
+        <div className="relative w-64">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Tìm kiếm sản phẩm..."
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary/80"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+        </div>
+
+        <div className="flex gap-4">
+          {/* Brand filter */}
+          <select
+            value={selectedBrand}
+            onChange={(e) => setSelectedBrand(e.target.value)}
+            className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded focus:outline-none focus:border-primary/80"
+          >
+            <option value="">Tất cả thương hiệu</option>
+            {brands.map((brand) => (
+              <option key={brand.id} value={brand.id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Status filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded focus:outline-none focus:border-primary/80"
+          >
+            <option value="all">Tất cả trạng thái </option>
+            <option value="Active">Đang hoạt động</option>
+            <option value="Inactive">Không hoạt động</option>
+          </select>
+        </div>
       </div>
 
       <table className="min-w-full bg-white rounded-md shadow-lg">

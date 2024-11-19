@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { ToastContainer, toast } from 'react-toastify';
-import { CloseCircleOutlined } from '@ant-design/icons';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import slugify from '~/ultis/config';
 import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -12,13 +12,15 @@ import { Navigation } from 'swiper/modules';
 const GadgetHistory = () => {
   const [gadgets, setGadgets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isBeginning, setIsBeginning] = useState(true);
+  const [isEnd, setIsEnd] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGadgetHistory = async () => {
       try {
         const response = await AxiosInterceptor.get('/api/gadget-histories');
-        const fetchedGadgets = response.data.items.map(item => item.gadget).slice(0, 4); // Show only the first 4 gadgets
+        const fetchedGadgets = response.data.items.map(item => item.gadget);
         setGadgets(fetchedGadgets);
       } catch (error) {
         toast.error('Failed to fetch gadget history');
@@ -47,66 +49,102 @@ const GadgetHistory = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-2xl font-bold mb-4">Sản phẩm đã xem</h1>
       <ToastContainer />
-      <Swiper
-        slidesPerView={4}
-        spaceBetween={20}
-        navigation
-        modules={[Navigation]}
-        className="mySwiper"
-      >
-        {gadgets.length > 0 ? (
-          gadgets.map((gadget) => (
-            <SwiperSlide key={gadget.id}>
-              <div
-                onClick={() => navigate(`/gadget/detail/${slugify(gadget.name)}`, {
-                  state: {
-                    productId: gadget.id,
+
+      {/* Custom Navigation Buttons */}
+      <div className="relative">
+        <Swiper
+          slidesPerView={4}
+          spaceBetween={20}
+          navigation={{
+            prevEl: '.custom-swiper-button-prev',
+            nextEl: '.custom-swiper-button-next',
+          }}
+          modules={[Navigation]}
+          onSlideChange={(swiper) => {
+            setIsBeginning(swiper.isBeginning);
+            setIsEnd(swiper.isEnd);
+          }}
+          breakpoints={{
+            320: { slidesPerView: 1, spaceBetween: 10 },
+            480: { slidesPerView: 2, spaceBetween: 15 },
+            768: { slidesPerView: 3, spaceBetween: 20 },
+            1024: { slidesPerView: 4, spaceBetween: 20 },
+          }}
+          className="mySwiper"
+        >
+          {gadgets.length > 0 ? (
+            gadgets.map((gadget) => (
+              <SwiperSlide key={gadget.id}>
+                <div
+                  onClick={() =>
+                    navigate(`/gadget/detail/${slugify(gadget.name)}`, {
+                      state: { productId: gadget.id },
+                    })
                   }
-                })}
-                className="relative p-4 border rounded-lg shadow-md w-76 cursor-pointer"
-              >
-                <div className="flex">
-            
-                
-                  <img src={gadget.thumbnailUrl} alt={gadget.name} className="w-16 h-16 object-contain rounded mr-4" />
-                  <div className="flex flex-col w-48">
-                    <h3
-                      className="font-semibold text-xs overflow-hidden overflow-ellipsis whitespace-nowrap"
-                      style={{
-                        display: '-webkit-box',
-                        WebkitBoxOrient: 'vertical',
-                        WebkitLineClamp: 1, // Only one line visible with ellipsis
-                        whiteSpace: 'normal',
-                      }}
-                    >
-                      {gadget.name}
-                    </h3>
-                    <div className="text-gray-500 text-sm mt-1">
-                      {gadget.discountPercentage > 0 ? (
-                        <>
-                          <span className="text-red-500 font-bold">{gadget.discountPrice.toLocaleString()}₫</span>
-                          <span className="text-gray-500 text-xs ml-2 line-through">{gadget.price.toLocaleString()}₫</span>
-                          <span className="text-gray-500 font-semibold text-xs ml-2">-{gadget.discountPercentage}%</span>
-                        </>
-                      ) : (
-                        <span className="text-gray-800 font-semibold text-sm">{gadget.price.toLocaleString()}₫</span>
+                  className="relative p-2 border rounded-lg shadow-md w-76 cursor-pointer"
+                >
+                  <div className="flex">
+                    <img
+                      src={gadget.thumbnailUrl}
+                      alt={gadget.name}
+                      className="w-16 h-16 object-contain rounded mr-4"
+                    />
+                    <div className="flex flex-col w-48">
+                      <h3
+                        className="font-semibold text-xs overflow-hidden overflow-ellipsis whitespace-nowrap"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitBoxOrient: 'vertical',
+                          WebkitLineClamp: 1,
+                          whiteSpace: 'normal',
+                        }}
+                      >
+                        {gadget.name}
+                      </h3>
+                      <div className="text-gray-500 text-sm mt-1">
+                        {gadget.discountPercentage > 0 ? (
+                          <>
+                            <span className="text-red-500 font-semibold">
+                              {gadget.discountPrice.toLocaleString()}₫
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-gray-500 font-semibold ">
+                            {gadget.price.toLocaleString()}₫
+                          </span>
+                        )}
+                      </div>
+                      {!gadget.isForSale && (
+                        <div className="text-red-500 font-bold text-sm">
+                          Ngừng kinh doanh
+                        </div>
                       )}
                     </div>
-                    {!gadget.isForSale && (
-                    <div className="text-red-500 font-bold text-sm">
-                      Ngừng kinh doanh
-                    </div>
-                  )}
                   </div>
                 </div>
+              </SwiperSlide>
+            ))
+          ) : (
+            <p>Không có sản phẩm đã xem gần đây.</p>
+          )}
+        </Swiper>
 
-              </div>
-            </SwiperSlide>
-          ))
-        ) : (
-          <p>Không có sản phẩm đã xem gần đây.</p>
-        )}
-      </Swiper>
+        {/* Updated Navigation Buttons with conditional rendering */}
+        <button 
+          className={`custom-swiper-button-prev absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-gray-800/80 p-2 rounded-l shadow-md hover:bg-white dark:hover:bg-gray-800 transition-colors ${
+            isBeginning ? 'hidden' : ''
+          }`}
+        >
+          <ChevronLeft className="w-6 h-6 text-gray-700" />
+        </button>
+        <button 
+          className={`custom-swiper-button-next absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-gray-800/80 p-2 rounded-l shadow-md hover:bg-white dark:hover:bg-gray-800 transition-colors ${
+            isEnd ? 'hidden' : ''
+          }`}
+        >
+          <ChevronRight className="w-6 h-6 text-gray-700" />
+        </button>
+      </div>
     </div>
   );
 };

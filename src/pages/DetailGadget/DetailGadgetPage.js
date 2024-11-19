@@ -11,7 +11,7 @@ import StarRatings from 'react-star-ratings';
 import { Star } from 'lucide-react';
 import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
 import GadgetSuggest from '../Gadgets/GadgetSuggest';
-import user from "~/assets/R.png"
+import users from "~/assets/R.png"
 
 const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -235,6 +235,11 @@ const [user, setUser] = useState(null);
         fetchProduct();
         fetchReviews();
     }, [productId, isAuthenticated, apiBase]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [productId]);  // This will run whenever productId changes
+
     const imgRef = useRef(null); // Tạo ref để tham chiếu đến hình ảnh chính
 
     const handleImageClick = (imageUrl) => {
@@ -243,9 +248,14 @@ const [user, setUser] = useState(null);
         }
     };
     if (error) return <div>{error}</div>;
-    if (!product) return <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-        <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-    </div>;
+    if (!product) return    <div className="flex items-center justify-center min-h-screen">
+    <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+      <div className="h-4 w-4 bg-white rounded-full"></div>
+    </div>
+    <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+      Loading...
+    </span>
+  </div>;
 
     const handleQuantityChange = (type) => {
         setQuantity(prev => type === 'increment' ? prev + 1 : Math.max(1, prev - 1));
@@ -517,7 +527,7 @@ const [user, setUser] = useState(null);
                                     <div key={review.id} className="mb-6 p-6 border border-gray-200 rounded-lg shadow-sm">
                                         <div className="flex items-center mb-4">
                                             <img
-                                                src={review.customer.avatarUrl || user}
+                                                src={review.customer.avatarUrl || users}
                                                 alt={review.customer.fullName}
                                                 className="w-12 h-12 rounded-full mr-4"
                                             />
@@ -678,6 +688,7 @@ const [user, setUser] = useState(null);
                 onClose={() => setShowProfileWarning(false)}
             /> */}
         </div>
+
     );
 };
 

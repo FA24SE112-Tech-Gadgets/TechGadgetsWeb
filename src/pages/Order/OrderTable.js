@@ -14,7 +14,6 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -23,7 +22,18 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
   const handleChangePage = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+  const getPaginationRange = () => {
+    const maxVisible = 5; // Số lượng nút hiển thị
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(start + maxVisible - 1, totalPages);
 
+    // Điều chỉnh start nếu end đã chạm giới hạn
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
   // Add this useEffect to reset pagination when orders change
   useEffect(() => {
     setCurrentPage(1);
@@ -192,18 +202,21 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
         </tbody>
       </table>
       {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
-        <nav className="flex items-center space-x-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => handleChangePage(i + 1)}
-              className={`px-4 py-2 rounded-md ${i + 1 === currentPage ? "bg-primary/70 text-white" : "bg-gray-200 text-gray-700"}`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </nav>
+      <div className="flex justify-center mt-6 space-x-2">
+        {getPaginationRange().map((pageNumber) => (
+          <button
+            key={pageNumber}
+            onClick={() => handleChangePage(pageNumber)}
+            className={`px-4 py-2 rounded-md ${
+              pageNumber === currentPage
+                ? 'bg-primary/80 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}
+            // disabled={isLoading}
+          >
+            {pageNumber}
+          </button>
+        ))}
       </div>
 
       {/* Cancel Order Modal */}
