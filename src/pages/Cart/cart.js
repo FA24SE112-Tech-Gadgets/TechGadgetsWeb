@@ -13,7 +13,7 @@ const OrderConfirmation = ({ selectedItems, cartItemsBySeller, totalPrice, onCan
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(false);
     const navigate = useNavigate();
-    
+
     const handleConfirmOrder = async () => {
         setIsProcessing(true);
         try {
@@ -37,7 +37,6 @@ const OrderConfirmation = ({ selectedItems, cartItemsBySeller, totalPrice, onCan
             setIsProcessing(false);
         }
     };
-
 
     if (orderSuccess) {
         return (
@@ -132,7 +131,7 @@ const CartPage = () => {
                 const response = await AxiosInterceptor.get('/api/users/current');
                 setUser(response.data.customer);
                 console.log("data nè", response.data.customer);
-                
+
             } catch (error) {
                 console.error("Error fetching user data:", error);
             }
@@ -140,7 +139,7 @@ const CartPage = () => {
 
         fetchUserData();
     }, []);
-    
+
     useEffect(() => {
         const fetchSellers = async () => {
             try {
@@ -331,7 +330,23 @@ const CartPage = () => {
         setIsOpen(false);
     };
 
+    const isAnySelectedItemInactiveOrNotForSale = () => {
+        for (const [sellerId, productIds] of Object.entries(selectedItems)) {
+            for (const productId of productIds) {
+                const item = cartItemsBySeller[sellerId]?.find(item => item.gadget.id === productId);
+                if (item && (item.gadget.status === "Inactive" || item.gadget.isForSale === false)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
     const handleCheckout = () => {
+        if (isAnySelectedItemInactiveOrNotForSale()) {
+            toast.error("Không thể mua hàng do có sản phẩm không hợp lệ trong giỏ hàng.");
+            return;
+        }
         if (!user?.address || !user?.phoneNumber) {
             setIsOpen(true);
             return;
@@ -440,7 +455,7 @@ const CartPage = () => {
                                                         >{item.gadget.name}</h4>
                                                         <p>Hãng: {item.gadget.brand.name}</p>
                                                         <p>Loại sản phẩm: {item.gadget.category.name}</p>
-                                                        
+
                                                         <div className="flex items-center mt-2">
                                                             <p>Đơn giá: </p>
                                                             {item.gadget.discountPercentage > 0 ? (
@@ -459,7 +474,7 @@ const CartPage = () => {
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        
+
                                                         <div className="flex items-center mt-2">
                                                             <p>Thành tiền: </p>
                                                             <span className="font-semibold text-red-500 ml-2">
@@ -470,7 +485,11 @@ const CartPage = () => {
                                                                 ).toLocaleString()}₫
                                                             </span>
                                                         </div>
-                                                        {item.gadget.isForSale === false && (
+                                                        {item.gadget.status === "Inactive" ? (
+                                                            <div className="text-red-500">
+                                                                Sản phẩm đã bị khóa do vi phạm chính sách TechGadget
+                                                            </div>
+                                                        ) : item.gadget.isForSale === false && (
                                                             <div className="text-red-500">
                                                                 Ngừng kinh doanh
                                                             </div>
@@ -514,13 +533,18 @@ const CartPage = () => {
                                     <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
                                         <p className="text-lg font-semibold text-gray-700">Tổng tiền:</p>
                                         <p className="text-xl font-bold text-red-500">{totalPrice.toLocaleString()}₫</p>
-                                        <p className="text-lg font-semibold text-gray-700 sm:border-l sm:pl-4 sm:ml-4">Sản phẩm đã chọn:
+                                        <p className="text-lg font-semibold text-gray-700 sm:border-l sm:pl-4 sm:ml-4">
+                                            Sản phẩm đã chọn:
                                             <span className="text-blue-600 font-bold ml-2">{selectedItemCount}</span>
                                         </p>
                                     </div>
                                     <button
                                         onClick={handleCheckout}
-                                        className="bg-primary/80 hover:bg-secondary/90 text-white px-6 py-2 rounded-lg font-semibold transition duration-200"
+                                        disabled={isAnySelectedItemInactiveOrNotForSale()}
+                                        className={`px-6 py-2 rounded-lg font-semibold transition duration-200 ${isAnySelectedItemInactiveOrNotForSale()
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-primary/80 hover:bg-secondary/90 text-white'
+                                            }`}
                                     >
                                         Mua ngay
                                     </button>

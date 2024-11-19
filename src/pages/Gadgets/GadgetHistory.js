@@ -66,8 +66,8 @@ const GadgetHistory = () => {
                 className="relative p-4 border rounded-lg shadow-md w-76 cursor-pointer"
               >
                 <div className="flex">
-            
-                
+
+
                   <img src={gadget.thumbnailUrl} alt={gadget.name} className="w-16 h-16 object-contain rounded mr-4" />
                   <div className="flex flex-col w-48">
                     <h3
@@ -92,11 +92,20 @@ const GadgetHistory = () => {
                         <span className="text-gray-800 font-semibold text-sm">{gadget.price.toLocaleString()}₫</span>
                       )}
                     </div>
-                    {!gadget.isForSale && (
-                    <div className="text-red-500 font-bold text-sm">
-                      Ngừng kinh doanh
-                    </div>
-                  )}
+                    {gadget.status === "Inactive" ? (
+                     <div className="text-red-500 font-bold text-sm">
+                        Sản phẩm đã bị khóa
+                      </div>
+                    ) : !gadget.isForSale && (
+                      <div className="text-red-500 font-bold text-sm">
+                        Ngừng kinh doanh
+                      </div>
+                    )}
+                    {/* {!gadget.isForSale && (
+                      <div className="text-red-500 font-bold text-sm">
+                        Ngừng kinh doanh
+                      </div>
+                    )} */}
                   </div>
                 </div>
 

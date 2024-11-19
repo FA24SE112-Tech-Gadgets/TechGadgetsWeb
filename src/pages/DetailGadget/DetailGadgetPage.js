@@ -135,7 +135,7 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
 
 // const ProfileWarningModal = ({ isOpen, onClose }) => {
 //     const navigate = useNavigate();
-    
+
 //     return (
 //         <Modal
 //             title="Thông tin cá nhân chưa đầy đủ"
@@ -174,15 +174,15 @@ const DetailGadgetPage = () => {
     const [showProfileWarning, setShowProfileWarning] = useState(false);
     const navigate = useNavigate();
     // const {user} = useAuth()
-    const [isOpen, setIsOpen] = useState(false); 
-const [user, setUser] = useState(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const [user, setUser] = useState(null);
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const response = await AxiosInterceptor.get('/api/users/current');
                 setUser(response.data.customer);
                 console.log("data nè", response.data.customer);
-                
+
             } catch (error) {
                 console.error("Error fetching user data:", error);
             }
@@ -280,7 +280,7 @@ const [user, setUser] = useState(null);
     const onClose = () => {
         setIsOpen(false);
     };
-    
+
     const handleCancelOrder = () => {
         setShowConfirmation(false);
     };
@@ -323,7 +323,7 @@ const [user, setUser] = useState(null);
                 ]}
             />
 
-            <ToastContainer autoClose={3000}/>
+            <ToastContainer autoClose={3000} />
             <Modal
                 title="Thông tin cá nhân chưa đầy đủ"
                 open={isOpen}
@@ -387,38 +387,38 @@ const [user, setUser] = useState(null);
                             </button>
                         </div>
                         {activeTab === 'specifications' && (
-                              <div className="space-y-4">
-                              {product.specificationValues && (() => {
-                                  // Group specifications by their keys
-                                  const groupedSpecs = product.specificationValues.reduce((acc, spec) => {
-                                      const keyName = spec.specificationKey?.name || 'N/A';
-                                      if (!acc[keyName]) {
-                                          acc[keyName] = [];
-                                      }
-                                      acc[keyName].push(spec);
-                                      return acc;
-                                  }, {});
+                            <div className="space-y-4">
+                                {product.specificationValues && (() => {
+                                    // Group specifications by their keys
+                                    const groupedSpecs = product.specificationValues.reduce((acc, spec) => {
+                                        const keyName = spec.specificationKey?.name || 'N/A';
+                                        if (!acc[keyName]) {
+                                            acc[keyName] = [];
+                                        }
+                                        acc[keyName].push(spec);
+                                        return acc;
+                                    }, {});
 
-                                  // Render grouped specifications
-                                  return Object.entries(groupedSpecs).map(([keyName, specs]) => (
-                                      <div key={keyName}
-                                          className="flex items-start text-sm border-b border-gray-200 py-3 last:border-0"
-                                      >
-                                          <div className="w-1/3 text-gray-600">
-                                              {keyName}
-                                          </div>
-                                          <div className="w-2/3 font-medium text-gray-900">
-                                              {specs.map((spec, index) => (
-                                                  <div key={spec.id}>
-                                                      {spec.value || 'N/A'} {spec.specificationUnit?.name || ''}
-                                                  </div>
-                                              ))}
-                                          </div>
-                                      </div>
-                                  ));
-                              })()}
-                          </div>
-                        
+                                    // Render grouped specifications
+                                    return Object.entries(groupedSpecs).map(([keyName, specs]) => (
+                                        <div key={keyName}
+                                            className="flex items-start text-sm border-b border-gray-200 py-3 last:border-0"
+                                        >
+                                            <div className="w-1/3 text-gray-600">
+                                                {keyName}
+                                            </div>
+                                            <div className="w-2/3 font-medium text-gray-900">
+                                                {specs.map((spec, index) => (
+                                                    <div key={spec.id}>
+                                                        {spec.value || 'N/A'} {spec.specificationUnit?.name || ''}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ));
+                                })()}
+                            </div>
+
                         )}
                         {activeTab === 'review' && (
                             <div className="space-y-4">
@@ -556,13 +556,26 @@ const [user, setUser] = useState(null);
                                 </div>
                             )}
                         </div>
-                        {product.isForSale === false && (
+                        {product.status === "Inactive" ? (
+                            <div className="relative">
+                                <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-sm font-bold py-1 px-2 rounded-full shadow-lg">
+                                    Sản phẩm đã bị khóa
+                                </div>
+                            </div>
+                        ) : product.isForSale === false && (
                             <div className="relative">
                                 <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-lg">
                                     Ngừng kinh doanh
                                 </div>
                             </div>
                         )}
+                        {/* {product.isForSale === false && (
+                            <div className="relative">
+                                <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-lg">
+                                    Ngừng kinh doanh
+                                </div>
+                            </div>
+                        )} */}
                         <div className={`space-y-2 mb-6 ${product.isForSale === false ? 'opacity-50' : ''}`}>
                             <div className="flex items-center space-x-3 mb-4">
                                 <div className="text-gray-600">Số lượng:</div>

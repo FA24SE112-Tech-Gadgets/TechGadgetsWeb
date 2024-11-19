@@ -95,7 +95,11 @@ const GadgetSearchHistory = () => {
                         </div>
                       )}
                     </div>
-                    {!item.gadget.isForSale && (
+                    {item.gadget.status === "Inactive" ? (
+                    <div className="text-red-500 font-semibold text-sm">
+                        Sản phẩm đã bị khóa do vi phạm chính sách TechGadget
+                      </div>
+                    ) : !item.gadget.isForSale && (
                       <div className="text-red-500 font-semibold text-sm">
                         Ngừng kinh doanh
                       </div>
