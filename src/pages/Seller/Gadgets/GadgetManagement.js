@@ -3,7 +3,7 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { toast, ToastContainer } from "react-toastify";
-import { Eye, X, Percent, Plus, Box, ShoppingBag, Pause, Search, Edit, Loader } from 'lucide-react'; 
+import { Eye, X, Percent, Plus, Box, ShoppingBag, Pause, Search, Edit, Loader } from 'lucide-react';
 
 import slugify from '~/ultis/config';
 
@@ -44,12 +44,12 @@ const GadgetManagement = ({ categoryId }) => {
         try {
             setIsLoading(true);
             let url = `/api/gadgets/category/${categoryId}/current-seller?Page=1&PageSize=100`;
-            
+
             // Add search parameter if exists
             if (searchTerm) {
                 url += `&Name=${encodeURIComponent(searchTerm)}`;
             }
-            
+
             // Remove sort parameter logic
 
             const response = await AxiosInterceptor.get(url);
@@ -79,13 +79,13 @@ const GadgetManagement = ({ categoryId }) => {
     const handleSaleToggle = async (id, isForSale) => {
         setLoadingStates(prev => ({ ...prev, [id]: true }));
         try {
-            const endpoint = isForSale 
-                ? `/api/gadgets/${id}/set-not-for-sale` 
+            const endpoint = isForSale
+                ? `/api/gadgets/${id}/set-not-for-sale`
                 : `/api/gadgets/${id}/set-for-sale`;
-            
+
             // Send the API request without awaiting a response for `fetchGadgets`
             await AxiosInterceptor.put(endpoint);
-            
+
             // Update the local state to reflect the new sale status without refetching
             setGadgets(prevGadgets =>
                 prevGadgets.map(gadget =>
@@ -106,7 +106,7 @@ const GadgetManagement = ({ categoryId }) => {
             setLoadingStates(prev => ({ ...prev, [id]: false }));
         }
     };
-    
+
 
     const handleChangePage = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -254,7 +254,7 @@ const GadgetManagement = ({ categoryId }) => {
     return (
         <div className="p-6">
             <ToastContainer position="top-right" autoClose={3000} />
-            
+
             {/* Statistics Section with improved layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
@@ -268,7 +268,7 @@ const GadgetManagement = ({ categoryId }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
@@ -282,7 +282,7 @@ const GadgetManagement = ({ categoryId }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
@@ -296,7 +296,7 @@ const GadgetManagement = ({ categoryId }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
@@ -372,28 +372,33 @@ const GadgetManagement = ({ categoryId }) => {
                                 {gadget.name.length > 20 ? `${gadget.name.slice(0, 20)}...` : gadget.name}
                             </td>
                             <td className="p-4">{`${gadget.price.toLocaleString()}₫`}</td>
-                            <td className="p-4">
+                            <td className="p-4 relative">
                                 {gadget.discountPercentage > 0 ? (
-                                    <button
-                                        onClick={() => showDiscountModal(gadget)}
-                                        className="text-sm text-blue-600 hover:text-blue-800"
-                                    >
-                                        <span className="block text-sm text-gray-600">{`-${gadget.discountPercentage}%`}</span>
-                                        {gadget.discountExpiredDate && (
-                                            <span className="block text-xs text-gray-500">
-                                                {`HSD: ${formatDate(gadget.discountExpiredDate)}`}
-                                            </span>
-                                        )}
-                                    </button>
+                                    <>
+                                        <span className="text-sm text-blue-600 hover:text-blue-800">
+                                            <span className="block text-sm text-gray-600">{`-${gadget.discountPercentage}%`}</span>
+                                            {gadget.discountExpiredDate && (
+                                                <span className="block text-xs text-gray-500">
+                                                    {`HSD: ${formatDate(gadget.discountExpiredDate)}`}
+                                                </span>
+                                            )}
+                                        </span>
+                                        <button
+                                            onClick={() => showDiscountModal(gadget)}
+                                            className="absolute top-0 right-0 bg-white p-1 rounded-full shadow-md border mt-2"
+                                            title="Cập nhật sản phẩm"
+                                        >
+                                            <Edit className="h-4 w-4 text-primary/100" />
+                                        </button>
+                                    </>
                                 ) : (
                                     <button
                                         onClick={() => showDiscountModal(gadget)}
                                         className="flex items-center justify-center w-8 h-8 rounded-full text-primary/80 hover:text-primary"
                                         disabled={isLoading}
                                     >
-                                        <Plus className="h-5 w-5 items-center" />
+                                        <Plus className="h-5 w-5" />
                                     </button>
-
                                 )}
                             </td>
                             <td className="p-4">{gadget.quantity}</td>

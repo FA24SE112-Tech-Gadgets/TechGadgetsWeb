@@ -44,7 +44,6 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
             });
             setOrderSuccess(true);
             console.log("Buy success", response);
-            // toast.success("Mua sản phẩm thành công");
         } catch (error) {
             console.error("Error placing order:", error);
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -53,9 +52,23 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
                 // Display the message from the first reason
                 if (reasons.length > 0) {
                     const reasonMessage = reasons[0].message;
-                    toast.error(reasonMessage);
+                    onCancel(); // Close the confirmation modal first
+                    setTimeout(() => {
+                        toast.error(reasonMessage, {
+                            position: "top-right",
+                            autoClose: 3000,
+                            style: { zIndex: 9999 }
+                        });
+                    }, 100);
                 } else {
-                    toast.error("Đặt hàng thất bại. Vui lòng thử lại.");
+                    onCancel(); // Close the confirmation modal first
+                    setTimeout(() => {
+                        toast.error("Đặt hàng thất bại. Vui lòng thử lại.", {
+                            position: "top-right",
+                            autoClose: 3000,
+                            style: { zIndex: 9999 }
+                        });
+                    }, 100);
                 }
             }
         } finally {
@@ -257,16 +270,19 @@ const [user, setUser] = useState(null);
                 gadgetId: productId,
                 quantity,
             });
-
-
-
-
             console.log("Product added to cart", response);
             toast.success("Thêm sản phẩm thành công");
         } catch (error) {
-            console.error("Error adding product to cart:", error);
-            toast.error("Thêm sản phẩm thất bại");
-        }
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
+                if (reasons.length > 0) {
+                  const reasonMessage = reasons[0].message;
+                  toast.error(reasonMessage);
+                } else {
+                  toast.error("Thêm sản phẩm thất bại, vui lòng thử lại");
+                }
+              }
+            }
     };
 
     const handleBuyNow = () => {
@@ -323,7 +339,18 @@ const [user, setUser] = useState(null);
                 ]}
             />
 
-            <ToastContainer autoClose={3000}/>
+            <ToastContainer 
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                style={{ zIndex: 9999 }}
+            />
             <Modal
                 title="Thông tin cá nhân chưa đầy đủ"
                 open={isOpen}

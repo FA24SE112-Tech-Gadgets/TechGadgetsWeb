@@ -9,6 +9,7 @@ import { Breadcrumb, Button } from 'antd';
 import slugify from '~/ultis/config';
 import { FilterOutlined } from '@ant-design/icons';
 import FilterPage from './Filter/FilterPage';
+import PosterBanner from '../Home/Poster2';
 
 function CategoryGadgetPage() {
     const location = useLocation();
@@ -60,12 +61,12 @@ function CategoryGadgetPage() {
                     AxiosInterceptor.get(`/api/reviews/summary/gadgets/${gadget.id}`)
                 );
                 const reviewResponses = await Promise.all(reviewPromises);
-                
+
                 const reviewMap = {};
                 newProducts.forEach((gadget, index) => {
                     reviewMap[gadget.id] = reviewResponses[index].data;
                 });
-                
+
                 setReviewData(prevReviewData => ({
                     ...prevReviewData,
                     ...reviewMap
@@ -103,8 +104,15 @@ function CategoryGadgetPage() {
                 )
             );
         } catch (error) {
-            console.error("Error toggling favorite status:", error);
-            toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
+                if (reasons.length > 0) {
+                    const reasonMessage = reasons[0].message;
+                    toast.error(reasonMessage);
+                } else {
+                    toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
+                }
+            }
         }
     };
 
@@ -137,11 +145,12 @@ function CategoryGadgetPage() {
                         </p>
                     </Breadcrumb.Item>
                 </Breadcrumb>
-
+                <div className='p-2'></div>
+                <PosterBanner />
                 <Button onClick={toggleFilterModal} className="mt-4 px-4">
                     <FilterOutlined />
                 </Button>
-
+              
                 <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8">
                     {products.length === 0 && !loading ? (
                         <div className="text-center py-4 text-gray-500">Không có sản phẩm</div>
@@ -173,7 +182,7 @@ function CategoryGadgetPage() {
                                         className="w-full h-32 object-contain mb-2 rounded"
                                     />
                                     <h3 className="font-semibold text-xs line-clamp-2">{product.name}</h3>
-                                  
+
                                     <div className="flex py-4">
                                         {product.discountPercentage > 0 ? (
                                             <>
@@ -192,12 +201,12 @@ function CategoryGadgetPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between p-2">
-                                      {/* Add review display */}
-                                      {reviewData[product.id] && reviewData[product.id].numOfReview > 0 ? (
-                                           <div className="flex items-center text-xs text-gray-600">
+                                    {/* Add review display */}
+                                    {reviewData[product.id] && reviewData[product.id].numOfReview > 0 ? (
+                                        <div className="flex items-center text-xs text-gray-600">
                                             <span className="flex items-center">
                                                 <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
                                                 {reviewData[product.id].avgReview} ({reviewData[product.id].numOfReview})
                                             </span>
@@ -205,8 +214,8 @@ function CategoryGadgetPage() {
                                     ) : (
                                         // Placeholder to maintain spacing when no reviews exist
                                         <div className="w-16"></div>
-                                      )}
-                                  <div className="flex items-center text-sm text-gray-500">
+                                    )}
+                                    <div className="flex items-center text-sm text-gray-500">
                                         <span className="mr-2">Yêu thích</span>
                                         <span
                                             onClick={(e) => {

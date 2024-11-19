@@ -9,6 +9,7 @@ import { Breadcrumb, Button } from 'antd';
 import slugify from '~/ultis/config';
 import Filter from './Filter/Filter';
 import { FilterOutlined } from '@ant-design/icons';
+import PosterBanner from '../Home/Poster2';
 
 function BrandGadgetPage() {
   const location = useLocation();
@@ -56,7 +57,7 @@ function BrandGadgetPage() {
       const reviewPromises = activeProducts.map(gadget =>
         AxiosInterceptor.get(`${apiBaseUrl}/api/reviews/summary/gadgets/${gadget.id}`)
       );
-      
+
       const reviewResponses = await Promise.all(reviewPromises);
       const reviewMap = {};
       activeProducts.forEach((gadget, index) => {
@@ -94,8 +95,15 @@ function BrandGadgetPage() {
       );
       // toast.success("Thêm vào yêu thích thành công");
     } catch (error) {
-      console.error("Error toggling favorite status:", error);
-      toast.error("An error occurred, please try again.");
+      if (error.response && error.response.data && error.response.data.reasons) {
+        const reasons = error.response.data.reasons;
+        if (reasons.length > 0) {
+          const reasonMessage = reasons[0].message;
+          toast.error(reasonMessage);
+        } else {
+          toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
+        }
+      }
     }
   };
 
@@ -133,10 +141,11 @@ function BrandGadgetPage() {
             <p>{brand}</p>
           </Breadcrumb.Item>
         </Breadcrumb>
+        <div className="p-2"></div>
+        <PosterBanner />
         <Button onClick={toggleFilterModal} className="mt-4 px-4">
           <FilterOutlined />
         </Button>
-
 
         <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8 ">
           {products.length === 0 && !loading ? (

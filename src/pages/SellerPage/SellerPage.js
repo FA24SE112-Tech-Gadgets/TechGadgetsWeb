@@ -129,9 +129,16 @@ const SellerPage = () => {
                 };
             });
         } catch (error) {
-            console.error("Error toggling favorite status:", error);
-            toast.error("Có lỗi xảy ra, vui lòng thử lại.");
-        }
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
+                if (reasons.length > 0) {
+                  const reasonMessage = reasons[0].message;
+                  toast.error(reasonMessage);
+                } else {
+                  toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
+                }
+              }
+            }
     };
 
     const handleSearch = () => {
