@@ -3,7 +3,7 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { toast, ToastContainer } from "react-toastify";
-import { Eye, X, Percent, Plus, Box, ShoppingBag, Pause, Search, Edit, Loader, Calendar } from 'lucide-react';
+import { Eye, X, Percent, Plus, Box, ShoppingBag, Pause, Search, Edit, Loader, Calendar, List, TicketX, AlignLeft, OctagonX } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -32,6 +32,12 @@ const GadgetManagement = ({ categoryId }) => {
     const [loadingStates, setLoadingStates] = useState({}); // Add this state
     const [isEditing, setIsEditing] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [dropdownOpen, setDropdownOpen] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [gadgetToRemoveDiscount, setGadgetToRemoveDiscount] = useState(null);
+    const [actionDropdownId, setActionDropdownId] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [gadgetToDelete, setGadgetToDelete] = useState(null);
     const itemsPerPage = 5;
     const navigate = useNavigate();
     const formRef = React.useRef(null);
@@ -124,12 +130,22 @@ const GadgetManagement = ({ categoryId }) => {
             const discountDate = new Date(gadget.discountExpiredDate);
             setSelectedDate(discountDate);
             setFormattedDate(moment(discountDate).format('DD/MM/YYYY'));
-            if (formRef.current) {
-                formRef.current.discountPercentage.value = gadget.discountPercentage;
-            }
+            
+            // Set timeout to ensure form is mounted before setting value
+            setTimeout(() => {
+                if (formRef.current) {
+                    const input = formRef.current.querySelector('#discountPercentage');
+                    if (input) {
+                        input.value = gadget.discountPercentage;
+                    }
+                }
+            }, 0);
         } else {
             setSelectedDate(null);
             setFormattedDate('');
+            if (formRef.current) {
+                formRef.current.reset();
+            }
         }
     };
 
@@ -241,6 +257,81 @@ const GadgetManagement = ({ categoryId }) => {
         }
     };
 
+    const handleRemoveDiscount = async (gadgetId) => {
+        setGadgetToRemoveDiscount(gadgetId);
+        setShowConfirmModal(true);
+        setDropdownOpen(null);
+    };
+
+    const confirmRemoveDiscount = async () => {
+        try {
+            await AxiosInterceptor.put(`/api/gadget-discount/${gadgetToRemoveDiscount}`);
+            await fetchGadgets();
+            toast.success('Đã xóa giảm giá thành công!');
+            setShowConfirmModal(false);
+            setGadgetToRemoveDiscount(null);
+        } catch (error) {
+            console.error("Error removing discount:", error);
+            if (error.response?.data?.reasons?.[0]?.message) {
+                toast.error(error.response.data.reasons[0].message);
+            } else {
+                toast.error("Xóa giảm giá thất bại. Vui lòng thử lại.");
+            }
+        }
+    };
+
+    const handleDeleteGadget = async () => {
+        try {
+            await AxiosInterceptor.delete(`/api/gadgets/${gadgetToDelete}`);
+            await fetchGadgets();
+            toast.success('Xóa sản phẩm thành công!');
+            setShowDeleteModal(false);
+            setGadgetToDelete(null);
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
+                if (reasons.length > 0) {
+                  const reasonMessage = reasons[0].message;
+                  toast.error(reasonMessage);
+                } else {
+                  toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
+                }
+              }
+            
+        }
+    };
+
+    const toggleActionDropdown = (gadgetId, e) => {
+        e.stopPropagation();
+        setActionDropdownId(actionDropdownId === gadgetId ? null : gadgetId);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownOpen && !event.target.closest('.dropdown-container')) {
+                setDropdownOpen(null);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [dropdownOpen]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (actionDropdownId && !event.target.closest('td')) {
+                setActionDropdownId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [actionDropdownId]);
+
     if (isLoading) return (
         <div className="flex items-center justify-center min-h-screen">
             <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
@@ -265,6 +356,66 @@ const GadgetManagement = ({ categoryId }) => {
                 return status;
         }
     };
+    const renderConfirmModal = () => {
+        if (!showConfirmModal) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                    <h3 className="text-lg font-semibold mb-4">Xác nhận xóa giảm giá</h3>
+                    <p className="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa giảm giá này không?</p>
+                    <div className="flex justify-end space-x-3">
+                        <button
+                            onClick={() => {
+                                setShowConfirmModal(false);
+                                setGadgetToRemoveDiscount(null);
+                            }}
+                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            onClick={confirmRemoveDiscount}
+                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                        >
+                            Xác nhận
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderDeleteConfirmModal = () => {
+        if (!showDeleteModal) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                    <h3 className="text-lg font-semibold mb-4">Xác nhận xóa sản phẩm</h3>
+                    <p className="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
+                    <div className="flex justify-end space-x-3">
+                        <button
+                            onClick={() => {
+                                setShowDeleteModal(false);
+                                setGadgetToDelete(null);
+                            }}
+                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            onClick={handleDeleteGadget}
+                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                        >
+                            Xác nhận
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="p-6">
             <ToastContainer position="top-right" autoClose={3000} />
@@ -397,13 +548,45 @@ const GadgetManagement = ({ categoryId }) => {
                                                 </span>
                                             )}
                                         </span>
-                                        <button
-                                            onClick={() => showDiscountModal(gadget)}
-                                            className="absolute top-10 right-10 bg-white p-1 rounded-full shadow-md border mt-2"
-                                            title="Cập nhật sản phẩm"
-                                        >
-                                            <Edit className="h-4 w-4 text-primary/100" />
-                                        </button>
+                                        <div className="dropdown-container absolute top-10 right-10">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setDropdownOpen(dropdownOpen === gadget.id ? null : gadget.id);
+                                                }}
+                                                className="bg-white p-1 rounded-full shadow-md border mt-2"
+                                                title="Tùy chọn"
+                                            >
+                                                <List className="h-4 w-4 text-primary/100" />
+                                            </button>
+                                            {dropdownOpen === gadget.id && (
+                                                <div className="absolute top-full mt-2 right-0 z-50">
+                                                    <div className="py-1">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                showDiscountModal(gadget);
+                                                                setDropdownOpen(null);
+                                                            }}
+                                                            className="bg-white p-1 rounded-full shadow-md border mt-2 "
+                                                        >
+                                                            <Edit className="h-4 w-4 text-primary/80" />
+                                                            
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleRemoveDiscount(gadget.id);
+                                                            }}
+                                                            className="bg-white p-1 rounded-full shadow-md border mt-2"
+                                                        >
+                                                            <TicketX className="h-4 w-4 text-red-800" />
+                                                            
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </>
                                 ) : (
                                     <button
@@ -440,18 +623,43 @@ const GadgetManagement = ({ categoryId }) => {
                                     )}
                                 </div>
                             </td>
-                            <td className="p-4">
+                            <td className="p-4 relative">
                                 <button
-                                    onClick={() => navigate(`/gadget/detail-seller/${slugify(gadget.name)}`, {
-                                        state: {
-                                            gadgetId: gadget.id,
-                                        }
-                                    })}
+                                    onClick={(e) => toggleActionDropdown(gadget.id, e)}
                                     className="flex items-center space-x-1 text-primary/80 hover:text-primary"
                                     disabled={isLoading}
                                 >
-                                    <Eye className="h-5 w-5 items-center" />
+                                    <AlignLeft className="h-5 w-5 items-center" />
                                 </button>
+                                {actionDropdownId === gadget.id && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                                        <div className="py-1">
+                                            <button
+                                                onClick={() => {
+                                                    navigate(`/gadget/detail-seller/${slugify(gadget.name)}`, {
+                                                        state: { gadgetId: gadget.id }
+                                                    });
+                                                    setActionDropdownId(null);
+                                                }}
+                                                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                                            >
+                                                <Eye className="h-4 w-4 mr-2" />
+                                                Xem chi tiết
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setGadgetToDelete(gadget.id);
+                                                    setShowDeleteModal(true);
+                                                    setActionDropdownId(null);
+                                                }}
+                                                className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full"
+                                            >
+                                                <OctagonX className="h-4 w-4 mr-2" />
+                                                Xóa sản phẩm
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </td>
                         </tr>
                     ))}
@@ -554,6 +762,8 @@ const GadgetManagement = ({ categoryId }) => {
                     </div>
                 </div>
             )}
+            {renderConfirmModal()}
+            {renderDeleteConfirmModal()}
         </div>
     );
 };

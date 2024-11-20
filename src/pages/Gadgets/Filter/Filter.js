@@ -3,12 +3,13 @@ import axios from 'axios';
 import { Modal, Checkbox, Button, Slider, Tag } from 'antd';
 import { useLocation } from 'react-router-dom';
 
-function Filter({ isVisible, onClose, onApplyFilters }) {
+function Filter({ isVisible, onClose, onApplyFilters, initialFilters }) {
   const location = useLocation();
   const { categoryId } = location.state || {};
   const [filters, setFilters] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [priceRange, setPriceRange] = useState([0, 200000000]);
+  const [isPriceRangeTouched, setIsPriceRangeTouched] = useState(false);
   const apiBaseUrl = process.env.NODE_ENV === "development"
     ? process.env.REACT_APP_DEV_API
     : process.env.REACT_APP_PRO_API;
@@ -38,6 +39,37 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
     }));
   };
 
+ // Add new useEffect to sync with parent's appliedFilters
+ useEffect(() => {
+  if (initialFilters) {
+    
+      
+      // Set price range
+      if (initialFilters.MinPrice != null && initialFilters.MaxPrice != null) {
+          setPriceRange([initialFilters.MinPrice, initialFilters.MaxPrice]);
+          setIsPriceRangeTouched(true);
+      } else {
+        setIsPriceRangeTouched(false);
+      }
+      
+      // Set gadget filters
+      if (initialFilters.GadgetFilters && filters.length > 0) {
+          const newSelectedFilters = {};
+          filters.forEach(filterCategory => {
+              filterCategory.gadgetFilters.forEach(filter => {
+                  if (initialFilters.GadgetFilters.includes(filter.gadgetFilterId)) {
+                      if (!newSelectedFilters[filterCategory.specificationKeyName]) {
+                          newSelectedFilters[filterCategory.specificationKeyName] = {};
+                      }
+                      newSelectedFilters[filterCategory.specificationKeyName][filter.gadgetFilterId] = filter.value;
+                  }
+              });
+          });
+          setSelectedFilters(newSelectedFilters);
+      }
+  }
+}, [initialFilters, filters, isVisible]);
+
   const removeSelectedFilter = (specKeyName, filterId) => {
     setSelectedFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
@@ -54,13 +86,17 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
       Object.keys(filters).filter(filterId => filters[filterId]).map(filterId => filterId)
     );
 
-    onApplyFilters({
+    const filterData = {
       GadgetFilters: gadgetFilters,
-      MinPrice: priceRange[0],
-      MaxPrice: priceRange[1]
-    });
+    };
 
-    onClose();
+    // Only include price range if it was modified
+    if (isPriceRangeTouched) {
+      filterData.MinPrice = priceRange[0];
+      filterData.MaxPrice = priceRange[1];
+    }
+
+    onApplyFilters(filterData);
   };
 
   const renderFilterGroup = () => (
@@ -118,6 +154,17 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
               </Tag>
             ))
         )}
+        {isPriceRangeTouched && (
+          <Tag
+            closable
+            onClose={() => {
+              setPriceRange([0, 200000000]);
+              setIsPriceRangeTouched(false);
+            }}
+          >
+            Giá: {priceRange[0].toLocaleString()}đ - {priceRange[1].toLocaleString()}đ
+          </Tag>
+        )}
       </div>
     </div>
   );
@@ -125,7 +172,7 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
 
   return (
     <Modal
-      visible={isVisible}
+      open={isVisible}  // Thay đổi visible thành open
       onCancel={onClose}
       width={900}
       footer={[
@@ -154,8 +201,11 @@ function Filter({ isVisible, onClose, onApplyFilters }) {
           range
           min={0}
           max={200000000}
-          defaultValue={priceRange}
-          onChange={(value) => setPriceRange(value)}
+          value={priceRange}
+          onChange={(value) => {
+            setPriceRange(value);
+            setIsPriceRangeTouched(true);
+          }}
           trackStyle={{
             backgroundColor: '#FFA500'
           }}
