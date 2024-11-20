@@ -52,7 +52,11 @@ const SearchComponent = () => {
       />
 
       {showModal && (
-        <div ref={modalRef} className="absolute top-full mt-2 w-full h-[500px] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 overflow-y-auto">
+        <div
+          ref={modalRef}
+          className={`absolute top-full mt-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 overflow-hidden ${searchResults.length > 0 ? 'max-h-[500px] overflow-y-auto' : ''
+            }`}
+        >
           {searchResults.length > 0 ? (
             searchResults.map((result) => (
               <div
@@ -88,6 +92,6 @@ const SearchComponent = () => {
       )}
     </div>
   );
-};
+}
 
 export default SearchComponent;
