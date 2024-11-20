@@ -2,23 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { ToastContainer, toast } from 'react-toastify';
 import { CiHeart } from 'react-icons/ci';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import slugify from '~/ultis/config';
 import 'react-toastify/dist/ReactToastify.css';
 
-const SuggestGadget = () => {
+const SuggestGadgetCurrent = () => {
   const [suggestedGadgets, setSuggestedGadgets] = useState([]);
   const [visibleCount, setVisibleCount] = useState(5); // Changed from 4 to 5
   const [loading, setLoading] = useState(true);
   const [reviewData, setReviewData] = useState({});
   const navigate = useNavigate();
-  const location = useLocation();
-  const { productId } = location.state || {};
+
 
   useEffect(() => {
     const fetchSuggestedGadgets = async () => {
       try {
-        const response = await AxiosInterceptor.get(`/api/gadgets/suggested/${productId}`);
+        const response = await AxiosInterceptor.get(`/api/gadgets/suggested/current-customer`);
         setSuggestedGadgets(response.data.items);
 
         // Fetch review data for each gadget
@@ -40,7 +39,7 @@ const SuggestGadget = () => {
     };
 
     fetchSuggestedGadgets();
-  }, [productId]);
+  }, []); // Remove productId from dependency array
 
   const toggleFavorite = async (gadgetId, isFavorite) => {
     try {
@@ -101,13 +100,13 @@ const SuggestGadget = () => {
               </div>
             )}
             {product.status === "Inactive" ? (
-              <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-xs font-bold text-center py-1 rounded">
-                Sản phẩm đã bị khóa
+              <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
+                Sản phẩm đã bị khóa 
               </div>
             ) : product.isForSale === false && (
-              <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-xs font-bold text-center py-1 rounded">
-              Ngừng kinh doanh
-            </div>
+              <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
+                Ngừng kinh doanh
+              </div>
             )}
             <div className="p-2 flex-grow cursor-pointer">
               <img
@@ -197,4 +196,4 @@ const SuggestGadget = () => {
   );
 };
 
-export default SuggestGadget;
+export default SuggestGadgetCurrent;

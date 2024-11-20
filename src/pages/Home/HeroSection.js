@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Image1 from "../../assets/hero/camera.png";
-import Image2 from "../../assets/hero/laptop.png";
-import Image3 from "../../assets/hero/sale.png";
+import Image1 from "../../assets/hero/phone.png";
+import Image2 from "../../assets/hero/laptop2.png";
+import Image3 from "../../assets/hero/headphone.png";
 import Slider from "react-slick";
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
@@ -12,26 +12,27 @@ import { Button } from "antd";
 const ImageList = [
   {
     id: 1,
-    img: Image1,
-    title: "Giảm giá tới 50% cho các loại máy quay phim",
+    img: Image3,
+    title: "Khuyến mãi HOT: Giảm giá tới 15% cho tai nghe cao cấp!",
     description:
-      "Nâng cấp video của bạn với các máy ảnh được đánh giá cao với giá không thể tốt hơn. Đừng bỏ lỡ các ưu đãi tốt nhất của năm.",
+      "Trải nghiệm âm thanh đỉnh cao với những chiếc tai nghe chất lượng hàng đầu. Cơ hội vàng để nâng cấp thiết bị của bạn. Mua ngay kẻo lỡ!",
   },
   {
     id: 2,
     img: Image2,
-    title: "Giảm giá 30% cho các Laptop Gaming",
+    title: "Sale sốc 20% - Laptop Gaming chinh phục mọi trận đấu!",
     description:
-      "Có những trải nghiệm tốt hơn trong công việc hoặc giải trí với dòng laptop giảm giá của chúng tôi. Ưu đãi có thời hạn!",
+      "Khám phá thế giới gaming đỉnh cao với các dòng laptop hiệu năng mạnh mẽ. Cơ hội có hạn, săn ngay để không bỏ lỡ ưu đãi đặc biệt này!",
   },
   {
     id: 3,
-    img: Image3,
-    title: "Giảm giá 70% cho các phụ kiện công nghệ",
+    img: Image1,
+    title: "Smartphone chính hãng - Giảm giá tới 15% hôm nay!",
     description:
-      "Hoàn thiện góc nhỏ công nghệ của bạn với các thiết bị công nghệ của chúng tôi, từ sạc đến vỏ máy, tất cả đều giảm giá đáng kinh ngạc.",
+      "Sở hữu điện thoại xịn với mức giá không thể tốt hơn. Thoải mái lựa chọn các dòng sản phẩm từ iPhone, Samsung, Xiaomi, và hơn thế nữa. Ưu đãi kết thúc sớm!",
   },
 ];
+
 
 const fetchBrandsForCategories = async (navigate) => {
   try {
@@ -205,7 +206,9 @@ const getCategoryIcon = (categoryName) => {
   }
 };
 
-const promoImages = [Image1, Image2, Image3];
+const promoImages = ["https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Gadgets/11f7ef79-450b-4375-9ff3-266344d1a855.jpg",
+  "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Gadgets/1de74d95-2bc4-4b56-8922-43ae56ea038c.jpg",
+  "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Gadgets/76f7a00b-6749-45db-b5bc-6377237ee6d5.jpg"];
 
 const HeroSection = ({ handleOrderPopup }) => {
   const navigate = useNavigate();
@@ -396,8 +399,8 @@ const HeroSection = ({ handleOrderPopup }) => {
                     >
                     </div>
                   </div>
-                  {/* image section */}
-                  <div className="order-1 sm:order-2">
+                   {/* image section */}
+                   <div className="order-1 sm:order-2">
                     <div
                       data-aos="zoom-in"
                       data-aos-once="true"
@@ -422,14 +425,15 @@ const HeroSection = ({ handleOrderPopup }) => {
             {promoImages.map((img, index) => (
               <div
                 key={index}
-                className="border border-gray-300 rounded-lg p-2 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="border border-gray-300 rounded-lg p-0 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
               >
                 <img
                   src={img}
                   alt={`Promo ${index + 1}`}
-                  className="rounded-lg object-cover w-full h-[60px] hover:scale-105 transition-transform duration-300"
+                  className="rounded-lg object-cover w-full h-[80px]  hover:scale-105 transition-transform duration-300"
                 />
               </div>
+
             ))}
           </div>
         </div>

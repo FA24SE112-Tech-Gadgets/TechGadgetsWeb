@@ -11,7 +11,7 @@ import StarRatings from 'react-star-ratings';
 import { Star } from 'lucide-react';
 import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
 import GadgetSuggest from '../Gadgets/GadgetSuggest';
-import user from "~/assets/R.png"
+import users from "~/assets/R.png"
 
 const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -44,7 +44,6 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
             });
             setOrderSuccess(true);
             console.log("Buy success", response);
-            // toast.success("Mua sản phẩm thành công");
         } catch (error) {
             console.error("Error placing order:", error);
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -53,9 +52,23 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
                 // Display the message from the first reason
                 if (reasons.length > 0) {
                     const reasonMessage = reasons[0].message;
-                    toast.error(reasonMessage);
+                    onCancel(); // Close the confirmation modal first
+                    setTimeout(() => {
+                        toast.error(reasonMessage, {
+                            position: "top-right",
+                            autoClose: 3000,
+                            style: { zIndex: 9999 }
+                        });
+                    }, 100);
                 } else {
-                    toast.error("Đặt hàng thất bại. Vui lòng thử lại.");
+                    onCancel(); // Close the confirmation modal first
+                    setTimeout(() => {
+                        toast.error("Đặt hàng thất bại. Vui lòng thử lại.", {
+                            position: "top-right",
+                            autoClose: 3000,
+                            style: { zIndex: 9999 }
+                        });
+                    }, 100);
                 }
             }
         } finally {
@@ -222,6 +235,11 @@ const DetailGadgetPage = () => {
         fetchProduct();
         fetchReviews();
     }, [productId, isAuthenticated, apiBase]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [productId]);  // This will run whenever productId changes
+
     const imgRef = useRef(null); // Tạo ref để tham chiếu đến hình ảnh chính
 
     const handleImageClick = (imageUrl) => {
@@ -230,9 +248,14 @@ const DetailGadgetPage = () => {
         }
     };
     if (error) return <div>{error}</div>;
-    if (!product) return <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-        <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-    </div>;
+    if (!product) return    <div className="flex items-center justify-center min-h-screen">
+    <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+      <div className="h-4 w-4 bg-white rounded-full"></div>
+    </div>
+    <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+      Loading...
+    </span>
+  </div>;
 
     const handleQuantityChange = (type) => {
         setQuantity(prev => type === 'increment' ? prev + 1 : Math.max(1, prev - 1));
@@ -257,16 +280,19 @@ const DetailGadgetPage = () => {
                 gadgetId: productId,
                 quantity,
             });
-
-
-
-
             console.log("Product added to cart", response);
             toast.success("Thêm sản phẩm thành công");
         } catch (error) {
-            console.error("Error adding product to cart:", error);
-            toast.error("Thêm sản phẩm thất bại");
-        }
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
+                if (reasons.length > 0) {
+                  const reasonMessage = reasons[0].message;
+                  toast.error(reasonMessage);
+                } else {
+                  toast.error("Thêm sản phẩm thất bại, vui lòng thử lại");
+                }
+              }
+            }
     };
 
     const handleBuyNow = () => {
@@ -323,7 +349,18 @@ const DetailGadgetPage = () => {
                 ]}
             />
 
-            <ToastContainer autoClose={3000} />
+            <ToastContainer 
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                style={{ zIndex: 9999 }}
+            />
             <Modal
                 title="Thông tin cá nhân chưa đầy đủ"
                 open={isOpen}
@@ -490,7 +527,7 @@ const DetailGadgetPage = () => {
                                     <div key={review.id} className="mb-6 p-6 border border-gray-200 rounded-lg shadow-sm">
                                         <div className="flex items-center mb-4">
                                             <img
-                                                src={review.customer.avatarUrl || user}
+                                                src={review.customer.avatarUrl || users}
                                                 alt={review.customer.fullName}
                                                 className="w-12 h-12 rounded-full mr-4"
                                             />
@@ -569,13 +606,6 @@ const DetailGadgetPage = () => {
                                 </div>
                             </div>
                         )}
-                        {/* {product.isForSale === false && (
-                            <div className="relative">
-                                <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-lg">
-                                    Ngừng kinh doanh
-                                </div>
-                            </div>
-                        )} */}
                         <div className={`space-y-2 mb-6 ${product.isForSale === false ? 'opacity-50' : ''}`}>
                             <div className="flex items-center space-x-3 mb-4">
                                 <div className="text-gray-600">Số lượng:</div>
@@ -664,6 +694,7 @@ const DetailGadgetPage = () => {
                 onClose={() => setShowProfileWarning(false)}
             /> */}
         </div>
+
     );
 };
 

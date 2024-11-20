@@ -3,7 +3,9 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { toast, ToastContainer } from "react-toastify";
-import { Eye, X, Percent, Plus, Box, ShoppingBag, Pause, Search, Edit, Loader } from 'lucide-react'; 
+import { Eye, X, Percent, Plus, Box, ShoppingBag, Pause, Search, Edit, Loader, Calendar } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 import slugify from '~/ultis/config';
 
@@ -29,6 +31,7 @@ const GadgetManagement = ({ categoryId }) => {
     const [searchInput, setSearchInput] = useState('');
     const [loadingStates, setLoadingStates] = useState({}); // Add this state
     const [isEditing, setIsEditing] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(null);
     const itemsPerPage = 5;
     const navigate = useNavigate();
     const formRef = React.useRef(null);
@@ -44,12 +47,12 @@ const GadgetManagement = ({ categoryId }) => {
         try {
             setIsLoading(true);
             let url = `/api/gadgets/category/${categoryId}/current-seller?Page=1&PageSize=100`;
-            
+
             // Add search parameter if exists
             if (searchTerm) {
                 url += `&Name=${encodeURIComponent(searchTerm)}`;
             }
-            
+
             // Remove sort parameter logic
 
             const response = await AxiosInterceptor.get(url);
@@ -79,13 +82,13 @@ const GadgetManagement = ({ categoryId }) => {
     const handleSaleToggle = async (id, isForSale) => {
         setLoadingStates(prev => ({ ...prev, [id]: true }));
         try {
-            const endpoint = isForSale 
-                ? `/api/gadgets/${id}/set-not-for-sale` 
+            const endpoint = isForSale
+                ? `/api/gadgets/${id}/set-not-for-sale`
                 : `/api/gadgets/${id}/set-for-sale`;
-            
+
             // Send the API request without awaiting a response for `fetchGadgets`
             await AxiosInterceptor.put(endpoint);
-            
+
             // Update the local state to reflect the new sale status without refetching
             setGadgets(prevGadgets =>
                 prevGadgets.map(gadget =>
@@ -106,7 +109,7 @@ const GadgetManagement = ({ categoryId }) => {
             setLoadingStates(prev => ({ ...prev, [id]: false }));
         }
     };
-    
+
 
     const handleChangePage = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -117,16 +120,16 @@ const GadgetManagement = ({ categoryId }) => {
         setIsModalVisible(true);
         setIsEditing(gadget.discountPercentage > 0);
 
-        // Pre-fill form if discount exists
         if (gadget.discountPercentage > 0) {
-            setFormattedDate(moment(gadget.discountExpiredDate).format('DD/MM/YYYY'));
-            setTimeout(() => {
-                if (formRef.current) {
-                    formRef.current.discountPercentage.value = gadget.discountPercentage;
-                    formRef.current.discountExpiredDate.value = moment(gadget.discountExpiredDate).format('YYYY-MM-DD');
-                    formRef.current.discountExpiredTime.value = moment(gadget.discountExpiredDate).format('HH:mm');
-                }
-            }, 0);
+            const discountDate = new Date(gadget.discountExpiredDate);
+            setSelectedDate(discountDate);
+            setFormattedDate(moment(discountDate).format('DD/MM/YYYY'));
+            if (formRef.current) {
+                formRef.current.discountPercentage.value = gadget.discountPercentage;
+            }
+        } else {
+            setSelectedDate(null);
+            setFormattedDate('');
         }
     };
 
@@ -134,6 +137,7 @@ const GadgetManagement = ({ categoryId }) => {
         setIsModalVisible(false);
         setSelectedGadget(null);
         setIsEditing(false);
+        setSelectedDate(null);
         resetForm();
     };
 
@@ -159,13 +163,12 @@ const GadgetManagement = ({ categoryId }) => {
         return true;
     };
 
-    const handleDateChange = (e) => {
-        const date = e.target.value;
+    const handleDateChange = (date) => {
         if (date) {
-            e.target.dataset.rawValue = date;
-            const formatted = moment(date).format('DD/MM/YYYY');
-            setFormattedDate(formatted);
+            setSelectedDate(date);
+            setFormattedDate(moment(date).format('DD/MM/YYYY'));
         } else {
+            setSelectedDate(null);
             setFormattedDate('');
         }
     };
@@ -176,10 +179,13 @@ const GadgetManagement = ({ categoryId }) => {
 
         try {
             const discountPercentage = parseInt(event.target.discountPercentage.value, 10);
-            const discountDate = event.target.discountExpiredDate.dataset.rawValue;
-            const discountTime = event.target.discountExpiredTime.value || '23:59';
+            
+            if (!selectedDate) {
+                toast.error("Vui lòng chọn ngày hết hạn");
+                return;
+            }
 
-            const discountExpiredDate = moment(`${discountDate} ${discountTime}`).toISOString();
+            const discountExpiredDate = moment(selectedDate).toISOString();
 
             if (!validateDiscount(discountPercentage, discountExpiredDate)) {
                 return;
@@ -189,20 +195,19 @@ const GadgetManagement = ({ categoryId }) => {
             formData.append("DiscountPercentage", discountPercentage);
             formData.append("DiscountExpiredDate", discountExpiredDate);
 
-            console.log('Sending discount data as FormData:', {
-                DiscountPercentage: discountPercentage,
-                DiscountExpiredDate: discountExpiredDate
-            });
-
             await AxiosInterceptor.post(`/api/gadget-discount/${selectedGadget.id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }
             });
+            
+            toast.success(isEditing ? 'Cập nhật giảm giá thành công!' : 'Thêm giảm giá thành công!');
+            
             await fetchGadgets();
             resetForm();
             setIsModalVisible(false);
             setSelectedGadget(null);
+            setSelectedDate(null);
         } catch (error) {
             console.error("Error adding discount:", error);
             if (error.response?.data?.reasons?.[0]?.message) {
@@ -250,11 +255,20 @@ const GadgetManagement = ({ categoryId }) => {
     const handleUpdateGadget = (gadgetId) => {
         navigate(`/seller/gadgets/update/${gadgetId}`);
     };
-
+    const translateStatus = (status) => {
+        switch (status) {
+            case "Active":
+                return "Khả dụng";
+            case "Inactive":
+                return "Bị khóa";
+            default:
+                return status;
+        }
+    };
     return (
         <div className="p-6">
             <ToastContainer position="top-right" autoClose={3000} />
-            
+
             {/* Statistics Section with improved layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
@@ -268,7 +282,7 @@ const GadgetManagement = ({ categoryId }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
@@ -282,7 +296,7 @@ const GadgetManagement = ({ categoryId }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
@@ -296,7 +310,7 @@ const GadgetManagement = ({ categoryId }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
@@ -372,34 +386,39 @@ const GadgetManagement = ({ categoryId }) => {
                                 {gadget.name.length > 20 ? `${gadget.name.slice(0, 20)}...` : gadget.name}
                             </td>
                             <td className="p-4">{`${gadget.price.toLocaleString()}₫`}</td>
-                            <td className="p-4">
+                            <td className="p-4 relative">
                                 {gadget.discountPercentage > 0 ? (
-                                    <button
-                                        onClick={() => showDiscountModal(gadget)}
-                                        className="text-sm text-blue-600 hover:text-blue-800"
-                                    >
-                                        <span className="block text-sm text-gray-600">{`-${gadget.discountPercentage}%`}</span>
-                                        {gadget.discountExpiredDate && (
-                                            <span className="block text-xs text-gray-500">
-                                                {`HSD: ${formatDate(gadget.discountExpiredDate)}`}
-                                            </span>
-                                        )}
-                                    </button>
+                                    <>
+                                        <span className="text-sm text-blue-600 hover:text-blue-800">
+                                            <span className="block text-sm text-gray-600">{`-${gadget.discountPercentage}%`}</span>
+                                            {gadget.discountExpiredDate && (
+                                                <span className="block text-xs text-gray-500">
+                                                    {`HSD: ${formatDate(gadget.discountExpiredDate)}`}
+                                                </span>
+                                            )}
+                                        </span>
+                                        <button
+                                            onClick={() => showDiscountModal(gadget)}
+                                            className="absolute top-10 right-10 bg-white p-1 rounded-full shadow-md border mt-2"
+                                            title="Cập nhật sản phẩm"
+                                        >
+                                            <Edit className="h-4 w-4 text-primary/100" />
+                                        </button>
+                                    </>
                                 ) : (
                                     <button
                                         onClick={() => showDiscountModal(gadget)}
                                         className="flex items-center justify-center w-8 h-8 rounded-full text-primary/80 hover:text-primary"
                                         disabled={isLoading}
                                     >
-                                        <Plus className="h-5 w-5 items-center" />
+                                        <Plus className="h-5 w-5" />
                                     </button>
-
                                 )}
                             </td>
                             <td className="p-4">{gadget.quantity}</td>
                             <td className="p-4">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full  ${gadget.gadgetStatus === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                                    {gadget.gadgetStatus}
+                                {translateStatus(gadget.gadgetStatus)}
                                 </span>
 
                             </td>
@@ -465,8 +484,7 @@ const GadgetManagement = ({ categoryId }) => {
                     onClick={handleOutsideClick}
                 >
                     <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm space-y-4">
-                        <div
-                            className="flex justify-between items-center">
+                        <div className="flex justify-between items-center">
                             <h2 className="text-lg font-semibold">
                                 {isEditing ? 'Cập nhật giảm giá' : 'Thêm giảm giá'}
                             </h2>
@@ -489,51 +507,31 @@ const GadgetManagement = ({ categoryId }) => {
                                     name="discountPercentage"
                                     min="1"
                                     max="90"
-                                    step="1" // Thêm step để chỉ nhận số nguyên
+                                    step="1"
                                     required
-                                    className="mt-1 p-2 border border-gray-300 rounded focus:ring-primary/80 focus:border-primary/80"
+                                    className="mt-1 block w-full rounded-md border-gray-200 bg-gray-100 shadow-sm focus:border-indigo-300 focus:ring focus:ring-gray-400 focus:ring-opacity-50 px-2 py-2"
                                     disabled={isLoading}
                                 />
                             </div>
                             <div className="flex flex-col">
                                 <label htmlFor="discountExpiredDate" className="text-gray-700">
-                                    Nhập ngày hết hạn
+                                    Ngày hết hạn giảm giá
                                 </label>
-                                <input
-                                    type="date"
-                                    id="discountExpiredDate"
-                                    name="discountExpiredDate"
-                                    min={moment().format('YYYY-MM-DD')}
-                                    required
-                                    className="mt-1 p-2 border border-gray-300 rounded focus:ring-primary/80 focus:border-primary/80"
-                                    disabled={isLoading}
-                                    onChange={handleDateChange}
-                                    style={{ display: 'none' }}
-                                />
-                                <input
-                                    type="text"
-                                    value={formattedDate}
-                                    onClick={(e) => {
-                                        e.target.previousSibling.showPicker();
-                                    }}
-                                    readOnly
-                                    placeholder="DD/MM/YYYY"
-                                    className="mt-1 p-2 border border-gray-300 rounded focus:ring-primary/80 focus:border-primary/80"
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <label htmlFor="discountExpiredTime" className="text-gray-700">
-                                    Thời gian quá hạn
-                                </label>
-                                <input
-                                    type="time"
-                                    id="discountExpiredTime"
-                                    name="discountExpiredTime"
-                                    defaultValue="23:59"
-                                    required
-                                    className="mt-1 p-2 border border-gray-300 rounded focus:ring-primary/80 focus:border-primary/80"
-                                    disabled={isLoading}
-                                />
+                                <div className="flex items-center">
+                                    <DatePicker
+                                        selected={selectedDate}
+                                        onChange={handleDateChange}
+                                        showTimeSelect
+                                        timeFormat="HH:mm"
+                                        timeIntervals={15}
+                                        dateFormat="dd/MM/yyyy HH:mm"
+                                        minDate={new Date()}
+                                        className="mt-1 block w-full rounded-md border-gray-200 bg-gray-100 shadow-sm focus:border-indigo-300 focus:ring focus:ring-gray-400 focus:ring-opacity-50 px-2 py-2"
+                                        placeholderText="Chọn ngày và giờ"
+                                        required
+                                    />
+                                    <Calendar className="ml-2" />
+                                </div>
                             </div>
                             <div className="flex justify-end space-x-2">
                                 <button

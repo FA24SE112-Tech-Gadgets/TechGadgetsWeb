@@ -9,6 +9,7 @@ import { Breadcrumb, Button } from 'antd';
 import slugify from '~/ultis/config';
 import Filter from './Filter/Filter';
 import { FilterOutlined } from '@ant-design/icons';
+import PosterBanner from '../Home/Poster2';
 
 function BrandGadgetPage() {
   const location = useLocation();
@@ -56,7 +57,7 @@ function BrandGadgetPage() {
       const reviewPromises = activeProducts.map(gadget =>
         AxiosInterceptor.get(`${apiBaseUrl}/api/reviews/summary/gadgets/${gadget.id}`)
       );
-      
+
       const reviewResponses = await Promise.all(reviewPromises);
       const reviewMap = {};
       activeProducts.forEach((gadget, index) => {
@@ -79,6 +80,9 @@ function BrandGadgetPage() {
   // const handleNavigation = () => {
   //   navigate(`/gadgets/${slugify(category)}`);
   // };
+  useEffect(() => {
+    window.scrollTo(0, 0);
+}, []);
 
   const toggleFavorite = async (gadgetId, isFavorite) => {
     if (!isAuthenticated) {
@@ -94,8 +98,15 @@ function BrandGadgetPage() {
       );
       // toast.success("Thêm vào yêu thích thành công");
     } catch (error) {
-      console.error("Error toggling favorite status:", error);
-      toast.error("An error occurred, please try again.");
+      if (error.response && error.response.data && error.response.data.reasons) {
+        const reasons = error.response.data.reasons;
+        if (reasons.length > 0) {
+          const reasonMessage = reasons[0].message;
+          toast.error(reasonMessage);
+        } else {
+          toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
+        }
+      }
     }
   };
 
@@ -109,15 +120,20 @@ function BrandGadgetPage() {
     setFilterModalVisible(false); // Close modal after applying filters
   };
 
-
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+        <div className="h-4 w-4 bg-white rounded-full"></div>
+      </div>
+      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+        Loading...
+      </span>
+    </div>
+  );
   return (
     <div className="bg-white dark:bg-gray-900 dark:text-white">
       <ToastContainer />
-      {loading && (
-        <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-          <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-        </div>
-      )}
+
       <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <Breadcrumb className="w-full">
@@ -133,10 +149,11 @@ function BrandGadgetPage() {
             <p>{brand}</p>
           </Breadcrumb.Item>
         </Breadcrumb>
+        <div className="p-2"></div>
+        <PosterBanner />
         <Button onClick={toggleFilterModal} className="mt-4 px-4">
           <FilterOutlined />
         </Button>
-
 
         <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8 ">
           {products.length === 0 && !loading ? (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import icon from "~/assets/icon.ico";
 import { ShoppingCartCheckoutOutlined, StackedBarChartOutlined } from '@mui/icons-material';
 import { AppstoreAddOutlined } from '@ant-design/icons';
+import { PenLine, SquarePen } from 'lucide-react';
 
 const SellerSidebar = ({ minHeight = 'min-h-screen' }) => {
     const navigate = useNavigate();
@@ -33,7 +34,7 @@ const SellerSidebar = ({ minHeight = 'min-h-screen' }) => {
 
                 <div onClick={() => navigate('/seller/manage-reviews-gadgets')} className='flex items-center justify-between gap-[10px] py-[15px] cursor-pointer'>
                     <div className='flex items-center gap-[10px]'>
-                        <AppstoreAddOutlined className="text-black" />
+                        <SquarePen className="text-black" />
                         <p className='text-[14px] leading-[20px] font-normal text-black'>Đánh giá sản phẩm</p>
                     </div>
                 </div>
