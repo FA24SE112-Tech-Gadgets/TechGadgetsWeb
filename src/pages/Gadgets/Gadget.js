@@ -5,11 +5,12 @@ import useAuth from '~/context/auth/useAuth';
 import { toast, ToastContainer } from 'react-toastify';
 import { CiHeart } from 'react-icons/ci';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import { Breadcrumb, Button } from 'antd';
+import { Breadcrumb, Button, Tag } from 'antd';
 import slugify from '~/ultis/config';
 import Filter from './Filter/Filter';
 import { FilterOutlined } from '@ant-design/icons';
 import PosterBanner from '../Home/Poster2';
+import { ListFilter } from 'lucide-react';
 
 function BrandGadgetPage() {
   const location = useLocation();
@@ -25,7 +26,7 @@ function BrandGadgetPage() {
   const apiBaseUrl = process.env.NODE_ENV === "development"
     ? process.env.REACT_APP_DEV_API
     : process.env.REACT_APP_PRO_API;
-
+  const [filters, setFilters] = useState([]);
   // Fetch products based on brand, category, and applied filters
   const fetchBrandProducts = async () => {
     setLoading(true);
@@ -72,7 +73,20 @@ function BrandGadgetPage() {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/gadget-filters/category/${categoryId}?Page=1&PageSize=100`);
+        setFilters(response.data);
+      } catch (error) {
+        console.error("Error fetching filters:", error);
+      }
+    };
 
+    if (categoryId) {
+      fetchFilters();
+    }
+  }, [categoryId, apiBaseUrl]);
   useEffect(() => {
     fetchBrandProducts();
   }, [categoryId, brandId, appliedFilters, isAuthenticated]);
@@ -82,7 +96,7 @@ function BrandGadgetPage() {
   // };
   useEffect(() => {
     window.scrollTo(0, 0);
-}, []);
+  }, []);
 
   const toggleFavorite = async (gadgetId, isFavorite) => {
     if (!isAuthenticated) {
@@ -115,10 +129,68 @@ function BrandGadgetPage() {
   };
 
   const handleApplyFilters = (filters) => {
-    console.log("Applied Filters: ", filters);
     setAppliedFilters(filters);
-    setFilterModalVisible(false); // Close modal after applying filters
+    setFilterModalVisible(false); // Đóng modal sau khi áp dụng filter
   };
+  const removeFilter = (type, value) => {
+    setAppliedFilters(prev => {
+      const newFilters = { ...prev };
+      if (type === 'Brands') {
+        newFilters.Brands = prev.Brands.filter(brand => brand !== value);
+      } else if (type === 'GadgetFilters') {
+        newFilters.GadgetFilters = prev.GadgetFilters.filter(filter => filter !== value);
+      }
+      return newFilters;
+    });
+  };
+  const renderAppliedFilters = () => {
+    if (!appliedFilters || Object.keys(appliedFilters).length === 0) return null;
+
+    return (
+      <div className="bg-gray-50 p-4 rounded-lg ">
+
+
+        <div className="flex flex-wrap gap-2 mt-2">
+          {appliedFilters.GadgetFilters?.map(filterId => {
+            let filterText = '';
+            filters.some(category => {
+              const filter = category.gadgetFilters.find(f => f.gadgetFilterId === filterId);
+              if (filter) {
+                filterText = `${category.specificationKeyName}: ${filter.value}`;
+                return true;
+              }
+              return false;
+            });
+
+            return (
+              <Tag
+                key={filterId}
+                closable
+                onClose={() => removeFilter('GadgetFilters', filterId)}
+              >
+                {filterText}
+              </Tag>
+            );
+          })}
+
+          {appliedFilters.MinPrice != null && appliedFilters.MaxPrice != null && (
+            <Tag
+              closable
+              onClose={() => {
+                const newFilters = { ...appliedFilters };
+                delete newFilters.MinPrice;
+                delete newFilters.MaxPrice;
+                setAppliedFilters(newFilters);
+              }}
+            >
+              Giá: {appliedFilters.MinPrice.toLocaleString()}đ - {appliedFilters.MaxPrice.toLocaleString()}đ
+            </Tag>
+          )}
+        </div>
+      </div>
+    );
+  };
+
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen">
@@ -151,9 +223,12 @@ function BrandGadgetPage() {
         </Breadcrumb>
         <div className="p-2"></div>
         <PosterBanner />
-        <Button onClick={toggleFilterModal} className="mt-4 px-4">
-          <FilterOutlined />
-        </Button>
+        <div className="flex ">
+          <Button onClick={toggleFilterModal} className="mt-4 px-4 text-primary/80">
+            <ListFilter />
+          </Button>
+          {renderAppliedFilters()}
+        </div>
 
         <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8 ">
           {products.length === 0 && !loading ? (
@@ -252,6 +327,7 @@ function BrandGadgetPage() {
         isVisible={isFilterModalVisible}
         onClose={toggleFilterModal}
         onApplyFilters={handleApplyFilters}
+        initialFilters={appliedFilters}
       />
     </div>
   );

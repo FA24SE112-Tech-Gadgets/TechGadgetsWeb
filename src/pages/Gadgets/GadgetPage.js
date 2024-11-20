@@ -5,11 +5,12 @@ import useAuth from '~/context/auth/useAuth';
 import { toast, ToastContainer } from 'react-toastify';
 import { CiHeart } from 'react-icons/ci';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import { Breadcrumb, Button } from 'antd';
+import { Breadcrumb, Button, Tag } from 'antd';
 import slugify from '~/ultis/config';
 import { FilterOutlined } from '@ant-design/icons';
 import FilterPage from './Filter/FilterPage';
 import PosterBanner from '../Home/Poster2';
+import { ListFilter } from 'lucide-react';
 
 function CategoryGadgetPage() {
     const location = useLocation();
@@ -23,6 +24,8 @@ function CategoryGadgetPage() {
     const [appliedFilters, setAppliedFilters] = useState({});
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const [brands, setBrands] = useState([]);
+    const [filters, setFilters] = useState([]);
 
     const [reviewData, setReviewData] = useState({});
     const apiBaseUrl = process.env.NODE_ENV === "development"
@@ -90,6 +93,37 @@ function CategoryGadgetPage() {
         };
         fetchBrandProducts();
     }, [category, categoryId, apiBaseUrl, appliedFilters, isAuthenticated, page]);
+
+    useEffect(() => {
+        const fetchBrands = async () => {
+            try {
+                const response = await axios.get(`${apiBaseUrl}/api/brands/categories/${categoryId}?Page=1&PageSize=100`);
+                setBrands(response.data.items);
+            } catch (error) {
+                console.error("Error fetching brands:", error);
+            }
+        };
+
+        if (categoryId) {
+            fetchBrands();
+        }
+    }, [categoryId, apiBaseUrl]);
+
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                const response = await axios.get(`${apiBaseUrl}/api/gadget-filters/category/${categoryId}?Page=1&PageSize=100`);
+                setFilters(response.data);
+            } catch (error) {
+                console.error("Error fetching filters:", error);
+            }
+        };
+
+        if (categoryId) {
+            fetchFilters();
+        }
+    }, [categoryId, apiBaseUrl]);
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -123,40 +157,108 @@ function CategoryGadgetPage() {
     };
 
     const handleApplyFilters = (filters) => {
-        setAppliedFilters(filters);  // Đảm bảo filters bao gồm cả Brands
-        setFilterModalVisible(false);
-        setPage(1); // Reset page khi áp dụng bộ lọc
+        setAppliedFilters(filters);
+        setPage(1);
+    };
+
+    const removeFilter = (type, value) => {
+        setAppliedFilters(prev => {
+            const newFilters = { ...prev };
+            if (type === 'Brands') {
+                newFilters.Brands = prev.Brands.filter(brand => brand !== value);
+            } else if (type === 'GadgetFilters') {
+                newFilters.GadgetFilters = prev.GadgetFilters.filter(filter => filter !== value);
+            } else if (type === 'Price') {
+                delete newFilters.MinPrice;
+                delete newFilters.MaxPrice;
+            }
+            return newFilters;
+        });
+        setPage(1);
+    };
+
+    const renderAppliedFilters = () => {
+        if (!appliedFilters || Object.keys(appliedFilters).length === 0) return null;
+
+        return (
+            <div className="bg-gray-50 p-4 rounded-lg ">
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                    {appliedFilters.GadgetFilters?.map(filterId => {
+                        let filterText = '';
+                        filters.some(category => {
+                            const filter = category.gadgetFilters.find(f => f.gadgetFilterId === filterId);
+                            if (filter) {
+                                filterText = `${category.specificationKeyName}: ${filter.value}`;
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        return (
+                            <Tag
+                                key={filterId}
+                                closable
+                                onClose={() => removeFilter('GadgetFilters', filterId)}
+                            >
+                                {filterText}
+                            </Tag>
+                        );
+                    })}
+
+                    {appliedFilters.Brands?.map(brandId => {
+                        const brand = brands.find(b => b.id === brandId);
+                        return (
+                            <Tag
+                                key={brandId}
+                                closable
+                                onClose={() => removeFilter('Brands', brandId)}
+                            >
+                                Brand: {brand?.name || 'Unknown'}
+                            </Tag>
+                        );
+                    })}
+
+                    {appliedFilters.MinPrice != null && appliedFilters.MaxPrice != null && (
+                        <Tag
+                            closable
+                            onClose={() => removeFilter('Price')}
+                        >
+                            Giá: {appliedFilters.MinPrice.toLocaleString()}đ - {appliedFilters.MaxPrice.toLocaleString()}đ
+                        </Tag>
+                    )}
+                </div>
+            </div>
+        );
     };
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
-            <div className="h-4 w-4 bg-white rounded-full"></div>
-          </div>
-          <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-            Loading...
-          </span>
+            <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+                <div className="h-4 w-4 bg-white rounded-full"></div>
+            </div>
+            <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+                Loading...
+            </span>
         </div>
-      );
+    );
     return (
         <div className="bg-white dark:bg-gray-900 dark:text-white">
             <ToastContainer />
-
-            <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Breadcrumb className="w-full">
                     <Breadcrumb.Item>
-                        <p>
-                            {category}
-                        </p>
+                        <p>{category}</p>
                     </Breadcrumb.Item>
                 </Breadcrumb>
                 <div className='p-2'></div>
                 <PosterBanner />
-                <Button onClick={toggleFilterModal} className="mt-4 px-4">
-                    <FilterOutlined />
-                </Button>
-              
+                <div className="flex ">
+                    <Button onClick={toggleFilterModal} className="mt-4 px-4 text-primary/80">
+                        <ListFilter />
+                    </Button>
+                    {renderAppliedFilters()}
+                </div>
                 <div className="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mx-auto px-4 py-8">
                     {products.length === 0 && !loading ? (
                         <div className="text-center py-4 text-gray-500">Không có sản phẩm</div>
@@ -262,6 +364,7 @@ function CategoryGadgetPage() {
                 isVisible={isFilterModalVisible}
                 onClose={toggleFilterModal}
                 onApplyFilters={handleApplyFilters}
+                initialFilters={appliedFilters} // Add this prop
             />
         </div>
     );
