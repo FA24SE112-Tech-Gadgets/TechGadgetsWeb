@@ -10,7 +10,7 @@ const ManageBrandByCategory = ({ categoryId }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const fetchBrands = async () => {
     try {
@@ -54,12 +54,15 @@ const ManageBrandByCategory = ({ categoryId }) => {
   };
 
   if (isLoading) return (
-    <div className="flex items-center justify-center min-h-[200px]">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
         <div className="h-4 w-4 bg-white rounded-full"></div>
       </div>
-      <span className="ml-2 text-xl font-bold text-primary">Loading...</span>
+      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+        Loading...
+      </span>
     </div>
+
   );
 
   return (
