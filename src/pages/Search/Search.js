@@ -10,6 +10,7 @@ const SearchComponent = () => {
   const [showModal, setShowModal] = useState(false);
   const modalRef = useRef(null);
   const navigate = useNavigate();
+
   const handleSearch = async (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
       try {
@@ -41,17 +42,17 @@ const SearchComponent = () => {
         type="text"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        onKeyDown={handleSearch} // triggers on pressing Enter
+        onKeyDown={handleSearch}
         placeholder="Tìm kiếm"
-        className="w-[400px] sm:w-[400px] group-hover:w-[400px] transition-all duration-300 rounded-full border border-gray-300 px-2 py-1 focus:outline-none focus:border-1 focus:border-primary dark:border-gray-500 dark:bg-gray-800"
+        className="w-[400px] sm:w-[400px] group-hover:w-[400px] transition-all duration-300 rounded-full border border-gray-300 px-2 py-1 focus:outline-none focus:border-1 focus:border-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
       />
       <IoMdSearch
-        className="text-gray-500 group-hover:text-primary absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer"
-        onClick={handleSearch} // triggers on clicking search icon
+        className="text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-primary absolute top-1/2 -translate-y-1/2 right-3 cursor-pointer"
+        onClick={handleSearch}
       />
 
       {showModal && (
-        <div ref={modalRef} className="absolute top-full mt-2 w-full h-[500px] bg-white border border-gray-300 rounded-lg shadow-lg z-50 overflow-y-auto">
+        <div ref={modalRef} className="absolute top-full mt-2 w-full h-[500px] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 overflow-y-auto">
           {searchResults.length > 0 ? (
             searchResults.map((result) => (
               <div
@@ -61,17 +62,17 @@ const SearchComponent = () => {
                     productId: result.id,
                   }
                 })}
-                className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
               >
                 <img src={result.thumbnailUrl} alt={result.name} className="w-12 h-12 object-contain rounded mr-4" />
                 <div className="flex-1">
-                  <h3 className="text-xs font-semibold">{result.name}</h3>
-                  <div className="text-gray-500">
+                  <h3 className="text-xs font-semibold text-gray-800 dark:text-white">{result.name}</h3>
+                  <div className="text-gray-500 dark:text-gray-400">
                     {result.discountPercentage > 0 ? (
                       <>
-                        <span className="text-red-500 text-xs mr-3">{result.discountPrice.toLocaleString()}₫</span>
-                        <span className="text-xs line-through ">{result.price.toLocaleString()}₫</span>
-                        <span className="bg-red-100 text-xs text-red-600 rounded-full ml-2 px-2 py-1">-{result.discountPercentage}%</span>
+                        <span className="text-red-500 dark:text-red-400 text-xs mr-3">{result.discountPrice.toLocaleString()}₫</span>
+                        <span className="text-xs line-through">{result.price.toLocaleString()}₫</span>
+                        <span className="bg-red-100 dark:bg-red-900 text-xs text-red-600 dark:text-red-300 rounded-full ml-2 px-2 py-1">-{result.discountPercentage}%</span>
                       </>
                     ) : (
                       <span className="text-xs">{result.price.toLocaleString()}₫</span>
@@ -81,7 +82,7 @@ const SearchComponent = () => {
               </div>
             ))
           ) : (
-            <div className="p-2 text-gray-500">Không tìm thấy sản phẩm</div>
+            <div className="p-2 text-gray-500 dark:text-gray-400">Không tìm thấy sản phẩm</div>
           )}
         </div>
       )}

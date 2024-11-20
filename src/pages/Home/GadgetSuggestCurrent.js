@@ -87,7 +87,7 @@ const SuggestGadgetCurrent = () => {
         {suggestedGadgets.slice(0, visibleCount).map((product) => (
           <div
             key={product.id}
-            className="border-1 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform-gpu hover:scale-105 hover:border-primary/50 overflow-hidden bg-gray-100"
+            className="border-1 rounded-2xl text-black shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform-gpu hover:scale-105 hover:border-primary/50 overflow-hidden bg-gray-100 dark:bg-gray-800 dark:border-gray-700"
             onClick={() =>
               navigate(`/gadget/detail/${slugify(product.name)}`, {
                 state: { productId: product.id },
@@ -115,7 +115,7 @@ const SuggestGadgetCurrent = () => {
                 className="w-full h-24 object-contain mb-2 rounded-xl"
               />
               <h3
-                className="font-semibold text-xs overflow-hidden overflow-ellipsis whitespace-nowrap"
+                className="font-semibold text-xs overflow-hidden overflow-ellipsis whitespace-nowrap dark:text-white"
                 style={{
                   display: '-webkit-box',
                   WebkitBoxOrient: 'vertical',
@@ -125,19 +125,19 @@ const SuggestGadgetCurrent = () => {
                 {product.name}
               </h3>
 
-              <div className=" py-2">
+              <div className=" flex py-4">
 
                 {product.discountPercentage > 0 ? (
                   <>
-                    <div className="text-red-500 font-semibold text-xs mr-2">
+                    <div className="text-red-500 dark:text-red-400 font-semibold text-xs mr-2">
                       {product.discountPrice.toLocaleString()}₫
                     </div>
-                    <span className="line-through text-gray-500 text-xs">
+                    <span className="line-through text-gray-500 dark:text-gray-400 text-xs">
                       {product.price.toLocaleString()}₫
                     </span>
                   </>
                 ) : (
-                  <div className="text-gray-800 font-semibold text-xs">
+                  <div className="text-gray-800 dark:text-gray-200 font-semibold text-xs">
                     {product.price.toLocaleString()}₫
                   </div>
                 )}

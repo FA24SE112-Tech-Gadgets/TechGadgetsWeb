@@ -142,9 +142,9 @@ export default function ProductPage() {
 
   const renderProduct = (product, setCategory) => (
     <div className="parent-container overflow-hidden p-2">
-      <div
+       <div
         key={product.id}
-        className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105  hover:border-primary/50"
+        className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105 hover:border-primary/50 dark:bg-gray-800 dark:border-gray-700"
         onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
           state: {
             productId: product.id,
@@ -161,37 +161,32 @@ export default function ProductPage() {
             Ngừng kinh doanh
           </div>
         )}
-        <div className="p-2 flex-grow">
+      <div className="p-2 flex-grow">
           <img
             src={product.thumbnailUrl}
             alt={product.name}
             className="w-full h-32 object-contain mb-2 rounded-2xl"
           />
-          <h3 className="font-semibold text-xs overflow-hidden overflow-ellipsis whitespace-nowrap" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>
+          <h3 className="font-semibold text-xs overflow-hidden overflow-ellipsis whitespace-nowrap dark:text-white" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>
             {product.name}
           </h3>
-
-
-
           <div className="flex py-4">
             {product.discountPercentage > 0 ? (
               <>
-                <div className="text-red-500 font-semibold text-sm mr-2">
+                <div className="text-red-500 dark:text-red-400 font-semibold text-sm mr-2">
                   {product.discountPrice.toLocaleString()}₫
                 </div>
-                <span className="line-through text-gray-500">
+                <span className="line-through text-gray-500 dark:text-gray-400">
                   {product.price.toLocaleString()}₫
                 </span>
               </>
             ) : (
-              <div className="text-gray-800 font-semibold text-sm">
+              <div className="text-gray-800 dark:text-gray-200 font-semibold text-sm">
                 {product.price.toLocaleString()}₫
               </div>
             )}
           </div>
-
         </div>
-
         <div className="flex items-center justify-between p-2">
           {/* Reviews */}
           {reviews[product.id] && reviews[product.id].numOfReview > 0 ? (
@@ -274,34 +269,31 @@ export default function ProductPage() {
   const renderCategory = (category, title) => (
     <div data-aos="fade-up" className="mb-10">
       <div className="flex items-center justify-between p-2">
-        <h2 className="text-2xl font-bold">{title}</h2>
+        <h2 className="text-2xl font-bold dark:text-white">{title}</h2>
         <div className="flex flex-wrap space-x-2">
           {brands[category].map((brand) => (
-            <button className="bg-gray-200 dark:bg-gray-500 dark:text-white hover:bg-gray-300 px-4 py-2 rounded-lg"
+            <button 
+              className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg"
               key={brand.id}
               onClick={() => {
                 navigate(`/gadgets/${title}/${slugify(brand.name)}`, {
-
                   state: {
                     categoryId: categoryIds[category],
                     brandId: brand.id
                   }
-
                 })
               }}
             >
               {brand.name}
-
             </button>
           ))}
-          <button className="bg-gray-200 dark:bg-gray-500 dark:text-white hover:bg-gray-300 px-4 py-2 rounded-lg"
+          <button 
+            className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg"
             onClick={() => {
               navigate(`/gadgets/${title}`, {
-
                 state: {
                   categoryId: categoryIds[category],
                 }
-
               })
             }}
           >

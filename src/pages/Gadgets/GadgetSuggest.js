@@ -88,7 +88,7 @@ const SuggestGadget = () => {
         {suggestedGadgets.slice(0, visibleCount).map((product) => (
           <div
             key={product.id}
-            className="border-1 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform-gpu hover:scale-105 hover:border-primary/50 overflow-hidden bg-gray-100"
+            className="border-1 rounded-2xl shadow-sm text-black flex flex-col justify-between relative transition-transform duration-200 transform-gpu hover:scale-105 hover:border-primary/50 overflow-hidden bg-gray-100"
             onClick={() =>
               navigate(`/gadget/detail/${slugify(product.name)}`, {
                 state: { productId: product.id },
@@ -126,7 +126,7 @@ const SuggestGadget = () => {
                 {product.name}
               </h3>
 
-              <div className=" py-2">
+              <div className="flex py-4">
 
                 {product.discountPercentage > 0 ? (
                   <>

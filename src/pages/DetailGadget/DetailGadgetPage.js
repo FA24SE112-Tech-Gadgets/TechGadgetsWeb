@@ -13,11 +13,13 @@ import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
 import GadgetSuggest from '../Gadgets/GadgetSuggest';
 import users from "~/assets/R.png"
 
-const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
+const OrderConfirmation = ({ product, quantity, onCancel }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(false);
     const navigate = useNavigate();
     const popupRef = useRef(null);
+    const unitPrice = product.discountPrice || product.price;
+    const totalPrice = unitPrice * quantity;
 
     const handleClickOutside = (event) => {
         if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -43,7 +45,6 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
                 quantity,
             });
             setOrderSuccess(true);
-            console.log("Buy success", response);
         } catch (error) {
             console.error("Error placing order:", error);
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -101,6 +102,7 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
             </div>
         );
     }
+console.log('data nè:',product);
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
@@ -111,12 +113,12 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
 
                 <div className="mb-6 border-b pb-4">
                     <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center flex-grow mr-4">
+                        <div className="flex items-center flex-grow mr-4">                          
                             <img src={product.thumbnailUrl} alt={product.name} className="w-12 h-12 object-contain mr-2" />
                             <span className="text-gray-600">{product.name} x {quantity}</span>
                         </div>
                         <span className="font-medium text-gray-800 ml-4">
-                            {totalPrice.toLocaleString()}₫
+                            {unitPrice.toLocaleString()}₫
                         </span>
                     </div>
                 </div>
@@ -194,8 +196,6 @@ const DetailGadgetPage = () => {
             try {
                 const response = await AxiosInterceptor.get('/api/users/current');
                 setUser(response.data.customer);
-                console.log("data nè", response.data.customer);
-
             } catch (error) {
                 console.error("Error fetching user data:", error);
             }
@@ -213,8 +213,6 @@ const DetailGadgetPage = () => {
                 console.log("API Response:", response.data);
                 setProduct(response.data);
                 setPrice(response.price);
-                console.log("giá", response.data.price);
-
             } catch (error) {
                 console.error("Error fetching product details:", error);
                 setError("Failed to fetch product details.");
