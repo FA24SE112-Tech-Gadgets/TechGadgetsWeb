@@ -130,7 +130,7 @@ const GadgetManagement = ({ categoryId }) => {
             const discountDate = new Date(gadget.discountExpiredDate);
             setSelectedDate(discountDate);
             setFormattedDate(moment(discountDate).format('DD/MM/YYYY'));
-            
+
             // Set timeout to ensure form is mounted before setting value
             setTimeout(() => {
                 if (formRef.current) {
@@ -195,7 +195,7 @@ const GadgetManagement = ({ categoryId }) => {
 
         try {
             const discountPercentage = parseInt(event.target.discountPercentage.value, 10);
-            
+
             if (!selectedDate) {
                 toast.error("Vui lòng chọn ngày hết hạn");
                 return;
@@ -216,9 +216,9 @@ const GadgetManagement = ({ categoryId }) => {
                     'Content-Type': 'multipart/form-data',
                 }
             });
-            
+
             toast.success(isEditing ? 'Cập nhật giảm giá thành công!' : 'Thêm giảm giá thành công!');
-            
+
             await fetchGadgets();
             resetForm();
             setIsModalVisible(false);
@@ -291,13 +291,13 @@ const GadgetManagement = ({ categoryId }) => {
             if (error.response && error.response.data && error.response.data.reasons) {
                 const reasons = error.response.data.reasons;
                 if (reasons.length > 0) {
-                  const reasonMessage = reasons[0].message;
-                  toast.error(reasonMessage);
+                    const reasonMessage = reasons[0].message;
+                    toast.error(reasonMessage);
                 } else {
-                  toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
+                    toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
                 }
-              }
-            
+            }
+
         }
     };
 
@@ -415,6 +415,7 @@ const GadgetManagement = ({ categoryId }) => {
             </div>
         );
     };
+
 
     return (
         <div className="p-6">
@@ -536,7 +537,22 @@ const GadgetManagement = ({ categoryId }) => {
                             <td className="p-4">
                                 {gadget.name.length > 20 ? `${gadget.name.slice(0, 20)}...` : gadget.name}
                             </td>
-                            <td className="p-4">{`${gadget.price.toLocaleString()}₫`}</td>
+                            <td className="p-4">
+                                {gadget.discountPercentage > 0 ? (
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                                            {`${gadget.discountPrice.toLocaleString()}₫`}
+                                        </span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 line-through">
+                                            {`${gadget.price.toLocaleString()}₫`}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <span className="text-sm text-gray-900 dark:text-white">
+                                        {`${gadget.price.toLocaleString()}₫`}
+                                    </span>
+                                )}
+                            </td>
                             <td className="p-4 relative">
                                 {gadget.discountPercentage > 0 ? (
                                     <>
@@ -571,7 +587,7 @@ const GadgetManagement = ({ categoryId }) => {
                                                             className="bg-white p-1 rounded-full shadow-md border mt-2 "
                                                         >
                                                             <Edit className="h-4 w-4 text-primary/80" />
-                                                            
+
                                                         </button>
                                                         <button
                                                             onClick={(e) => {
@@ -581,7 +597,7 @@ const GadgetManagement = ({ categoryId }) => {
                                                             className="bg-white p-1 rounded-full shadow-md border mt-2"
                                                         >
                                                             <TicketX className="h-4 w-4 text-red-800" />
-                                                            
+
                                                         </button>
                                                     </div>
                                                 </div>
@@ -601,7 +617,7 @@ const GadgetManagement = ({ categoryId }) => {
                             <td className="p-4">{gadget.quantity}</td>
                             <td className="p-4">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full  ${gadget.gadgetStatus === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                                {translateStatus(gadget.gadgetStatus)}
+                                    {translateStatus(gadget.gadgetStatus)}
                                 </span>
 
                             </td>

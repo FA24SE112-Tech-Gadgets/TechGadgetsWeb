@@ -64,12 +64,12 @@ const ManageGadget = ({ categoryId }) => {
   const handleStatusToggle = async (gadgetId, currentStatus) => {
     setLoadingStates(prev => ({ ...prev, [gadgetId]: true }));
     try {
-      const endpoint = currentStatus === "Active" 
+      const endpoint = currentStatus === "Active"
         ? `/api/gadgets/${gadgetId}/deactivate`
         : `/api/gadgets/${gadgetId}/activate`;
-      
+
       await AxiosInterceptor.put(endpoint);
-      
+
       setGadgets(prev => prev.map(gadget => {
         if (gadget.id === gadgetId) {
           return {
@@ -79,7 +79,7 @@ const ManageGadget = ({ categoryId }) => {
         }
         return gadget;
       }));
-      
+
       // toast.success("Cập nhật trạng thái thành công");
     } catch (error) {
       console.error("Error toggling status:", error);
@@ -149,7 +149,7 @@ const ManageGadget = ({ categoryId }) => {
   return (
     <div className="">
       <ToastContainer position="top-right" autoClose={3000} />
-      
+
       <div className="flex justify-between mb-4">
         {/* Add search input */}
         <div className="relative w-64">
@@ -220,7 +220,22 @@ const ManageGadget = ({ categoryId }) => {
               <td className="p-4">
                 {gadget.name.length > 20 ? `${gadget.name.slice(0, 20)}...` : gadget.name}
               </td>
-              <td className="p-4">{`${gadget.price.toLocaleString()}₫`}</td>
+              <td className="p-4">
+                {gadget.discountPercentage > 0 ? (
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                      {`${gadget.discountPrice.toLocaleString()}₫`}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 line-through">
+                      {`${gadget.price.toLocaleString()}₫`}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-gray-900 dark:text-white">
+                    {`${gadget.price.toLocaleString()}₫`}
+                  </span>
+                )}
+              </td>
               <td className="p-4">
                 {gadget.discountPercentage > 0 ? (
                   <>
@@ -253,13 +268,13 @@ const ManageGadget = ({ categoryId }) => {
                 </div>
               </td>
               <td className="p-4">
-                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${gadget.isForSale ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}>
+                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${gadget.isForSale ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
                   {gadget.isForSale ? "Đang bán" : "Ngừng bán"}
                 </span>
               </td>
               <td className="p-4">
                 <button
-                   onClick={() => navigate(`/gadget/detail-manager/${slugify(gadget.name)}`, {
+                  onClick={() => navigate(`/gadget/detail-manager/${slugify(gadget.name)}`, {
                     state: {
                       gadgetId: gadget.id,
                     }
@@ -283,11 +298,10 @@ const ManageGadget = ({ categoryId }) => {
           <button
             key={pageNumber}
             onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${
-              pageNumber === currentPage
+            className={`px-4 py-2 rounded-md ${pageNumber === currentPage
                 ? 'bg-primary/80 text-white'
                 : 'bg-gray-200 text-gray-700'
-            }`}
+              }`}
             disabled={isLoading}
           >
             {pageNumber}

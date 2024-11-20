@@ -19,7 +19,7 @@ const Sidebar = ({ minHeight = 'min-h-screen' }) => {
 
     const menuItems = [
         { path: '/specification-unit', icon: FaRegSun, text: 'Quản lý đơn vị' },
-        { path: '/category', icon: FaWrench, text: 'Quản lý danh mục' },
+        // { path: '/category', icon: FaWrench, text: 'Quản lý danh mục' },
         { path: '/brand', icon: FaWrench, text: 'Quản lý thương hiệu' },
         { path: '/manage-seller-application', icon: FaWpforms, text: 'Quản lý đơn người bán' },
         { path: '/manage-gadget', icon: FaProductHunt, text: 'Quản lý sản phẩm' },
