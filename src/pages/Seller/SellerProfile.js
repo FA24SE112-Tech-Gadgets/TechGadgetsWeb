@@ -14,7 +14,7 @@ import {
     FileTextOutlined,
     TagsOutlined
 } from '@ant-design/icons';
-import { ArrowBack, ArrowLeft } from '@mui/icons-material';
+import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 const labels = {
@@ -117,8 +117,7 @@ const SellerProfilePage = () => {
     return (
         <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-primary/40 to-secondary/40">
             <ToastContainer />
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
-                
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">              
             <div>
                 <button
                    onClick={() => navigate('/seller/Order-management')}

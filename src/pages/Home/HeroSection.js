@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Image1 from "../../assets/hero/phone.png";
-import Image2 from "../../assets/hero/laptop2.png";
+import Image2 from "../../assets/hero/laptop.png";
 import Image3 from "../../assets/hero/headphone.png";
 import Slider from "react-slick";
 import { Link, useNavigate } from "react-router-dom";

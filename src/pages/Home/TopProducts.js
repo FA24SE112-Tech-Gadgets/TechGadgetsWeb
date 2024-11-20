@@ -15,9 +15,9 @@ const ProductsData = [
   {
     id: 2,
     img: Img2,
-    title: "Màn hình 4K",
+    title: "Loa Bluetooth",
     description:
-      "Trải nghiệm hình ảnh tuyệt đẹp với màn hình 4K UHD hàng đầu của chúng tôi, hoàn hảo cho chơi game và sử dụng chuyên nghiệp.",
+      "Đắm chìm trong âm thanh sống động với loa Bluetooth cao cấp. Thiết kế hiện đại, âm thanh chất lượng vượt trội – lựa chọn hoàn hảo cho mọi không gian.",
   },
   {
     id: 3,
@@ -64,6 +64,7 @@ const TopProducts = ({ handleOrderPopup }) => {
               <div className="p-4 text-center">
                 {/* star rating */}
                 <div className="w-full flex items-center justify-center gap-1">
+                  <FaStar className="text-yellow-500" />
                   <FaStar className="text-yellow-500" />
                   <FaStar className="text-yellow-500" />
                   <FaStar className="text-yellow-500" />

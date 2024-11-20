@@ -52,7 +52,6 @@ const{isAuthenticated}=useAuth();
       <Banner />
       {isAuthenticated && <SuggestGadgetCurrent />}
       {isAuthenticated && <GadgetHistory />}
-      <Subscribe />
       <Testimonials />
 
       <Footer />

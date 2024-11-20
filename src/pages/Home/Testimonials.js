@@ -11,13 +11,13 @@ const TestimonialData = [
   {
     id: 2,
     name: "Phạm Ngọc Lan",
-    text: "Tôi rất ấn tượng với sự đa dạng sản phẩm trên trang này. Mọi thứ từ laptop đến phụ kiện đều có mức giá tốt và chất lượng đảm bảo.",
+    text: "Tôi rất ấn tượng với sự đa dạng sản phẩm trên trang này. Mọi thứ từ laptop đến tai nghe đều có mức giá tốt và chất lượng đảm bảo.",
     img: "https://picsum.photos/102/102",
   },
   {
     id: 3,
     name: "Đỗ Minh Khoa",
-    text: "Tech-Gadgets thực sự là nơi lý tưởng để tìm kiếm các sản phẩm công nghệ mới nhất với giá cạnh tranh.",
+    text: "Tech-Gadgets thực sự là nơi lý tưởng để tìm kiếm các sản phẩm công nghệ mới nhất với mức giá cạnh tranh.",
     img: "https://picsum.photos/104/104",
   },
   {
@@ -77,7 +77,7 @@ const Testimonials = () => {
             Đánh giá từ khách hàng
           </p>
           <h1 data-aos="fade-up" className="text-3xl font-bold">
-            Những phản hồi của khách hàng về sản phẩm, dịch vụ
+            Những phản hồi của khách hàng
           </h1>
           <p data-aos="fade-up" className="text-xs text-gray-400">
           Mua sắm dễ dàng, trải nghiệm tuyệt vời - Tech Gadgets luôn đồng hành cùng bạn
