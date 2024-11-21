@@ -1,35 +1,24 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
-
-const TestimonialData = [
-  {
-    id: 1,
-    name: "Nguyễn Văn Hùng",
-    text: "Cổng thông tin Tech-Gadgets đã giúp tôi tìm được các thiết bị công nghệ tiên tiến phù hợp với nhu cầu bản thân. ",
-    img: "https://picsum.photos/101/101",
-  },
-  {
-    id: 2,
-    name: "Phạm Ngọc Lan",
-    text: "Tôi rất ấn tượng với sự đa dạng sản phẩm trên trang này. Mọi thứ từ laptop đến tai nghe đều có mức giá tốt và chất lượng đảm bảo.",
-    img: "https://picsum.photos/102/102",
-  },
-  {
-    id: 3,
-    name: "Đỗ Minh Khoa",
-    text: "Tech-Gadgets thực sự là nơi lý tưởng để tìm kiếm các sản phẩm công nghệ mới nhất với mức giá cạnh tranh.",
-    img: "https://picsum.photos/104/104",
-  },
-  {
-    id: 5,
-    name: "Lê Vũ Thu Phương",
-    text: "Tôi đã tìm được chiếc điện thoại mình mong muốn nhờ chức năng tìm kiếm nâng cao của cổng thông tin này.",
-    img: "https://picsum.photos/103/103",
-  },
-];
-
+import { Star } from 'lucide-react';
+import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 
 const Testimonials = () => {
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await AxiosInterceptor.get('/api/reviews/home-page?Page=1&PageSize=50');
+        setReviews(response.data.items);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
   var settings = {
     dots: true,
     arrows: false,
@@ -73,38 +62,46 @@ const Testimonials = () => {
       <div className="container">
         {/* header section */}
         <div className="text-center mb-10 max-w-[600px] mx-auto">
-          <p data-aos="fade-up" className="text-sm text-primary">
+          <p className="text-sm text-primary">
             Đánh giá từ khách hàng
           </p>
-          <h1 data-aos="fade-up" className="text-3xl font-bold">
+          <h1 className="text-3xl font-bold">
             Những phản hồi của khách hàng
           </h1>
-          <p data-aos="fade-up" className="text-xs text-gray-400">
-          Mua sắm dễ dàng, trải nghiệm tuyệt vời - Tech Gadgets luôn đồng hành cùng bạn
+          <p className="text-xs text-gray-400">
+            Mua sắm dễ dàng, trải nghiệm tuyệt vời - Tech Gadgets luôn đồng hành cùng bạn
           </p>
         </div>
 
         {/* Testimonial cards */}
-        <div data-aos="zoom-in">
+        <div>
           <Slider {...settings}>
-            {TestimonialData.map((data) => (
-              <div className="my-6" key={data.id}>
+            {reviews.map((review) => (
+              <div className="my-6" key={review.id}>
                 <div
                   className="flex flex-col gap-4 shadow-lg py-8 px-6 mx-4 rounded-xl dark:bg-gray-700 bg-primary/10 relative"
                 >
                   <div className="mb-4">
                     <img
-                      src={data.img}
-                      alt=""
-                      className="rounded-full w-20 h-20"
+                      src={review.customer.avatarUrl || "https://storage.googleapis.com/fbdemo-f9d5f.appspot.com/Gadgets/9d575c15-aa74-4262-97cc-6fe67c57ce2e.jpg"}
+                      alt={`Avatar of ${review.customer.fullName}`}
+                      className="rounded-full w-20 h-20 object-cover"
                     />
                   </div>
                   <div className="flex flex-col items-center gap-4">
                     <div className="space-y-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-300">{data.text}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-300">{review.content}</p>
                       <h1 className="text-xl font-bold text-black/80 dark:text-light dark:text-gray-300">
-                        {data.name}
+                        {review.customer.fullName}
                       </h1>
+                      <div className="flex justify-center">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <p className="text-black/20 text-9xl font-serif absolute top-0 right-0 dark:text-gray-300">

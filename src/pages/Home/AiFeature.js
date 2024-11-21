@@ -19,15 +19,14 @@ const AiFeature = () => {
                     </div>
                     <div className="md:w-3/5 p-8 relative">
                         <div className="relative z-10">
-                        <h1 className="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
-                                Khám phá tính năng tìm kiếm sản phẩm bằng AI
+                            <h1 className="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
+                                Khám phá tính năng tìm kiếm sản phẩm bằng ngôn ngữ tự nhiện
                             </h1>
                             <p className="text-lg text-white mb-8 leading-relaxed drop-shadow-md">
-                                Tính năng tìm kiếm sản phẩm bằng công nghệ AI cho phép bạn tìm kiếm các sản phẩm một cách nhanh chóng và chính xác.
-                                Nhờ vào công nghệ trí tuệ nhân tạo tiên tiến, hệ thống của chúng tôi có thể hiểu được ý định tìm kiếm của bạn,
-                                phân tích từ khóa và gợi ý các sản phẩm phù hợp nhất với nhu cầu của bạn.
+                                Tính năng tìm kiếm sản phẩm bằng ngôn ngữ tự nhiên giúp bạn dễ dàng tìm thấy sản phẩm một cách nhanh chóng và chính xác. Hệ thống có
+                                khả năng hiểu ý định tìm kiếm, phân tích từ khóa và gợi ý những sản phẩm phù hợp nhất với nhu cầu của bạn.
                             </p>
-                            <button 
+                            <button
                                 onClick={() => navigate("/search-by-natural-language")}
                                 className="group inline-flex items-center px-6 py-3 text-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-300 ease-in-out hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >

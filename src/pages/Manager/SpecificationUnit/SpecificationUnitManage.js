@@ -14,7 +14,7 @@ export default function SpecificationUnitManage({ categoryId }) {
   const fetchSpecificationKeys = async () => {
     try {
       setIsLoading(true);
-      let url = `https://tech-gadgets-dev.xyz/api/specification-keys/categories/${categoryId}?Page=1&PageSize=100`;
+      let url = `/api/specification-keys/categories/${categoryId}?Page=1&PageSize=100`;
       if (debouncedSearch) {
         url += `&Name=${encodeURIComponent(debouncedSearch)}`;
       }
@@ -22,7 +22,6 @@ export default function SpecificationUnitManage({ categoryId }) {
       setSpecificationKeys(response.data.items);
     } catch (error) {
       console.error("Error fetching specification keys:", error);
-      toast.error("Failed to fetch specification keys");
     } finally {
       setIsLoading(false);
     }
