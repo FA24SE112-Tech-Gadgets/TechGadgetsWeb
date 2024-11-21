@@ -28,6 +28,15 @@ const AdminSideBar = ({ minHeight = 'min-h-screen' }) => {
         <h2 className="text-sm font-semibold text-black/60 mb-4 px-3">MENU QUẢN LÝ</h2>
         <div 
           className='flex items-center justify-between gap-[10px] py-[12px] cursor-pointer hover:bg-black/10 px-3 rounded-lg transition-all duration-300'
+          onClick={() => navigate('/admin/dashboard')}
+        >
+          <div className='flex items-center gap-[10px]'>
+            <FaUsersCog className="text-xl" color='black' /> 
+            <p className='text-[14px] leading-[20px] font-medium text-black'>Trang quản lý</p>
+          </div>
+        </div>
+        <div 
+          className='flex items-center justify-between gap-[10px] py-[12px] cursor-pointer hover:bg-black/10 px-3 rounded-lg transition-all duration-300'
           onClick={() => navigate('/admin/manage-users')}
         >
           <div className='flex items-center gap-[10px]'>

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
-import { Eye, X, Loader, User } from "lucide-react";
+import { Eye, X, Loader, User, Building, Store, MapPin, Briefcase, Mail, FileText, Phone, IdCard, Calendar, Shell, Search } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
+import { FaGenderless } from "react-icons/fa";
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
@@ -19,10 +20,15 @@ const AdminPage = () => {
   const itemsPerPage = 10;
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [userToToggle, setUserToToggle] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentSearchTerm, setCurrentSearchTerm] = useState('');
 
   useEffect(() => {
     let url = `/api/users?Page=${page}&PageSize=${pageSize}`;
     
+    if (currentSearchTerm.trim()) {
+      url += `&Name=${encodeURIComponent(currentSearchTerm.trim())}`;
+    }
     if (roleFilter !== 'all') {
       url += `&Role=${roleFilter}`;
     }
@@ -42,12 +48,12 @@ const AdminPage = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [roleFilter, statusFilter, page, pageSize]);
+  }, [roleFilter, statusFilter, page, pageSize, currentSearchTerm]);
 
   // Add new useEffect to reset currentPage when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [roleFilter, statusFilter]);
+  }, [roleFilter, statusFilter, searchQuery]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -95,66 +101,174 @@ const AdminPage = () => {
       case "Manager":
         return (
           <div className="space-y-4">
-            {user.manager?.fullName && renderField("Tên quản lý", user.manager.fullName)}
-            {renderField("Email", user.email)}
-          </div>
+          {user.manager?.fullName &&
+            renderField(
+              <>
+                <User className="inline-block mr-2 text-primary/70" /> Tên quản lý
+              </>,
+              user.manager.fullName
+            )}
+          {renderField(
+            <>
+              <Mail className="inline-block mr-2 text-green-500" /> Email
+            </>,
+            user.email
+          )}
+        </div>
         );
       case "Seller":
         return (
           <div className="space-y-4">
-            {user.seller?.companyName && renderField("Tên công ty", user.seller.companyName)}
-            {user.seller?.shopName && renderField("Tên cửa hàng", user.seller.shopName)}
-            {user.seller?.shopAddress && renderField("Địa chỉ cửa hàng", user.seller.shopAddress)}
-            {user.seller?.businessModel && renderField("Mô hình kinh doanh", user.seller.businessModel)}
-            {renderField("Email", user.email)}
-            {user.seller?.businessRegistrationCertificateUrl && (
-              <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">Giấy phép kinh doanh:</p>
-                <div className="flex justify-center">
-                  {getFileType(user.seller.businessRegistrationCertificateUrl) === 'image' ? (
-                    <img
-                      src={user.seller.businessRegistrationCertificateUrl}
-                      alt="Business Registration Certificate"
-                      className="max-w-full h-auto rounded-lg border border-gray-200 cursor-pointer"
-                      onClick={() => {
-                        setSelectedImage(user.seller.businessRegistrationCertificateUrl);
-                        setIsImageModalOpen(true);
-                      }}
-                    />
-                  ) : getFileType(user.seller.businessRegistrationCertificateUrl) === 'pdf' ? (
-                    <iframe
-                      src={user.seller.businessRegistrationCertificateUrl}
-                      title="Business Registration Certificate"
-                      className="w-full h-96 rounded-lg shadow-md"
-                    />
-                  ) : (
-                    <p>Không thể hiển thị file. <a href={user.seller.businessRegistrationCertificateUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Tải xuống</a></p>
-                  )}
-                </div>
-              </div>
+      {user.seller?.companyName &&
+        renderField(
+          <>
+            <Building className="inline-block mr-2 text-primary/70" /> Tên công ty
+          </>,
+          user.seller.companyName
+        )}
+      {user.seller?.shopName &&
+        renderField(
+          <>
+            <Store className="inline-block mr-2 text-green-500" /> Tên cửa hàng
+          </>,
+          user.seller.shopName
+        )}
+      {user.seller?.shopAddress &&
+        renderField(
+          <>
+            <MapPin className="inline-block mr-2 text-red-500" /> Địa chỉ cửa hàng
+          </>,
+          user.seller.shopAddress
+        )}
+      {user.seller?.businessModel &&
+        renderField(
+          <>
+            <Briefcase className="inline-block mr-2 text-yellow-500" /> Mô hình kinh doanh
+          </>,
+          user.seller.businessModel
+        )}
+      {renderField(
+        <>
+          <Mail className="inline-block mr-2 text-purple-500" /> Email
+        </>,
+        user.email
+      )}
+      {user.seller?.businessRegistrationCertificateUrl && (
+        <div className="mb-4">
+          <p className="text-sm text-gray-500 mb-2">
+            <FileText className="inline-block mr-2 text-gray-500" /> Giấy phép kinh doanh:
+          </p>
+          <div className="flex justify-center">
+            {getFileType(user.seller.businessRegistrationCertificateUrl) === "image" ? (
+              <img
+                src={user.seller.businessRegistrationCertificateUrl}
+                alt="Business Registration Certificate"
+                className="max-w-full h-auto rounded-lg border border-gray-200 cursor-pointer"
+                onClick={() => {
+                  setSelectedImage(user.seller.businessRegistrationCertificateUrl);
+                  setIsImageModalOpen(true);
+                }}
+              />
+            ) : getFileType(user.seller.businessRegistrationCertificateUrl) === "pdf" ? (
+              <iframe
+                src={user.seller.businessRegistrationCertificateUrl}
+                title="Business Registration Certificate"
+                className="w-full h-96 rounded-lg shadow-md"
+              />
+            ) : (
+              <p>
+                Không thể hiển thị file.{" "}
+                <a
+                  href={user.seller.businessRegistrationCertificateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  Tải xuống
+                </a>
+              </p>
             )}
           </div>
+        </div>
+      )}
+    </div>
         );
       case "Customer":
         return (
           <div className="space-y-4">
-            {user.customer?.avatarUrl && (
-              <div className="flex justify-center mb-4">
-                <img
-                  src={user.customer.avatarUrl}
-                  alt="Avatar"
-                  className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
-                />
-              </div>
+          {/* Avatar */}
+          {user.customer?.avatarUrl && (
+            <div className="flex justify-center mb-4">
+              <img
+                src={user.customer.avatarUrl}
+                alt="Avatar"
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 shadow-md"
+              />
+            </div>
+          )}
+    
+          {/* Full Name */}
+          {user.customer?.fullName &&
+            renderField(
+              <>
+                <User className="inline-block mr-2 text-primary/70" /> Họ và tên
+              </>,
+              user.customer.fullName
             )}
-            {user.customer?.fullName && renderField("Họ và tên", user.customer.fullName)}
-            {renderField("Email", user.email)}
-            {user.customer?.phoneNumber && renderField("Số điện thoại", user.customer.phoneNumber)}
-            {user.customer?.address && renderField("Địa chỉ", user.customer.address)}
-            {user.customer?.cccd && renderField("CCCD", user.customer.cccd)}
-            {user.customer?.gender && renderField("Giới tính", user.customer.gender)}
-            {user.customer?.dateOfBirth && renderField("Ngày sinh", new Date(user.customer.dateOfBirth).toLocaleDateString())}
-          </div>
+    
+          {/* Email */}
+          {renderField(
+            <>
+              <Mail className="inline-block mr-2 text-green-500" /> Email
+            </>,
+            user.email
+          )}
+    
+          {/* Phone Number */}
+          {user.customer?.phoneNumber &&
+            renderField(
+              <>
+                <Phone className="inline-block mr-2 text-yellow-500" /> Số điện thoại
+              </>,
+              user.customer.phoneNumber
+            )}
+    
+          {/* Address */}
+          {user.customer?.address &&
+            renderField(
+              <>
+                <MapPin className="inline-block mr-2 text-red-500" /> Địa chỉ
+              </>,
+              user.customer.address
+            )}
+    
+          {/* CCCD */}
+          {user.customer?.cccd &&
+            renderField(
+              <>
+                <IdCard className="inline-block mr-2 text-indigo-500" /> CCCD
+              </>,
+              user.customer.cccd
+            )}
+    
+          {/* Gender */}
+          {user.customer?.gender &&
+            renderField(
+              <>
+                <Shell className="inline-block mr-2 text-pink-500" /> Giới tính
+              </>,
+              user.customer.gender
+            )}
+    
+          {/* Date of Birth */}
+          {user.customer?.dateOfBirth &&
+            renderField(
+              <>
+                <Calendar className="inline-block mr-2 text-purple-500" /> Ngày sinh
+              </>,
+              new Date(user.customer.dateOfBirth).toLocaleDateString()
+            )}
+        </div>
         );
       default:
         return null;
@@ -206,6 +320,11 @@ const AdminPage = () => {
     }
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault(); // Prevent form submission
+    setCurrentSearchTerm(searchQuery);
+  };
+
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -226,13 +345,14 @@ const AdminPage = () => {
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
-        <div className="h-4 w-4 bg-white rounded-full"></div>
-      </div>
-      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-        Loading...
-      </span>
+    <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+      <div className="h-4 w-4 bg-white rounded-full"></div>
     </div>
+    <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+      Loading...
+    </span>
+  </div>
+
   );
 
   return (
@@ -240,42 +360,63 @@ const AdminPage = () => {
       <ToastContainer position="top-right" autoClose={3000} />
       <h1 className="text-2xl font-semibold mb-4">Quản lý người dùng</h1>
       
-      <div className="mb-6 flex gap-4 justify-end">
-        <div className="relative">
-          <select
-            value={roleFilter}
-            onChange={(e) => {
-              setRoleFilter(e.target.value);
-            }}
-            className="w-48 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+      <div className="mb-6 flex gap-4 justify-between">
+        {/* Replace search input with form */}
+        <form onSubmit={handleSearch} className="relative w-64 flex">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Tìm kiếm theo tên..."
+            className="w-full px-4 py-2 bg-white border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary/70"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 bg-primary/70 text-white rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:ring-offset-2"
           >
-            <option value="all">Tất cả </option>
-            <option value="Customer">Khách hàng</option>
-            <option value="Seller">Người bán</option>
-            <option value="Manager">Quản lý</option>
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-            </svg>
+            <Search className="h-5 w-5" />
+          </button>
+        </form>
+
+        <div className="flex gap-4">
+          {/* Existing role filter */}
+          <div className="relative">
+            <select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+              }}
+              className="w-48 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary/70 appearance-none cursor-pointer"
+            >
+              <option value="all">Tất cả vai trò</option>
+              <option value="Customer">Khách hàng</option>
+              <option value="Seller">Người bán</option>
+              <option value="Manager">Quản lý</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
-        </div>
-        
-        <div className="relative">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-48 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
-          >
-            <option value="all">Tất cả </option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-            <option value="Pending">Pending</option>
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-            </svg>
+          
+          {/* Existing status filter */}
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-48 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary/70 appearance-none cursor-pointer"
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="Active">Hoạt động</option>
+              <option value="Inactive">Không hoạt động</option>
+              <option value="Pending">Đang chờ</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         </div>
       </div>

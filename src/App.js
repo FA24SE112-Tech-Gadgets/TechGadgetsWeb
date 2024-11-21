@@ -52,6 +52,7 @@ import SellerPage from "./pages/SellerPage/SellerPage";
 import ManageGadgetPage from "./pages/Manager/Gadget/ManageGadgetPage";
 import AdminLayout from "./components/layout/AdminLayout";
 import AdminPage from "./pages/Admin/AdminPage";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 
 
@@ -227,6 +228,9 @@ function App() {
       <Route element={<AdminLayout />}>
           <Route path='/admin/manage-users' element={
          <AdminPage/>
+        } />
+        <Route path='/admin/dashboard' element={
+         <AdminDashboard/>
         } />
       </Route>
     </Routes>

@@ -117,7 +117,7 @@ const AuthProvider = ({ children }) => {
 						setError(null);
 						console.log("Login successful, navigating to home...", resData);
 						if (clientRole === "Admin") {
-							navigate("/admin/manage-users");
+							navigate("/admin/dashboard");
 						} else if (clientRole === "Manager") {
 							navigate("/specification-unit");
 						} else if (clientRole === "Seller") {
