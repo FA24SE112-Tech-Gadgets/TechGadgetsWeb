@@ -600,7 +600,7 @@ const DetailGadgetPage = () => {
                         ) : product.isForSale === false && (
                             <div className="relative">
                                 <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-lg">
-                                    Ngừng kinh doanh
+                                    Ngừng bán
                                 </div>
                             </div>
                         )}

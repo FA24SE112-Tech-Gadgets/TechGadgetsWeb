@@ -27,6 +27,8 @@ const ManageGadget = ({ categoryId }) => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [brands, setBrands] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [gadgetToToggle, setGadgetToToggle] = useState(null);
 
   const fetchBrands = async () => {
     try {
@@ -61,31 +63,40 @@ const ManageGadget = ({ categoryId }) => {
     }
   };
 
-  const handleStatusToggle = async (gadgetId, currentStatus) => {
-    setLoadingStates(prev => ({ ...prev, [gadgetId]: true }));
+  const handleStatusToggleClick = (gadget) => {
+    setGadgetToToggle(gadget);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmStatusToggle = async () => {
+    if (!gadgetToToggle) return;
+    
+    setLoadingStates(prev => ({ ...prev, [gadgetToToggle.id]: true }));
     try {
-      const endpoint = currentStatus === "Active" 
-        ? `/api/gadgets/${gadgetId}/deactivate`
-        : `/api/gadgets/${gadgetId}/activate`;
+      const endpoint = gadgetToToggle.gadgetStatus === "Active" 
+        ? `/api/gadgets/${gadgetToToggle.id}/deactivate`
+        : `/api/gadgets/${gadgetToToggle.id}/activate`;
       
       await AxiosInterceptor.put(endpoint);
       
       setGadgets(prev => prev.map(gadget => {
-        if (gadget.id === gadgetId) {
+        if (gadget.id === gadgetToToggle.id) {
           return {
             ...gadget,
-            gadgetStatus: currentStatus === "Active" ? "Inactive" : "Active"
+            gadgetStatus: gadgetToToggle.gadgetStatus === "Active" ? "Inactive" : "Active"
           };
         }
         return gadget;
       }));
       
-      // toast.success("Cập nhật trạng thái thành công");
+      toast.success("Cập nhật trạng thái thành công");
     } catch (error) {
       console.error("Error toggling status:", error);
       toast.error("Không thể cập nhật trạng thái");
     } finally {
-      setLoadingStates(prev => ({ ...prev, [gadgetId]: false }));
+      setLoadingStates(prev => ({ ...prev, [gadgetToToggle.id]: false }));
+      setShowConfirmModal(false);
+      setGadgetToToggle(null);
     }
   };
 
@@ -245,7 +256,7 @@ const ManageGadget = ({ categoryId }) => {
                         type="checkbox"
                         className="sr-only peer"
                         checked={gadget.gadgetStatus === "Active"}
-                        onChange={() => handleStatusToggle(gadget.id, gadget.gadgetStatus)}
+                        onChange={() => handleStatusToggleClick(gadget)}
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
@@ -294,6 +305,33 @@ const ManageGadget = ({ categoryId }) => {
           </button>
         ))}
       </div>
+
+      {showConfirmModal && gadgetToToggle && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Xác nhận thay đổi trạng thái
+            </h3>
+            <p className="text-gray-500 mb-6">
+              Bạn có chắc chắn muốn {gadgetToToggle.gadgetStatus === "Active" ? "khóa" : "mở khóa"} sản phẩm này?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors duration-200"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmStatusToggle}
+                className="px-4 py-2 bg-primary/80 hover:bg-primary text-white rounded-md transition-colors duration-200"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

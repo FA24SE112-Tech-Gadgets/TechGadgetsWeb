@@ -17,6 +17,8 @@ const AdminPage = () => {
   const [loadingStates, setLoadingStates] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [userToToggle, setUserToToggle] = useState(null);
 
   useEffect(() => {
     let url = `/api/users?Page=${page}&PageSize=${pageSize}`;
@@ -164,20 +166,27 @@ const AdminPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleStatusToggle = async (userId, currentStatus) => {
-    setLoadingStates(prev => ({ ...prev, [userId]: true }));
+  const handleStatusToggleClick = (user) => {
+    setUserToToggle(user);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmStatusToggle = async () => {
+    if (!userToToggle) return;
+    
+    setLoadingStates(prev => ({ ...prev, [userToToggle.id]: true }));
     try {
-      const endpoint = currentStatus === "Active" 
-        ? `/api/user/${userId}/deactivate`  // for deactivating user
-        : `/api/user/${userId}/activate`;   // for activating user
+      const endpoint = userToToggle.status === "Active" 
+        ? `/api/user/${userToToggle.id}/deactivate`
+        : `/api/user/${userToToggle.id}/activate`;
       
       await AxiosInterceptor.put(endpoint);
       
       setUsers(prev => prev.map(user => {
-        if (user.id === userId) {
+        if (user.id === userToToggle.id) {
           return {
             ...user,
-            status: currentStatus === "Active" ? "Inactive" : "Active"
+            status: userToToggle.status === "Active" ? "Inactive" : "Active"
           };
         }
         return user;
@@ -185,18 +194,15 @@ const AdminPage = () => {
       
       toast.success("Cập nhật trạng thái thành công");
     } catch (error) {
-        if (error.response && error.response.data && error.response.data.reasons) {
-            const reasons = error.response.data.reasons;
-            if (reasons.length > 0) {
-              const reasonMessage = reasons[0].message;
-              toast.error(reasonMessage);
-            } else {
-              toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
-            }
-          }
-        
+      if (error.response?.data?.reasons?.[0]?.message) {
+        toast.error(error.response.data.reasons[0].message);
+      } else {
+        toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
+      }
     } finally {
-      setLoadingStates(prev => ({ ...prev, [userId]: false }));
+      setLoadingStates(prev => ({ ...prev, [userToToggle.id]: false }));
+      setShowConfirmModal(false);
+      setUserToToggle(null);
     }
   };
 
@@ -299,7 +305,7 @@ const AdminPage = () => {
                           type="checkbox"
                           className="sr-only peer"
                           checked={user.status === "Active"}
-                          onChange={() => handleStatusToggle(user.id, user.status)}
+                          onChange={() => handleStatusToggleClick(user)}
                         />
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                       </label>
@@ -399,6 +405,33 @@ const AdminPage = () => {
             >
               <X className="h-6 w-6" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {showConfirmModal && userToToggle && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Xác nhận thay đổi trạng thái
+            </h3>
+            <p className="text-gray-500 mb-6">
+              Bạn có chắc chắn muốn {userToToggle.status === "Active" ? "khóa" : "mở khóa"} tài khoản này?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors duration-200"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmStatusToggle}
+                className="px-4 py-2 bg-primary/80 hover:bg-primary text-white rounded-md transition-colors duration-200"
+              >
+                Xác nhận
+              </button>
+            </div>
           </div>
         </div>
       )}

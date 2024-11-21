@@ -498,7 +498,7 @@ const CartPage = () => {
                                                             </div>
                                                         ) : item.gadget.isForSale === false && (
                                                             <div className="text-red-500">
-                                                                Ngừng kinh doanh
+                                                                Ngừng bán
                                                             </div>
                                                         )}
                                                     </div>

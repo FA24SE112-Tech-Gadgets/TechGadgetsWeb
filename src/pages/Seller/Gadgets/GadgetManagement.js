@@ -38,6 +38,8 @@ const GadgetManagement = ({ categoryId }) => {
     const [actionDropdownId, setActionDropdownId] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [gadgetToDelete, setGadgetToDelete] = useState(null);
+    const [showSaleConfirmModal, setShowSaleConfirmModal] = useState(false);
+    const [gadgetToToggleSale, setGadgetToToggleSale] = useState(null);
     const itemsPerPage = 5;
     const navigate = useNavigate();
     const formRef = React.useRef(null);
@@ -84,23 +86,40 @@ const GadgetManagement = ({ categoryId }) => {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentGadgets = gadgets.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(gadgets.length / itemsPerPage);
+    const getPaginationRange = () => {
+        const maxVisible = 5; // Số lượng nút hiển thị
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(start + maxVisible - 1, totalPages);
+    
+        // Điều chỉnh start nếu end đã chạm giới hạn
+        if (end - start + 1 < maxVisible) {
+          start = Math.max(1, end - maxVisible + 1);
+        }
+    
+        return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+      };
+    const handleSaleToggle = (id, isForSale) => {
+        setGadgetToToggleSale({ id, isForSale });
+        setShowSaleConfirmModal(true);
+    };
 
-    const handleSaleToggle = async (id, isForSale) => {
-        setLoadingStates(prev => ({ ...prev, [id]: true }));
+    const confirmSaleToggle = async () => {
+        if (!gadgetToToggleSale) return;
+        
+        setLoadingStates(prev => ({ ...prev, [gadgetToToggleSale.id]: true }));
         try {
-            const endpoint = isForSale
-                ? `/api/gadgets/${id}/set-not-for-sale`
-                : `/api/gadgets/${id}/set-for-sale`;
+            const endpoint = gadgetToToggleSale.isForSale
+                ? `/api/gadgets/${gadgetToToggleSale.id}/set-not-for-sale`
+                : `/api/gadgets/${gadgetToToggleSale.id}/set-for-sale`;
 
-            // Send the API request without awaiting a response for `fetchGadgets`
             await AxiosInterceptor.put(endpoint);
 
-            // Update the local state to reflect the new sale status without refetching
             setGadgets(prevGadgets =>
                 prevGadgets.map(gadget =>
-                    gadget.id === id ? { ...gadget, isForSale: !isForSale } : gadget
+                    gadget.id === gadgetToToggleSale.id ? { ...gadget, isForSale: !gadgetToToggleSale.isForSale } : gadget
                 )
             );
+            toast.success("Cập nhật trạng thái thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
                 const reasons = error.response.data.reasons;
@@ -112,10 +131,11 @@ const GadgetManagement = ({ categoryId }) => {
                 }
             }
         } finally {
-            setLoadingStates(prev => ({ ...prev, [id]: false }));
+            setLoadingStates(prev => ({ ...prev, [gadgetToToggleSale.id]: false }));
+            setShowSaleConfirmModal(false);
+            setGadgetToToggleSale(null);
         }
     };
-
 
     const handleChangePage = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -416,6 +436,40 @@ const GadgetManagement = ({ categoryId }) => {
         );
     };
 
+    const renderSaleConfirmModal = () => {
+        if (!showSaleConfirmModal || !gadgetToToggleSale) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                        Xác nhận thay đổi trạng thái
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                        Bạn có chắc chắn muốn {gadgetToToggleSale.isForSale ? "ngừng bán" : "bán"} sản phẩm này?
+                    </p>
+                    <div className="flex justify-end gap-4">
+                        <button
+                            onClick={() => {
+                                setShowSaleConfirmModal(false);
+                                setGadgetToToggleSale(null);
+                            }}
+                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors duration-200"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            onClick={confirmSaleToggle}
+                            className="px-4 py-2 bg-primary/80 hover:bg-primary text-white rounded-md transition-colors duration-200"
+                        >
+                            Xác nhận
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="p-6">
             <ToastContainer position="top-right" autoClose={3000} />
@@ -465,7 +519,7 @@ const GadgetManagement = ({ categoryId }) => {
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-500">Ngừng kinh doanh</p>
+                            <p className="text-sm text-gray-500">Ngừng bán</p>
                             <p className="text-2xl font-bold text-primary/80">
                                 {gadgets.filter(g => !g.isForSale).length}
                             </p>
@@ -670,20 +724,21 @@ const GadgetManagement = ({ categoryId }) => {
             )}
             {/* Pagination */}
             <div className="flex justify-center mt-6 space-x-2">
-                {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                        key={i + 1}
-                        onClick={() => handleChangePage(i + 1)}
-                        className={`px-4 py-2 rounded-md ${i + 1 === currentPage
-                            ? 'bg-primary/80 text-white'
-                            : 'bg-gray-200 text-gray-700'
-                            }`}
-                        disabled={isLoading}
-                    >
-                        {i + 1}
-                    </button>
-                ))}
-            </div>
+        {getPaginationRange().map((pageNumber) => (
+          <button
+            key={pageNumber}
+            onClick={() => handleChangePage(pageNumber)}
+            className={`px-4 py-2 rounded-md ${
+              pageNumber === currentPage
+                ? 'bg-primary/80 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}
+            disabled={isLoading}
+          >
+            {pageNumber}
+          </button>
+        ))}
+      </div>
 
             {/* Discount Modal */}
             {isModalVisible && (
@@ -762,6 +817,7 @@ const GadgetManagement = ({ categoryId }) => {
                     </div>
                 </div>
             )}
+            {renderSaleConfirmModal()}
             {renderConfirmModal()}
             {renderDeleteConfirmModal()}
         </div>

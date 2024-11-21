@@ -142,7 +142,7 @@ export default function ProductPage() {
 
   const renderProduct = (product, setCategory) => (
     <div className="parent-container overflow-hidden p-2">
-       <div
+      <div
         key={product.id}
         className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105 hover:border-primary/50 dark:bg-gray-800 dark:border-gray-700"
         onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
@@ -152,16 +152,16 @@ export default function ProductPage() {
         })}
       >
         {product.discountPercentage > 0 && (
-          <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 rounded-tr-md rounded-b-md">
+          <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-1 rounded-tr-md rounded-b-md">
             Giảm {`${product.discountPercentage}%`}
           </div>
         )}
         {product.isForSale === false && (
-          <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
-            Ngừng kinh doanh
+          <div className="absolute top-0 right-0 bg-gray-400 text-white text-sm font-bold text-center py-1 px-1 rounded-tr-md rounded-b-md">
+            Ngừng bán
           </div>
         )}
-      <div className="p-2 flex-grow">
+        <div className="p-2 flex-grow">
           <img
             src={product.thumbnailUrl}
             alt={product.name}
@@ -272,7 +272,7 @@ export default function ProductPage() {
         <h2 className="text-2xl font-bold dark:text-white">{title}</h2>
         <div className="flex flex-wrap space-x-2">
           {brands[category].map((brand) => (
-            <button 
+            <button
               className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg"
               key={brand.id}
               onClick={() => {
@@ -287,7 +287,7 @@ export default function ProductPage() {
               {brand.name}
             </button>
           ))}
-          <button 
+          <button
             className="bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg"
             onClick={() => {
               navigate(`/gadgets/${title}`, {

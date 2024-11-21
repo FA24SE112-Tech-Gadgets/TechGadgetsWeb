@@ -132,13 +132,13 @@ const SellerPage = () => {
             if (error.response && error.response.data && error.response.data.reasons) {
                 const reasons = error.response.data.reasons;
                 if (reasons.length > 0) {
-                  const reasonMessage = reasons[0].message;
-                  toast.error(reasonMessage);
+                    const reasonMessage = reasons[0].message;
+                    toast.error(reasonMessage);
                 } else {
-                  toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
+                    toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
                 }
-              }
             }
+        }
     };
 
     const handleSearch = () => {
@@ -160,7 +160,18 @@ const SellerPage = () => {
         setCurrentPage(pageNumber);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+    const getPaginationRange = () => {
+        const maxVisible = 5; // Số lượng nút hiển thị
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(start + maxVisible - 1, totalPages);
 
+        // Điều chỉnh start nếu end đã chạm giới hạn
+        if (end - start + 1 < maxVisible) {
+            start = Math.max(1, end - maxVisible + 1);
+        }
+
+        return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    };
     useEffect(() => {
         fetchSellerDetails();
     }, [sellerId]);
@@ -175,12 +186,12 @@ const SellerPage = () => {
 
     if (isLoading) return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
-        <div className="h-4 w-4 bg-white rounded-full"></div>
-      </div>
-      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-        Loading...
-      </span>
+            <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+                <div className="h-4 w-4 bg-white rounded-full"></div>
+            </div>
+            <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+                Loading...
+            </span>
 
         </div>
     );
@@ -240,7 +251,7 @@ const SellerPage = () => {
                                         <p className="text-2xl font-bold text-primary/80 mb-1">
                                             {statistics.notForSale}
                                         </p>
-                                        <p className="text-sm text-gray-600">Ngừng kinh doanh</p>
+                                        <p className="text-sm text-gray-600">Ngừng bán</p>
                                     </div>
                                 </div>
                             </div>
@@ -319,8 +330,8 @@ const SellerPage = () => {
                             )}
                             {/* Not for sale badge */}
                             {!gadget.isForSale && (
-                                <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-xs font-bold text-center py-0.5 rounded">
-                                    Ngừng kinh doanh
+                                <div className="absolute top-0 right-0 bg-gray-400 text-white text-sm font-bold text-center py-1 px-1 rounded-tr-md rounded-b-md">
+                                    Ngừng bán
                                 </div>
                             )}
                             <div className="p-1.5">
@@ -348,44 +359,44 @@ const SellerPage = () => {
                                 </div>
                             </div>
                             <div className="flex items-center justify-between p-2">
-                                      {/* Add review display */}
-                                      {reviewData[gadget.id] && reviewData[gadget.id].numOfReview > 0 ? (
-                                           <div className="flex items-center text-xs text-gray-600">
-                                            <span className="flex items-center">
-                                                <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                </svg>
-                                                {reviewData[gadget.id].avgReview} ({reviewData[gadget.id].numOfReview})
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        // Placeholder to maintain spacing when no reviews exist
-                                        <div className="w-16"></div>
-                                      )}
-                                  <div className="flex items-center text-sm text-gray-500">
-                                        <span className="mr-2">Yêu thích</span>
-                                        <span
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleFavorite(gadget.id, gadget.isFavorite);
-                                            }}
-                                            className="cursor-pointer flex items-center"
-                                        >
-                                            {gadget.isFavorite ? (
-                                                <svg
-                                                    className="h-8 w-5 text-red-500"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24"
-                                                    fill="currentColor"
-                                                >
-                                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                                </svg>
-                                            ) : (
-                                                <CiHeart className="h-8 w-5 text-gray-500" />
-                                            )}
+                                {/* Add review display */}
+                                {reviewData[gadget.id] && reviewData[gadget.id].numOfReview > 0 ? (
+                                    <div className="flex items-center text-xs text-gray-600">
+                                        <span className="flex items-center">
+                                            <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                            {reviewData[gadget.id].avgReview} ({reviewData[gadget.id].numOfReview})
                                         </span>
                                     </div>
+                                ) : (
+                                    // Placeholder to maintain spacing when no reviews exist
+                                    <div className="w-16"></div>
+                                )}
+                                <div className="flex items-center text-sm text-gray-500">
+                                    <span className="mr-2">Yêu thích</span>
+                                    <span
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleFavorite(gadget.id, gadget.isFavorite);
+                                        }}
+                                        className="cursor-pointer flex items-center"
+                                    >
+                                        {gadget.isFavorite ? (
+                                            <svg
+                                                className="h-8 w-5 text-red-500"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 24 24"
+                                                fill="currentColor"
+                                            >
+                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                            </svg>
+                                        ) : (
+                                            <CiHeart className="h-8 w-5 text-gray-500" />
+                                        )}
+                                    </span>
                                 </div>
+                            </div>
                         </div>
                     ))
                 ) : (
@@ -396,23 +407,21 @@ const SellerPage = () => {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex justify-center mt-6 space-x-2">
-                    {Array.from({ length: totalPages }, (_, i) => (
-                        <button
-                            key={i + 1}
-                            onClick={() => handleChangePage(i + 1)}
-                            className={`px-4 py-2 rounded-md ${i + 1 === currentPage
-                                    ? 'bg-primary/80 text-white'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
-                            disabled={isLoading}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
-                </div>
-            )}
+            <div className="flex justify-center mt-6 space-x-2">
+                {getPaginationRange().map((pageNumber) => (
+                    <button
+                        key={pageNumber}
+                        onClick={() => handleChangePage(pageNumber)}
+                        className={`px-4 py-2 rounded-md ${pageNumber === currentPage
+                                ? 'bg-primary/80 text-white'
+                                : 'bg-gray-200 text-gray-700'
+                            }`}
+                        disabled={isLoading}
+                    >
+                        {pageNumber}
+                    </button>
+                ))}
+            </div>
 
         </div>
     );

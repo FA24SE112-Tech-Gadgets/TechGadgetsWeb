@@ -120,7 +120,7 @@ const GadgetHistory = () => {
                         </div>
                       ) : !gadget.isForSale && (
                         <div className="text-red-500 font-bold text-sm">
-                          Ngừng kinh doanh
+                          Ngừng bán
                         </div>
                       )}
                     </div>

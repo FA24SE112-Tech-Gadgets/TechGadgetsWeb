@@ -188,8 +188,8 @@ function FavoritePage() {
                                                            Sản phẩm đã bị khóa do vi phạm chính sách TechGadget
                                                         </div>
                                                     ) : !product.isForSale && (
-                                                        <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
-                                                            Ngừng kinh doanh
+                                                        <div className="absolute top-0 right-0 bg-gray-400 text-white text-sm font-bold text-center py-1 px-1 rounded-tr-md rounded-b-md">
+                                                            Ngừng bán
                                                         </div>
                                                     )}
                                                     <div className="p-2">

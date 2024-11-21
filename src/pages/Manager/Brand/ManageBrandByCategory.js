@@ -64,7 +64,17 @@ const ManageBrandByCategory = ({ categoryId }) => {
     </div>
 
   );
+  const getPaginationRange = () => {
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(start + maxVisible - 1, totalPages);
 
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
   return (
     <div className="">
       <div className="flex justify-between mb-4">
@@ -111,11 +121,11 @@ const ManageBrandByCategory = ({ categoryId }) => {
         <div className="text-center p-4 text-gray-500">Không có thương hiệu</div>
       )}
 
-      <div className="flex justify-center mt-6 space-x-2">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+<div className="flex justify-center mt-6 space-x-2">
+        {getPaginationRange().map((pageNumber) => (
           <button
             key={pageNumber}
-            onClick={() => handlePageChange(pageNumber)}
+            onClick={() => setCurrentPage(pageNumber)}
             className={`px-4 py-2 rounded-md ${
               pageNumber === currentPage
                 ? 'bg-primary/80 text-white'
