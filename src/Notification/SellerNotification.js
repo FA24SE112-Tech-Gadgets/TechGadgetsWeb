@@ -1,45 +1,26 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell, Circle, ShoppingCart, Wallet, BellRing, Clock, MessageSquare } from 'lucide-react';
-import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import { onMessageListener } from '~/ultis/firebase';
 import { useNavigate } from 'react-router-dom';
+import { useDeviceToken } from '~/context/auth/Noti';
 
-const SellerNotification = () => {
-    const [notifications, setNotifications] = useState([]);
+const Notification = () => {
     const [showDropdown, setShowDropdown] = useState(false);
-    const [isFetching, setIsFetching] = useState(false);
-    const [unreadCount, setUnreadCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
     const dropdownRef = useRef(null);
     const pageRef = useRef(currentPage);
     const navigate = useNavigate();
-    const fetchNotifications = async (page = 1) => {
-        if (isFetching || !hasMore) return;
 
-        try {
-            setIsFetching(true);
-            const response = await AxiosInterceptor.get(`/api/notifications?page=${page}&pageSize=10`);
-            const newNotifications = response.data.items;
-
-            setNotifications(prev => {
-                if (page === 1) return newNotifications;
-                return [...prev, ...newNotifications];
-            });
-
-            const unreadNotifications = page === 1
-                ? newNotifications.filter(notification => !notification.isRead).length
-                : notifications.concat(newNotifications).filter(notification => !notification.isRead).length;
-            setUnreadCount(unreadNotifications);
-
-            setHasMore(response.data.hasNextPage);
-            pageRef.current = page;
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error);
-        } finally {
-            setIsFetching(false);
-        }
-    };
+    const {
+        notifications,
+        unreadCount,
+        isFetching,
+        hasMore,
+        fetchNotifications,
+        markAsRead,
+        markAllAsRead,
+        setupMessageListener,
+        setUnreadCount
+    } = useDeviceToken();
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -53,60 +34,30 @@ const SellerNotification = () => {
     }, []);
 
     useEffect(() => {
-        fetchNotifications();
+        pageRef.current = currentPage;
+    }, [notifications]);
 
-        onMessageListener()
-            .then((payload) => {
-                console.log("Foreground notification received: ", payload);
-                const newNotification = {
-                    id: payload.notification.id,
-                    title: payload.notification.title,
-                    content: payload.notification.body,
-                    isRead: false,
-                    type: payload.notification.type,
-                    sellerOrderId: payload.notification.sellerOrderId,
-                    createdAt: new Date().toISOString(),
-                    customer: payload.notification.customer,
-                    seller: payload.notification.seller,
-                };
+    useEffect(() => {
+        const messageUnsubscribe = setupMessageListener((payload) => {
+            // Show browser notification
+            if (Notification.permission === 'granted') {
+                new Notification(payload?.notification?.title || 'New Notification', {
+                    body: payload?.notification?.body,
+                    icon: payload?.notification?.icon || '/path/to/default/icon.png'
+                });
+            }
+        });
 
-                setNotifications(prev => [newNotification, ...prev]);
-                setUnreadCount(prev => prev + 1);
-            })
-            .catch((err) => console.log("Failed to receive message: ", err));
+        return () => messageUnsubscribe && messageUnsubscribe();
     }, []);
 
     const toggleDropdown = () => {
-        // Reset unreadCount về 0 khi click vào chuông
-        setUnreadCount(0);
         setShowDropdown(!showDropdown);
     };
 
-    const markAsRead = async (notificationId) => {
-        try {
-            await AxiosInterceptor.put(`/api/notification/${notificationId}`);
-            setNotifications(prev =>
-                prev.map(notification =>
-                    notification.id === notificationId
-                        ? { ...notification, isRead: true }
-                        : notification
-                )
-            );
-        } catch (error) {
-            console.error('Failed to mark notification as read:', error);
-        }
-    };
-
-    const markAllAsRead = async () => {
-        try {
-            await AxiosInterceptor.put(`/api/notification/all`);
-            setNotifications(prev =>
-                prev.map(notification => ({ ...notification, isRead: true }))
-            );
-            setUnreadCount(0);
-        } catch (error) {
-            console.error('Failed to mark all notifications as read:', error);
-        }
+    const handleMarkAllAsRead = () => {
+        markAllAsRead();
+        setUnreadCount(0);
     };
 
     const handleScroll = useCallback((e) => {
@@ -122,7 +73,7 @@ const SellerNotification = () => {
 
     const handleNotificationClick = (notification) => {
         markAsRead(notification.id);
-        if (notification.type === 'SellerOrder' && notification.sellerOrderId) {
+        if (notification.type === 'SellerOrder' ) {
             navigate(`/order/detail-seller/${notification.sellerOrderId}`);
         } else if (notification.type === 'WalletTracking') {
             navigate('/seller/transaction-history');
@@ -130,7 +81,7 @@ const SellerNotification = () => {
     };
 
     const getNotificationIcon = (type) => {
-        const iconClass = "w-10 h-10 p-2.5";
+        const iconClass = "w-10 h-10 p-2.5"; // Chuẩn hóa kích thước icon
         switch (type) {
             case 'SellerOrder':
                 return <ShoppingCart className={`${iconClass} text-white bg-primary/75 rounded-full flex-shrink-0`} />;
@@ -160,7 +111,7 @@ const SellerNotification = () => {
                     <div className="p-4 border-b flex justify-between items-center bg-white sticky top-0 z-10">
                         <h3 className="text-xl font-bold text-gray-800">Thông báo</h3>
                         <button
-                            onClick={markAllAsRead}
+                            onClick={handleMarkAllAsRead}
                             className="text-sm text-primary/75 hover:text-secondary/85 font-medium"
                         >
                             Đánh dấu tất cả đã đọc
@@ -170,14 +121,13 @@ const SellerNotification = () => {
                     <div
                         className="overflow-y-auto flex-1 scroll-smooth"
                         onScroll={handleScroll}
-                        
                     >
                         {isFetching && currentPage === 1 ? (
                             <div className="flex justify-center p-4">
                                 <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
                             </div>
                         ) : notifications.length === 0 ? (
-                            <p className="p-4 text-center text-gray-500">Không có thông báo</p>
+                            <p className="p-4 text-center text-gray-500">No notifications</p>
                         ) : (
                             notifications.map((notification) => (
                                 <div
@@ -185,6 +135,7 @@ const SellerNotification = () => {
                                     className={`p-3 cursor-pointer hover:bg-gray-50 transition-all 
                                     ${notification.isRead ? 'bg-white' : 'bg-blue-50'}`}
                                     onClick={() => handleNotificationClick(notification)}
+                                
                                 >
                                     <div className="flex items-start space-x-3">
                                         {getNotificationIcon(notification.type)}
@@ -195,7 +146,7 @@ const SellerNotification = () => {
                                                 </p>
                                             </div>
                                             <div className="flex items-center space-x-2 mt-1">
-                                                <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                            <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                                 <p className="text-xs text-gray-500">{notification.content}</p>
                                             </div>
                                             <div className="flex items-center space-x-2 mt-1">
@@ -224,4 +175,4 @@ const SellerNotification = () => {
     );
 };
 
-export default SellerNotification;
+export default Notification;

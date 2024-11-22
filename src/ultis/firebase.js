@@ -21,6 +21,13 @@ let currentDeviceToken = null;  // Add this line at the top level
 // Request permission to send notifications and retrieve the device token
 export const requestForToken = async () => {
   try {
+    // Request notification permission first
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.log('Notification permission denied');
+      return null;
+    }
+
     const currentToken = await getToken(messaging, {
       vapidKey: "BE-r6mRU4zAHn3fE8iS_HzPf1xvtUGVzFl4PcVoKz0osGG2iffl7QBLpZ-6KeMnd5oayi93m39SNvOunTIQYPbA" // Replace with your public VAPID key from Firebase Console
     });
@@ -48,10 +55,10 @@ export const clearDeviceToken = () => {
 };
 
 // Listen for foreground messages
-export const onMessageListener = () =>
-  new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
-      console.log("Foreground message received: ", payload);
-      resolve(payload);
-    });
+export const onMessageListener = (callback) => {
+  const unsubscribe = onMessage(messaging, (payload) => {
+    console.log("Raw Firebase message:", payload);
+    callback(payload);  // Gọi callback trực tiếp, không return
   });
+  return unsubscribe;
+};

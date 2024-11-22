@@ -1,42 +1,26 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bell, Circle, ShoppingCart, Wallet, BellRing, Clock, MessageSquare, Info } from 'lucide-react';
-import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import { onMessageListener } from '~/ultis/firebase';
+import { Bell, Circle, ShoppingCart, Wallet, BellRing, Clock, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDeviceToken } from '~/context/auth/Noti';
 
 const Notification = () => {
-    const [notifications, setNotifications] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [isFetching, setIsFetching] = useState(false);
-    const [unreadCount, setUnreadCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
     const dropdownRef = useRef(null);
     const pageRef = useRef(currentPage);
     const navigate = useNavigate();
 
-    const fetchNotifications = async (page = 1) => {
-        if (isFetching || !hasMore) return;
-
-        try {
-            setIsFetching(true);
-            const response = await AxiosInterceptor.get(`/api/notifications?page=${page}&pageSize=10`);
-            const newNotifications = response.data.items;
-
-            setNotifications((prev) => (page === 1 ? newNotifications : [...prev, ...newNotifications]));
-            const unreadNotifications = page === 1
-                ? newNotifications.filter((notification) => !notification.isRead).length
-                : notifications.concat(newNotifications).filter((notification) => !notification.isRead).length;
-            setUnreadCount(unreadNotifications);
-
-            setHasMore(response.data.hasNextPage);
-            pageRef.current = page;
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error);
-        } finally {
-            setIsFetching(false);
-        }
-    };
+    const {
+        notifications,
+        unreadCount,
+        isFetching,
+        hasMore,
+        fetchNotifications,
+        markAsRead,
+        markAllAsRead,
+        setupMessageListener,
+        setUnreadCount
+    } = useDeviceToken();
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -50,55 +34,30 @@ const Notification = () => {
     }, []);
 
     useEffect(() => {
-        fetchNotifications();
+        pageRef.current = currentPage;
+    }, [notifications]);
 
-        onMessageListener()
-            .then((payload) => {
-                console.log('Foreground notification received:', payload);
-                const newNotification = {
-                    id: payload.notification.id,
-                    title: payload.notification.title,
-                    content: payload.notification.body,
-                    isRead: false,
-                    type: payload.notification.type,
-                    sellerOrderId: payload.notification.sellerOrderId,
-                    createdAt: new Date().toISOString(),
-                };
+    useEffect(() => {
+        const messageUnsubscribe = setupMessageListener((payload) => {
+            // Show browser notification
+            if (Notification.permission === 'granted') {
+                new Notification(payload?.notification?.title || 'New Notification', {
+                    body: payload?.notification?.body,
+                    icon: payload?.notification?.icon || '/path/to/default/icon.png'
+                });
+            }
+        });
 
-                setNotifications((prev) => [newNotification, ...prev]);
-                setUnreadCount((prev) => prev + 1);
-            })
-            .catch((err) => console.log('Failed to receive message:', err));
+        return () => messageUnsubscribe && messageUnsubscribe();
     }, []);
 
     const toggleDropdown = () => {
-        setUnreadCount(0);
         setShowDropdown(!showDropdown);
     };
 
-    const markAsRead = async (notificationId) => {
-        try {
-            await AxiosInterceptor.put(`/api/notification/${notificationId}`);
-            setNotifications((prev) =>
-                prev.map((notification) =>
-                    notification.id === notificationId ? { ...notification, isRead: true } : notification
-                )
-            );
-        } catch (error) {
-            console.error('Failed to mark notification as read:', error);
-        }
-    };
-
-    const markAllAsRead = async () => {
-        try {
-            await AxiosInterceptor.put(`/api/notification/all`);
-            setNotifications((prev) =>
-                prev.map((notification) => ({ ...notification, isRead: true }))
-            );
-            setUnreadCount(0);
-        } catch (error) {
-            console.error('Failed to mark all notifications as read:', error);
-        }
+    const handleMarkAllAsRead = () => {
+        markAllAsRead();
+        setUnreadCount(0);
     };
 
     const handleScroll = useCallback((e) => {
@@ -114,10 +73,14 @@ const Notification = () => {
 
     const handleNotificationClick = (notification) => {
         markAsRead(notification.id);
-        if (notification.type === 'SellerOrder' && notification.sellerOrderId) {
+        console.log(notification);
+        
+        if (notification.type === 'SellerOrder' 
+            
+        ) {
             navigate(`/order/detail/${notification.sellerOrderId}`);
-        } else if (notification.type === 'WalletTracking') {
-            navigate('/deposit-history');
+        } else if (notification.type === 'WalletTracking' ) {
+            navigate(`/deposit-history`);
         }
     };
 
@@ -152,7 +115,7 @@ const Notification = () => {
                     <div className="p-4 border-b flex justify-between items-center bg-white sticky top-0 z-10">
                         <h3 className="text-xl font-bold text-gray-800">Thông báo</h3>
                         <button
-                            onClick={markAllAsRead}
+                            onClick={handleMarkAllAsRead}
                             className="text-sm text-primary/75 hover:text-secondary/85 font-medium"
                         >
                             Đánh dấu tất cả đã đọc
@@ -176,6 +139,7 @@ const Notification = () => {
                                     className={`p-3 cursor-pointer hover:bg-gray-50 transition-all 
                                     ${notification.isRead ? 'bg-white' : 'bg-blue-50'}`}
                                     onClick={() => handleNotificationClick(notification)}
+                                
                                 >
                                     <div className="flex items-start space-x-3">
                                         {getNotificationIcon(notification.type)}
