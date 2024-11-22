@@ -24,7 +24,6 @@ const ManageGadget = ({ categoryId }) => {
   const itemsPerPage = 3; // Add this constant
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [brands, setBrands] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -47,8 +46,8 @@ const ManageGadget = ({ categoryId }) => {
       if (statusFilter !== 'all') {
         url += `&GadgetStatus=${statusFilter}`;
       }
-      if (debouncedSearch) {
-        url += `&Name=${encodeURIComponent(debouncedSearch)}`;
+      if (searchTerm) {
+        url += `&Name=${encodeURIComponent(searchTerm)}`;
       }
       if (selectedBrand) {
         url += `&Brands=${selectedBrand}`;
@@ -125,20 +124,17 @@ const ManageGadget = ({ categoryId }) => {
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
-  // Add debounce effect for search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  // Add handleSearch function
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchGadgets();
+  };
 
   // Update useEffect to include debouncedSearch
   useEffect(() => {
     setCurrentPage(1);
     fetchGadgets();
-  }, [categoryId, statusFilter, debouncedSearch, selectedBrand]);
+  }, [categoryId, statusFilter, selectedBrand]);
 
   // Add useEffect for fetching brands when categoryId changes
   useEffect(() => {
@@ -168,10 +164,18 @@ const ManageGadget = ({ categoryId }) => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch();
+              }
+            }}
             placeholder="Tìm kiếm sản phẩm..."
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary/80"
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Search 
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 cursor-pointer hover:text-primary/80" 
+            onClick={handleSearch}
+          />
         </div>
 
         <div className="flex gap-4">

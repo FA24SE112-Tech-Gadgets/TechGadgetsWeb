@@ -409,7 +409,7 @@ const AdminPage = () => {
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="Active">Hoạt động</option>
-              <option value="Inactive">Không hoạt động</option>
+              <option value="Inactive">Bị khóa</option>
               <option value="Pending">Đang chờ</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
