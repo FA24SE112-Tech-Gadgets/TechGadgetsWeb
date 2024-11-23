@@ -37,12 +37,32 @@ const AuthProvider = ({ children }) => {
 				try {
 					const res = await AxiosInterceptor.get("/api/users/current");
 
-					// const res = await axios.get(`${process.env.REACT_APP_PRO_API}/api/account`);
 					if (res.status === 200) {
 						setUser(res.data);
 						setAuthenticated(true);
 						setError(null);
-						//  navigate("/");
+
+						// Navigate based on role
+						switch (res.data.role) {
+							case "Admin":
+								navigate("/admin/dashboard");
+								break;
+							case "Manager":
+								navigate("/specification-unit");
+								break;
+							case "Seller":
+								if (res.data.seller === null) {
+									navigate("/seller-application");
+								} else {
+									navigate("/seller/Order-management");
+								}
+								break;
+							case "Customer":
+								navigate("/");
+								break;
+							default:
+								navigate("/");
+						}
 					}
 				} catch (error) {
 					setUser(null);
