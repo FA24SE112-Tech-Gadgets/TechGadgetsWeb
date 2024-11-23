@@ -11,6 +11,7 @@ export function NotiProvider({ children }) {
   const [isFetching, setIsFetching] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [hasNewNotification, setHasNewNotification] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   const requestAndUpdateToken = async () => {
     try {
@@ -136,10 +137,18 @@ console.log('newNotifications', newNotifications);
   const FETCH_COOLDOWN = 2000; // 2 giây cooldown giữa các lần fetch
   const fetchPromiseRef = useRef(null);
   const lastFetchTimeRef = useRef(0);
+  
+  const resetNotificationCount = () => {
+    setNotificationCount(0);
+  };
+
   const setupMessageListener = (onShowNotification) => {
     const messageHandler = (payload) => {
       console.log("Received message in context:", payload);
       setHasNewNotification(true);
+      
+      // Increment notification count
+      setNotificationCount(prev => prev + 1);
       
       // Add 3 second delay before fetching
       setTimeout(() => {
@@ -177,6 +186,7 @@ console.log('newNotifications', newNotifications);
         console.log('🔔 Got background notification');
         // Đánh dấu có notification mới
         setHasNewNotification(true);
+        setNotificationCount(prev => prev + 1); // Increment count for background notifications
         
         console.log('⏰ Waiting 3s before fetch...');
         setTimeout(() => {
@@ -270,7 +280,9 @@ console.log('newNotifications', newNotifications);
       addNewNotification,
       hasNewNotification,
       setHasNewNotification,
-      setupMessageListener // Thêm lại setupMessageListener vào context
+      setupMessageListener, // Thêm lại setupMessageListener vào context
+      notificationCount,
+      resetNotificationCount
     }}>
       {children}
     </NotiContext.Provider>

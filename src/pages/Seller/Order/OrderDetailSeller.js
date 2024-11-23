@@ -12,6 +12,7 @@ const OrderDetailSeller = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -56,6 +57,7 @@ const OrderDetailSeller = () => {
   };
 
   const openCancelModal = () => {
+    setShowConfirmModal(false);
     setShowCancelModal(true);
   };
 
@@ -112,6 +114,11 @@ const OrderDetailSeller = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleConfirmOrderClick = () => {
+    setShowCancelModal(false);
+    setShowConfirmModal(true);
   };
 
   if (!orderDetails) {
@@ -179,7 +186,7 @@ const OrderDetailSeller = () => {
 
                         <h3 className="font-semibold text-yellow-700 ">Đơn hàng của bạn đang chờ xử lý</h3>
                         <p className="text-sm text-gray-600">
-                            Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
+                            Ngày đ���t hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
                       
                         </p>
                     </div>
@@ -257,8 +264,8 @@ const OrderDetailSeller = () => {
       {orderDetails.status === "Pending" && (
         <div className="flex justify-end mt-4 space-x-4">
           <button
-            onClick={handleConfirmOrder}
-            className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600"
+            onClick={handleConfirmOrderClick}
+            className="bg-primary/80 text-white rounded px-4 py-2 hover:bg-primary/70"
             disabled={isLoading}
           >
             Xác nhận đơn hàng
@@ -272,35 +279,64 @@ const OrderDetailSeller = () => {
         </div>
       )}
 
-      {/* Cancel Order Modal */}
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-[90%] max-w-[400px]">
+            <h3 className="text-lg font-semibold mb-4">Xác nhận đơn hàng</h3>
+            <p className="mb-4">Bạn có chắc chắn muốn xác nhận đơn hàng này không?</p>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 border rounded hover:bg-gray-100"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  handleConfirmOrder();
+                  setShowConfirmModal(false);
+                }}
+                className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary/70"
+                disabled={isLoading}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Order Modal - Updated */}
       {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-[90%] max-w-[400px] m-4">
-            <div className="p-6 border-b dark:border-gray-700">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                Hủy đơn hàng #{orderId}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg w-[90%] max-w-[400px]">
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-semibold">
+                Xác nhận hủy đơn hàng #{orderId}
               </h2>
             </div>
             <div className="p-6">
+              <p className="mb-4">Bạn có chắc chắn muốn hủy đơn hàng này không?</p>
               <textarea
                 placeholder="Lý do hủy"
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
-                className="w-full h-24 border rounded p-2 dark:border-gray-700"
+                className="w-full h-24 border rounded p-2 mb-4"
               />
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="px-4 py-2 border rounded hover:bg-gray-100"
+                >
+                  Đóng
+                </button>
                 <button
                   onClick={handleCancelOrder}
-                  className="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600"
+                  className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary/70"
                   disabled={isLoading}
                 >
                   Xác nhận hủy
-                </button>
-                <button
-                  onClick={() => setShowCancelModal(false)}
-                  className="ml-2 text-gray-600 hover:text-gray-800"
-                >
-                  Hủy
                 </button>
               </div>
             </div>

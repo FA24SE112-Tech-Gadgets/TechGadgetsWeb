@@ -12,12 +12,13 @@ const Notification = () => {
 
     const {
         notifications,
-        unreadCount,
         isFetching,
         hasMore,
         fetchNotifications,
         markAsRead,
         markAllAsRead,
+        notificationCount,
+        resetNotificationCount,
         setupMessageListener,
         setUnreadCount
     } = useDeviceToken();
@@ -53,13 +54,12 @@ const Notification = () => {
 
     const toggleDropdown = () => {
         setShowDropdown(!showDropdown);
+        resetNotificationCount(); // Reset counter when bell is clicked
     };
-
     const handleMarkAllAsRead = () => {
         markAllAsRead();
         setUnreadCount(0);
     };
-
     const handleScroll = useCallback((e) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target;
         const threshold = 50;
@@ -103,9 +103,9 @@ const Notification = () => {
                 className="relative p-2 rounded-full hover:bg-gray-200 transition-all"
             >
                 <Bell className="w-6 h-6 text-gray-700 hover:text-indigo-900" />
-                {unreadCount > 0 && (
+                {notificationCount > 0 && (
                     <span className="absolute top-0 right-0 w-5 h-5 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                        {unreadCount > 99 ? '99+' : unreadCount}
+                        {notificationCount > 99 ? '99+' : notificationCount}
                     </span>
                 )}
             </button>
