@@ -6,6 +6,7 @@ import { useDeviceToken } from '~/context/auth/Noti';
 const Notification = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [activeTab, setActiveTab] = useState('all'); // Add this line
     const dropdownRef = useRef(null);
     const pageRef = useRef(currentPage);
     const navigate = useNavigate();
@@ -79,7 +80,6 @@ const Notification = () => {
             navigate('/seller/transaction-history');
         }
     };
-
     const getNotificationIcon = (type) => {
         const iconClass = "w-10 h-10 p-2.5"; // Chuẩn hóa kích thước icon
         switch (type) {
@@ -91,6 +91,11 @@ const Notification = () => {
                 return <BellRing className={`${iconClass} bg-gray-100 text-gray-600 rounded-full flex-shrink-0`} />;
         }
     };
+
+    // Add this function to filter notifications
+    const filteredNotifications = notifications.filter(notification =>
+        activeTab === 'all' || (activeTab === 'unread' && !notification.isRead)
+    );
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -117,7 +122,26 @@ const Notification = () => {
                             Đánh dấu tất cả đã đọc
                         </button>
                     </div>
-
+                    <div className="flex gap-2 p-2 items-center">
+                            <button
+                                className={`px-3 py-1 rounded-full text-xs font-medium transition-all
+                                    ${activeTab === 'all' 
+                                        ? 'bg-primary/75 text-white' 
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                onClick={() => setActiveTab('all')}
+                            >
+                                Tất cả 
+                            </button>
+                            <button
+                                className={`px-3 py-1 rounded-full text-xs font-medium transition-all
+                                    ${activeTab === 'unread' 
+                                        ? 'bg-primary/75 text-white' 
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                onClick={() => setActiveTab('unread')}
+                            >
+                                Chưa đọc ({notifications.filter(n => !n.isRead).length})
+                            </button>
+                        </div>
                     <div
                         className="overflow-y-auto flex-1 scroll-smooth"
                         onScroll={handleScroll}
@@ -126,16 +150,16 @@ const Notification = () => {
                             <div className="flex justify-center p-4">
                                 <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
                             </div>
-                        ) : notifications.length === 0 ? (
-                            <p className="p-4 text-center text-gray-500">No notifications</p>
+                        ) : filteredNotifications.length === 0 ? (
+                            <p className="p-4 text-center text-gray-500">Không có thông báo</p>
                         ) : (
-                            notifications.map((notification) => (
+                            filteredNotifications.map((notification) => (
                                 <div
                                     key={notification.id}
                                     className={`p-3 cursor-pointer hover:bg-gray-50 transition-all 
                                     ${notification.isRead ? 'bg-white' : 'bg-blue-50'}`}
                                     onClick={() => handleNotificationClick(notification)}
-                                
+
                                 >
                                     <div className="flex items-start space-x-3">
                                         {getNotificationIcon(notification.type)}
@@ -146,7 +170,7 @@ const Notification = () => {
                                                 </p>
                                             </div>
                                             <div className="flex items-center space-x-2 mt-1">
-                                            <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                                 <p className="text-xs text-gray-500">{notification.content}</p>
                                             </div>
                                             <div className="flex items-center space-x-2 mt-1">

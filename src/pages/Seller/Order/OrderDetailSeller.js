@@ -186,7 +186,7 @@ const OrderDetailSeller = () => {
 
                         <h3 className="font-semibold text-yellow-700 ">Đơn hàng của bạn đang chờ xử lý</h3>
                         <p className="text-sm text-gray-600">
-                            Ngày đ���t hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
+                            Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
                       
                         </p>
                     </div>
