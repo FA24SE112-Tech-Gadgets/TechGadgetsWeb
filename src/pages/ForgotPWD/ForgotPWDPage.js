@@ -29,7 +29,7 @@ function ForgotPassword() {
           : (process.env.REACT_APP_PRO_API + "/api/auth/resend"), 
         { email }
       );
-      if (response.status === 204) {
+        if (response.status >= 200 && response.status < 300) {
         toast.success('Đã gửi mã xác thực!');
         setStep(2); 
       }

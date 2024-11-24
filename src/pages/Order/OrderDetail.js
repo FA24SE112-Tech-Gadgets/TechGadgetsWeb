@@ -261,7 +261,7 @@ const OrderDetail = () => {
                         </div>
                         <div className="p-6">
                             <textarea
-                                placeholder="Lý do hủy"
+                                placeholder="Lý do hủy(Không bắt buộc)"
                                 value={cancelReason}
                                 onChange={(e) => setCancelReason(e.target.value)}
                                 className="w-full h-24 border rounded p-2 dark:border-gray-700"
