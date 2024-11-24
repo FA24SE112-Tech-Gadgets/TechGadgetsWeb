@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ShoppingCart, CheckCircle } from "lucide-react";
+import { ShoppingCart, CheckCircle, PenLine, NotebookPen, MessageSquareOff, MessageSquareMore } from "lucide-react";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 import { toast, ToastContainer } from "react-toastify";
 import ReviewSellerTable from "./ReviewSellerTable";
@@ -19,7 +19,6 @@ const ReviewSeller = () => {
       });
 
       const { items, totalCount } = response.data;
-      console.log("data seller", response.data);
 
       setOrders(items);
       setTotalPages(Math.ceil(totalCount / 10));
@@ -99,18 +98,18 @@ const ReviewSeller = () => {
             <option value="ASC">Cũ nhất</option>
           </select>
         </div>
-        <div className="flex space-x-4 mb-6 justify-end">
+        <div className="flex space-x-2 overflow-x-auto bg-primary/10 p-1 rounded-lg mb-6">
           <button
             onClick={() => handleStatusChange("NotReply")}
-            className={`px-4 py-2 rounded ${status === "NotReply" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center ${status === "NotReply" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <ShoppingCart className="inline-block mr-2" /> Chưa trả lời
+            <MessageSquareOff className="inline-block mr-2" /> Chưa trả lời
           </button>
           <button
             onClick={() => handleStatusChange("Replied")}
-            className={`px-4 py-2 rounded ${status === "Replied" ? "bg-green-500 text-white" : "bg-gray-100"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center ${status === "Replied" ?"bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <CheckCircle className="inline-block mr-2" /> Đã trả lời
+            <MessageSquareMore className="inline-block mr-2" /> Đã trả lời
           </button>
         </div>
       </div>

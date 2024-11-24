@@ -15,7 +15,7 @@ import { NotiProvider } from './context/auth/Noti';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <GoogleOAuthProvider clientId="918667179231-suhe212hae2usf0v7o8bcsdj5fd81cto.apps.googleusercontent.com">
+  <GoogleOAuthProvider clientId="487441071572-2ap1f43doe3ougaclupk9fe7qingl742.apps.googleusercontent.com">
     <BrowserRouter>
       <AuthProvider>
         <NotiProvider>

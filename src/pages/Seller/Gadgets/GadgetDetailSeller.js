@@ -2,13 +2,16 @@ import React, { useEffect, useState, useRef } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from "react-toastify";
+import { ArrowBack } from '@mui/icons-material';
+
 
 const GadgetDetailSeller = () => {
     const location = useLocation();
     const { gadgetId } = location.state || {};
     const [gadget, setGadget] = useState(null);
     const [activeTab, setActiveTab] = useState('specifications');
- 
+    const navigate = useNavigate();
+
     const imgRef = useRef(null);
 
     const fetchGadgetDetails = async () => {
@@ -49,6 +52,14 @@ const GadgetDetailSeller = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <ToastContainer />
             <div className="flex flex-col lg:flex-row gap-8">
+                <div className="relative pt-5">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="text-black cursor-pointer"
+                    >
+                        <ArrowBack />
+                    </button>
+                </div>
                 <div className="w-full">
                     <div className="flex justify-between items-center mb-4">
                         <h1 className="text-2xl font-bold">{gadget.name}</h1>

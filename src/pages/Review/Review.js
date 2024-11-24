@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ShoppingCart, CheckCircle } from "lucide-react";
+import { ShoppingCart, CheckCircle, MessageSquareOff, MessageSquareMore } from "lucide-react";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 import { toast, ToastContainer } from "react-toastify";
 import ReviewTable from "./ReviewTable";
@@ -19,7 +19,6 @@ const Review = () => {
       });
 
       const { items, totalCount } = response.data;
-      console.log("data seller", response.data);
 
       setOrders(items);
       setTotalPages(Math.ceil(totalCount / 10));
@@ -100,18 +99,18 @@ const Review = () => {
             <option value="ASC">Cũ nhất</option>
           </select>
         </div>
-        <div className="flex space-x-4 mb-6 justify-end">
+        <div className="flex space-x-2 overflow-x-auto bg-primary/10 p-1 rounded-lg mb-6">
           <button
             onClick={() => handleStatusChange("NotReview")}
-            className={`px-4 py-2 rounded ${status === "NotReview" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center ${status === "NotReview" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <ShoppingCart className="inline-block mr-2" /> Chưa đánh giá
+            <MessageSquareOff className="inline-block mr-2" /> Chưa trả lời
           </button>
           <button
             onClick={() => handleStatusChange("Reviewed")}
-            className={`px-4 py-2 rounded ${status === "Reviewed" ? "bg-green-500 text-white" : "bg-gray-100"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center ${status === "Reviewed" ?"bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <CheckCircle className="inline-block mr-2" /> Đã đánh giá
+            <MessageSquareMore className="inline-block mr-2" /> Đã trả lời
           </button>
         </div>
       </div>

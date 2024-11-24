@@ -14,6 +14,8 @@ import {
     FileTextOutlined,
     TagsOutlined
 } from '@ant-design/icons';
+import { ArrowBack } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const labels = {
     companyName: { text: 'Tên Công Ty', icon: <BankOutlined /> },
@@ -111,11 +113,19 @@ const SellerProfilePage = () => {
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
-
+    const navigate = useNavigate();
     return (
         <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-primary/40 to-secondary/40">
             <ToastContainer />
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">              
+            <div>
+                <button
+                   onClick={() => navigate(-1)}
+                    className="text-black  cursor-pointer"
+                >
+                    <ArrowBack /> 
+                </button>
+            </div> 
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-2">
                         <h1 className="text-2xl font-bold">Thông tin cá nhân</h1>

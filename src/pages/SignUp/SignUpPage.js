@@ -42,7 +42,6 @@ function SignUp() {
 
   const googleLoginHandler = useGoogleLogin({
     onSuccess: (response) => {
-      console.log('Google login successful:', response.access_token);
       googleLogin(response.access_token);
     },
     onError: (error) => {

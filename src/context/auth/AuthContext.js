@@ -37,12 +37,32 @@ const AuthProvider = ({ children }) => {
 				try {
 					const res = await AxiosInterceptor.get("/api/users/current");
 
-					// const res = await axios.get(`${process.env.REACT_APP_PRO_API}/api/account`);
 					if (res.status === 200) {
 						setUser(res.data);
 						setAuthenticated(true);
 						setError(null);
-						//  navigate("/");
+
+						// Navigate based on role
+						switch (res.data.role) {
+							case "Admin":
+								navigate("/admin/dashboard");
+								break;
+							case "Manager":
+								navigate("/manage-dashboard");
+								break;
+							case "Seller":
+								if (res.data.seller === null) {
+									navigate("/seller-application");
+								} else {
+									navigate("/seller/dashboard");
+								}
+								break;
+							case "Customer":
+								navigate("/");
+								break;
+							default:
+								navigate("/");
+						}
 					}
 				} catch (error) {
 					setUser(null);
@@ -64,14 +84,12 @@ const AuthProvider = ({ children }) => {
 		setIsLoading(true);
 		let res;
 		try {
-			console.log("Sending login request...");
 			res = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/login") : (process.env.REACT_APP_PRO_API + "/api/auth/login"), {
 				email: userAccount.email,
 				password: userAccount.password,
 				deviceToken: userAccount.deviceToken
 			}
 			);
-			console.log("Login response received:", res);
 		} catch (error) { //res.status !== 200
 			setAuthenticated(false);
 			setError(error?.response?.data?.reasons[0]);
@@ -84,7 +102,6 @@ const AuthProvider = ({ children }) => {
 			const decode = jwtDecode(res.data.token);
 			const userInfo = JSON.parse(decode.UserInfo || '{}');
 			const clientRole = userInfo.Role; // Lấy vai trò từ UserInfo
-			console.log("role", clientRole);
 
 			if (clientRole === "Customer" || clientRole === "Seller" || clientRole === "Admin" || clientRole === "Manager") {
 				localStorage.setItem('token', res.data.token);
@@ -99,7 +116,7 @@ const AuthProvider = ({ children }) => {
 						}
 					}
 					);
-					console.log("data", resData);
+					
 				} catch (error) {
 					await logout();
 					setIsLoading(false);
@@ -115,17 +132,15 @@ const AuthProvider = ({ children }) => {
 						setUser(resData.data);
 						setAuthenticated(true);
 						setError(null);
-						console.log("Login successful, navigating to home...", resData);
 						if (clientRole === "Admin") {
-							navigate("/admin/manage-users");
+							navigate("/admin/dashboard");
 						} else if (clientRole === "Manager") {
-							navigate("/specification-unit");
+							navigate("/manage-dashboard");
 						} else if (clientRole === "Seller") {
 							if (resData.data.seller === null) {
-								console.log('day ne', resData.data.seller);
 								navigate("/seller-application");
 							} else {
-								navigate("/seller/Order-management");
+								navigate("/seller/dashboard");
 							}
 						} else {
 							navigate("/");
@@ -158,7 +173,6 @@ const AuthProvider = ({ children }) => {
 		setIsLoading(true);
 		let res;
 		try {
-			console.log("Sending Google login request...");
 			res = await axios.post(
 				process.env.NODE_ENV === "development"
 					? `${process.env.REACT_APP_DEV_API}/api/auth/google/${googleToken}`
@@ -167,7 +181,6 @@ const AuthProvider = ({ children }) => {
 					deviceToken: deviceToken
 				}
 			);
-			console.log("Google login response received:", res);
 
 			if (res.status === 200) {
 				const { token, refreshToken } = res.data;
@@ -264,7 +277,6 @@ const AuthProvider = ({ children }) => {
 				deviceToken: userDetails.deviceToken,
 			}
 			);
-			console.log("Register response received:", registerRes);
 
 			if (registerRes.status === 204) {
 				// Redirect to verify page
@@ -287,12 +299,10 @@ const AuthProvider = ({ children }) => {
 		setIsLoading(true);
 		let verifyRes;
 		try {
-			console.log("Sending request...");
 			verifyRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/verify") : (process.env.REACT_APP_PRO_API + "/api/auth/verify"), {
 				code: verificationData.code,
 				email: verificationData.email,
 			});
-			console.log("Verify response received:", verifyRes);
 
 			if (verifyRes.status === 200) {
 				const { token, refreshToken } = verifyRes.data;
@@ -303,8 +313,6 @@ const AuthProvider = ({ children }) => {
 				const decode = jwtDecode(token);
 				const userInfo = JSON.parse(decode.UserInfo || '{}');
 				const clientRole = userInfo.Role; // Lấy vai trò từ UserInfo
-				console.log("user info", decode);
-				console.log("Role", clientRole);
 
 				if (clientRole === "Seller") {
 					let resData;
@@ -319,7 +327,6 @@ const AuthProvider = ({ children }) => {
 						if (resData.status === 200) {
 							// Kiểm tra seller có null hay không
 							if (resData.data.seller === null) {
-								console.log('Seller is null, navigating to seller application...');
 								navigate("/seller-application"); // Điều hướng đến trang đăng ký seller
 							} else {
 								setUser(resData.data); // Lưu thông tin người dùng
@@ -400,12 +407,10 @@ const AuthProvider = ({ children }) => {
 		setIsLoading(true);
 		let resendRes;
 		try {
-			console.log("Sending resend request...");
 			resendRes = await axios.post(process.env.NODE_ENV === "development" ? (process.env.REACT_APP_DEV_API + "/api/auth/resend") : (process.env.REACT_APP_PRO_API + "/api/auth/resend"), {
 				email: email,
 			}
 			);
-			console.log("Resend response received:", resendRes);
 
 			if (resendRes.status === 204) {
 				toast.success("Gửi mã thành công, vui nhập mã")

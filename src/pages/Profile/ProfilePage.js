@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FaPencilAlt, FaSave, FaKey } from 'react-icons/fa';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import ChangePassword from './ChangePassword'; 
+import ChangePassword from './ChangePassword';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DefaultAvatar from '~/assets/R.png';
+import { ArrowBack } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const labels = {
   name: 'Tên',
@@ -19,12 +21,12 @@ const labels = {
 
 const formatDateToDisplay = (dateString) => {
   if (!dateString) {
-    return ''; 
+    return '';
   }
 
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
-    return ''; 
+    return '';
   }
 
   const day = String(date.getDate()).padStart(2, '0');
@@ -75,7 +77,6 @@ const ProfilePage = () => {
       try {
         const response = await AxiosInterceptor.get('/api/users/current');
         const userData = response.data.customer;
-        console.log(response.data);
 
         setProfile({
           name: userData.fullName,
@@ -104,7 +105,7 @@ const ProfilePage = () => {
     const file = e.target.files[0];
     if (file) {
       setProfile({ ...profile, avatar: file });
-      setPreviewImage(file); 
+      setPreviewImage(file);
     }
   };
 
@@ -152,11 +153,19 @@ const ProfilePage = () => {
   // Mở và đóng modal
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-
+  const navigate = useNavigate()
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-primary/40 to-secondary/40">
       <ToastContainer />
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
+        <div>
+          <button
+            onClick={() => navigate('/')}
+            className="text-black  cursor-pointer"
+          >
+            <ArrowBack />
+          </button>
+        </div>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-2">
             <h1 className="text-2xl font-bold">Thông tin cá nhân</h1>

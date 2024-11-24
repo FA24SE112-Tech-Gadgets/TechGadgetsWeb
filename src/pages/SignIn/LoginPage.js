@@ -57,9 +57,7 @@ function LogIn() {
 
   const googleLoginHandler = useGoogleLogin({
     onSuccess: (response) => {
-      console.log('Google login successful:', response.access_token);
       googleLogin(response.access_token, deviceToken);
-      console.log("device token", deviceToken);
       
     },
     onError: (error) => {

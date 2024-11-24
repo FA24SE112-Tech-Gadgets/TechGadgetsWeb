@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
-import { Eye, Percent, Plus, X, Box, ShoppingBag, Pause, Loader } from 'lucide-react';
+import { Eye, Percent, Plus, X, Box, ShoppingBag, Pause, Loader, Search } from 'lucide-react';
 import slugify from '~/ultis/config';
 
 const formatDate = (dateString) => {
@@ -23,6 +23,21 @@ const ManageGadget = ({ categoryId }) => {
   const [currentPage, setCurrentPage] = useState(1); // Changed to state
   const itemsPerPage = 3; // Add this constant
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [brands, setBrands] = useState([]);
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [gadgetToToggle, setGadgetToToggle] = useState(null);
+
+  const fetchBrands = async () => {
+    try {
+      const response = await AxiosInterceptor.get(`/api/brands/categories/${categoryId}?Page=1&PageSize=100`);
+      setBrands(response.data.items);
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+      toast.error("Failed to fetch brands");
+    }
+  };
 
   const fetchGadgets = async () => {
     try {
@@ -30,6 +45,12 @@ const ManageGadget = ({ categoryId }) => {
       let url = `/api/gadgets/category/${categoryId}/managers?Page=1&PageSize=200`;
       if (statusFilter !== 'all') {
         url += `&GadgetStatus=${statusFilter}`;
+      }
+      if (searchTerm) {
+        url += `&Name=${encodeURIComponent(searchTerm)}`;
+      }
+      if (selectedBrand) {
+        url += `&Brands=${selectedBrand}`;
       }
       const response = await AxiosInterceptor.get(url);
       setGadgets(response.data.items);
@@ -41,31 +62,40 @@ const ManageGadget = ({ categoryId }) => {
     }
   };
 
-  const handleStatusToggle = async (gadgetId, currentStatus) => {
-    setLoadingStates(prev => ({ ...prev, [gadgetId]: true }));
+  const handleStatusToggleClick = (gadget) => {
+    setGadgetToToggle(gadget);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmStatusToggle = async () => {
+    if (!gadgetToToggle) return;
+    
+    setLoadingStates(prev => ({ ...prev, [gadgetToToggle.id]: true }));
     try {
-      const endpoint = currentStatus === "Active" 
-        ? `/api/gadgets/${gadgetId}/deactivate`
-        : `/api/gadgets/${gadgetId}/activate`;
+      const endpoint = gadgetToToggle.gadgetStatus === "Active" 
+        ? `/api/gadgets/${gadgetToToggle.id}/deactivate`
+        : `/api/gadgets/${gadgetToToggle.id}/activate`;
       
       await AxiosInterceptor.put(endpoint);
-      
+
       setGadgets(prev => prev.map(gadget => {
-        if (gadget.id === gadgetId) {
+        if (gadget.id === gadgetToToggle.id) {
           return {
             ...gadget,
-            gadgetStatus: currentStatus === "Active" ? "Inactive" : "Active"
+            gadgetStatus: gadgetToToggle.gadgetStatus === "Active" ? "Inactive" : "Active"
           };
         }
         return gadget;
       }));
       
-      // toast.success("Cập nhật trạng thái thành công");
+      toast.success("Cập nhật trạng thái thành công");
     } catch (error) {
       console.error("Error toggling status:", error);
       toast.error("Không thể cập nhật trạng thái");
     } finally {
-      setLoadingStates(prev => ({ ...prev, [gadgetId]: false }));
+      setLoadingStates(prev => ({ ...prev, [gadgetToToggle.id]: false }));
+      setShowConfirmModal(false);
+      setGadgetToToggle(null);
     }
   };
 
@@ -94,11 +124,23 @@ const ManageGadget = ({ categoryId }) => {
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
-  // Update useEffect to reset page when filter changes
+  // Add handleSearch function
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchGadgets();
+  };
+
+  // Update useEffect to include debouncedSearch
   useEffect(() => {
     setCurrentPage(1);
     fetchGadgets();
-  }, [categoryId, statusFilter]);
+  }, [categoryId, statusFilter, selectedBrand]);
+
+  // Add useEffect for fetching brands when categoryId changes
+  useEffect(() => {
+    fetchBrands();
+    setSelectedBrand(''); // Reset selected brand when category changes
+  }, [categoryId]);
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-screen">
@@ -114,17 +156,54 @@ const ManageGadget = ({ categoryId }) => {
   return (
     <div className="">
       <ToastContainer position="top-right" autoClose={3000} />
-      
-      <div className="flex justify-end mb-4">
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded focus:outline-none focus:border-blue-500"
-        >
-          <option value="all">Tất cả </option>
-          <option value="Active">Đang hoạt động</option>
-          <option value="Inactive">Không hoạt động</option>
-        </select>
+
+      <div className="flex justify-between mb-4">
+        {/* Add search input */}
+        <div className="relative w-64">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch();
+              }
+            }}
+            placeholder="Tìm kiếm sản phẩm..."
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary/80"
+          />
+          <Search 
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 cursor-pointer hover:text-primary/80" 
+            onClick={handleSearch}
+          />
+        </div>
+
+        <div className="flex gap-4">
+          {/* Brand filter */}
+          <select
+            value={selectedBrand}
+            onChange={(e) => setSelectedBrand(e.target.value)}
+            className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded focus:outline-none focus:border-primary/80"
+          >
+            <option value="">Tất cả thương hiệu</option>
+            {brands.map((brand) => (
+              <option key={brand.id} value={brand.id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Status filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded focus:outline-none focus:border-primary/80"
+          >
+            <option value="all">Tất cả trạng thái </option>
+            <option value="Active">Đang hoạt động</option>
+            <option value="Inactive">Không hoạt động</option>
+          </select>
+        </div>
       </div>
 
       <table className="min-w-full bg-white rounded-md shadow-lg">
@@ -156,7 +235,22 @@ const ManageGadget = ({ categoryId }) => {
               <td className="p-4">
                 {gadget.name.length > 20 ? `${gadget.name.slice(0, 20)}...` : gadget.name}
               </td>
-              <td className="p-4">{`${gadget.price.toLocaleString()}₫`}</td>
+              <td className="p-4">
+                {gadget.discountPercentage > 0 ? (
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                      {`${gadget.discountPrice.toLocaleString()}₫`}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 line-through">
+                      {`${gadget.price.toLocaleString()}₫`}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-gray-900 dark:text-white">
+                    {`${gadget.price.toLocaleString()}₫`}
+                  </span>
+                )}
+              </td>
               <td className="p-4">
                 {gadget.discountPercentage > 0 ? (
                   <>
@@ -181,7 +275,7 @@ const ManageGadget = ({ categoryId }) => {
                         type="checkbox"
                         className="sr-only peer"
                         checked={gadget.gadgetStatus === "Active"}
-                        onChange={() => handleStatusToggle(gadget.id, gadget.gadgetStatus)}
+                        onChange={() => handleStatusToggleClick(gadget)}
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
@@ -189,13 +283,13 @@ const ManageGadget = ({ categoryId }) => {
                 </div>
               </td>
               <td className="p-4">
-                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${gadget.isForSale ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}>
+                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${gadget.isForSale ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
                   {gadget.isForSale ? "Đang bán" : "Ngừng bán"}
                 </span>
               </td>
               <td className="p-4">
                 <button
-                   onClick={() => navigate(`/gadget/detail-manager/${slugify(gadget.name)}`, {
+                  onClick={() => navigate(`/gadget/detail-manager/${slugify(gadget.name)}`, {
                     state: {
                       gadgetId: gadget.id,
                     }
@@ -219,17 +313,43 @@ const ManageGadget = ({ categoryId }) => {
           <button
             key={pageNumber}
             onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${
-              pageNumber === currentPage
+            className={`px-4 py-2 rounded-md ${pageNumber === currentPage
                 ? 'bg-primary/80 text-white'
                 : 'bg-gray-200 text-gray-700'
-            }`}
+              }`}
             disabled={isLoading}
           >
             {pageNumber}
           </button>
         ))}
       </div>
+
+      {showConfirmModal && gadgetToToggle && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Xác nhận thay đổi trạng thái
+            </h3>
+            <p className="text-gray-500 mb-6">
+              Bạn có chắc chắn muốn {gadgetToToggle.gadgetStatus === "Active" ? "khóa" : "mở khóa"} sản phẩm này?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors duration-200"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmStatusToggle}
+                className="px-4 py-2 bg-primary/80 hover:bg-primary text-white rounded-md transition-colors duration-200"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

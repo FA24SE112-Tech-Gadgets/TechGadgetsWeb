@@ -19,7 +19,6 @@ const SellerHeader = () => {
   const [showWalletAmount, setShowWalletAmount] = useState(false);
   const { deleteDeviceToken } = useDeviceToken();
   const handleLogout = async () => {
-    console.log("Logout clicked");
     await deleteDeviceToken(); 
     logout();
   };
@@ -31,7 +30,6 @@ const SellerHeader = () => {
     try {
       const response = await AxiosInterceptor.get('/api/users/current');
       setWalletAmount(response.data.wallet.amount);
-      console.log("wallet seller", response.data.wallet.amount);
 
     } catch (error) {
       console.error('Error fetching wallet amount:', error);
@@ -85,7 +83,9 @@ const SellerHeader = () => {
   return (
     <Header style={{ background: '#fff', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e8e8e8' }}>
       {/* Logo Section */}
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div 
+        onClick={() => navigate('/seller/Order-management')}
+        style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
         <div style={{ marginRight: '10px' }}>
           <img src={icon} alt="Logo" style={{ height: '40px', width: '40px', borderRadius: '50%' }} />
         </div>

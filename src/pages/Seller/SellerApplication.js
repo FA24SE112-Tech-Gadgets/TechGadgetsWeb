@@ -52,7 +52,6 @@ const SellerApplication = () => {
       }
     });
 
-    console.log('Form Data:', Array.from(formData.entries()));
 
     try {
       const baseUrl = process.env.NODE_ENV === "development"
@@ -65,7 +64,6 @@ const SellerApplication = () => {
         },
       });
 
-      console.log('Response:', response.data);
 
       if (response.status >= 200 && response.status < 300) {
         toast.success('Đơn Đăng Ký đã được gửi thành công!');
