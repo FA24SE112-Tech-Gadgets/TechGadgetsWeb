@@ -130,7 +130,6 @@ const CartPage = () => {
             try {
                 const response = await AxiosInterceptor.get('/api/users/current');
                 setUser(response.data.customer);
-                console.log("data nè", response.data.customer);
 
             } catch (error) {
                 console.error("Error fetching user data:", error);
@@ -299,17 +298,24 @@ const CartPage = () => {
     };
 
     const handleSelectAll = () => {
-        const allSelected = Object.keys(selectedItems).length === sellers.length &&
-            sellers.every(seller => selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length);
+        const validItemsBySeller = {};
+        sellers.forEach(seller => {
+            const validItems = (cartItemsBySeller[seller.id] || [])
+                .filter(item => item.gadget.status !== "Inactive" && item.gadget.isForSale !== false)
+                .map(item => item.gadget.id);
+            if (validItems.length > 0) {
+                validItemsBySeller[seller.id] = validItems;
+            }
+        });
+
+        const allSelected = Object.keys(selectedItems).length === Object.keys(validItemsBySeller).length &&
+            Object.keys(validItemsBySeller).every(sellerId => 
+                selectedItems[sellerId]?.length === validItemsBySeller[sellerId].length);
 
         if (allSelected) {
             setSelectedItems({});
         } else {
-            const newSelectedItems = {};
-            sellers.forEach(seller => {
-                newSelectedItems[seller.id] = cartItemsBySeller[seller.id].map(item => item.gadget.id);
-            });
-            setSelectedItems(newSelectedItems);
+            setSelectedItems(validItemsBySeller);
         }
     };
 
@@ -491,7 +497,7 @@ const CartPage = () => {
                                                             </div>
                                                         ) : item.gadget.isForSale === false && (
                                                             <div className="text-red-500">
-                                                                Ngừng kinh doanh
+                                                                Ngừng bán
                                                             </div>
                                                         )}
                                                     </div>

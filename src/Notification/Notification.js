@@ -1,42 +1,28 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bell, Circle, ShoppingCart, Wallet, BellRing, Clock, MessageSquare, Info } from 'lucide-react';
-import AxiosInterceptor from '~/components/api/AxiosInterceptor';
-import { onMessageListener } from '~/ultis/firebase';
+import { Bell, Circle, ShoppingCart, Wallet, BellRing, Clock, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDeviceToken } from '~/context/auth/Noti';
 
 const Notification = () => {
-    const [notifications, setNotifications] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [isFetching, setIsFetching] = useState(false);
-    const [unreadCount, setUnreadCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
+    const [activeTab, setActiveTab] = useState('all'); // Add this line
     const dropdownRef = useRef(null);
     const pageRef = useRef(currentPage);
     const navigate = useNavigate();
 
-    const fetchNotifications = async (page = 1) => {
-        if (isFetching || !hasMore) return;
-
-        try {
-            setIsFetching(true);
-            const response = await AxiosInterceptor.get(`/api/notifications?page=${page}&pageSize=10`);
-            const newNotifications = response.data.items;
-
-            setNotifications((prev) => (page === 1 ? newNotifications : [...prev, ...newNotifications]));
-            const unreadNotifications = page === 1
-                ? newNotifications.filter((notification) => !notification.isRead).length
-                : notifications.concat(newNotifications).filter((notification) => !notification.isRead).length;
-            setUnreadCount(unreadNotifications);
-
-            setHasMore(response.data.hasNextPage);
-            pageRef.current = page;
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error);
-        } finally {
-            setIsFetching(false);
-        }
-    };
+    const {
+        notifications,
+        isFetching,
+        hasMore,
+        fetchNotifications,
+        markAsRead,
+        markAllAsRead,
+        notificationCount,
+        resetNotificationCount,
+        setupMessageListener,
+        setUnreadCount
+    } = useDeviceToken();
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -50,57 +36,31 @@ const Notification = () => {
     }, []);
 
     useEffect(() => {
-        fetchNotifications();
+        pageRef.current = currentPage;
+    }, [notifications]);
 
-        onMessageListener()
-            .then((payload) => {
-                console.log('Foreground notification received:', payload);
-                const newNotification = {
-                    id: payload.notification.id,
-                    title: payload.notification.title,
-                    content: payload.notification.body,
-                    isRead: false,
-                    type: payload.notification.type,
-                    sellerOrderId: payload.notification.sellerOrderId,
-                    createdAt: new Date().toISOString(),
-                };
+    useEffect(() => {
+        const messageUnsubscribe = setupMessageListener((payload) => {
+            // Show browser notification
+            if (Notification.permission === 'granted') {
+                new Notification(payload?.notification?.title || 'New Notification', {
+                    body: payload?.notification?.body,
+                    icon: payload?.notification?.icon || '/path/to/default/icon.png'
+                });
+            }
+        });
 
-                setNotifications((prev) => [newNotification, ...prev]);
-                setUnreadCount((prev) => prev + 1);
-            })
-            .catch((err) => console.log('Failed to receive message:', err));
+        return () => messageUnsubscribe && messageUnsubscribe();
     }, []);
 
     const toggleDropdown = () => {
-        setUnreadCount(0);
         setShowDropdown(!showDropdown);
+        resetNotificationCount(); // Reset counter when bell is clicked
     };
-
-    const markAsRead = async (notificationId) => {
-        try {
-            await AxiosInterceptor.put(`/api/notification/${notificationId}`);
-            setNotifications((prev) =>
-                prev.map((notification) =>
-                    notification.id === notificationId ? { ...notification, isRead: true } : notification
-                )
-            );
-        } catch (error) {
-            console.error('Failed to mark notification as read:', error);
-        }
+    const handleMarkAllAsRead = () => {
+        markAllAsRead();
+        setUnreadCount(0);
     };
-
-    const markAllAsRead = async () => {
-        try {
-            await AxiosInterceptor.put(`/api/notification/all`);
-            setNotifications((prev) =>
-                prev.map((notification) => ({ ...notification, isRead: true }))
-            );
-            setUnreadCount(0);
-        } catch (error) {
-            console.error('Failed to mark all notifications as read:', error);
-        }
-    };
-
     const handleScroll = useCallback((e) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target;
         const threshold = 50;
@@ -114,10 +74,13 @@ const Notification = () => {
 
     const handleNotificationClick = (notification) => {
         markAsRead(notification.id);
-        if (notification.type === 'SellerOrder' && notification.sellerOrderId) {
+
+        if (notification.type === 'SellerOrder'
+
+        ) {
             navigate(`/order/detail/${notification.sellerOrderId}`);
         } else if (notification.type === 'WalletTracking') {
-            navigate('/deposit-history');
+            navigate(`/deposit-history`);
         }
     };
 
@@ -133,6 +96,11 @@ const Notification = () => {
         }
     };
 
+    // Add this function to filter notifications
+    const filteredNotifications = notifications.filter(notification =>
+        activeTab === 'all' || (activeTab === 'unread' && !notification.isRead)
+    );
+
     return (
         <div className="relative" ref={dropdownRef}>
             <button
@@ -140,9 +108,9 @@ const Notification = () => {
                 className="relative p-2 rounded-full hover:bg-gray-200 transition-all"
             >
                 <Bell className="w-6 h-6 text-gray-700 hover:text-indigo-900" />
-                {unreadCount > 0 && (
+                {notificationCount > 0 && (
                     <span className="absolute top-0 right-0 w-5 h-5 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                        {unreadCount > 99 ? '99+' : unreadCount}
+                        {notificationCount > 99 ? '99+' : notificationCount}
                     </span>
                 )}
             </button>
@@ -152,13 +120,32 @@ const Notification = () => {
                     <div className="p-4 border-b flex justify-between items-center bg-white sticky top-0 z-10">
                         <h3 className="text-xl font-bold text-gray-800">Thông báo</h3>
                         <button
-                            onClick={markAllAsRead}
+                            onClick={handleMarkAllAsRead}
                             className="text-sm text-primary/75 hover:text-secondary/85 font-medium"
                         >
                             Đánh dấu tất cả đã đọc
                         </button>
                     </div>
-
+                    <div className="flex gap-2 p-2 items-center">
+                            <button
+                                className={`px-3 py-1 rounded-full text-xs font-medium transition-all
+                                    ${activeTab === 'all' 
+                                        ? 'bg-primary/75 text-white' 
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                onClick={() => setActiveTab('all')}
+                            >
+                                Tất cả 
+                            </button>
+                            <button
+                                className={`px-3 py-1 rounded-full text-xs font-medium transition-all
+                                    ${activeTab === 'unread' 
+                                        ? 'bg-primary/75 text-white' 
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                onClick={() => setActiveTab('unread')}
+                            >
+                                Chưa đọc ({notifications.filter(n => !n.isRead).length})
+                            </button>
+                        </div>
                     <div
                         className="overflow-y-auto flex-1 scroll-smooth"
                         onScroll={handleScroll}
@@ -167,15 +154,16 @@ const Notification = () => {
                             <div className="flex justify-center p-4">
                                 <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
                             </div>
-                        ) : notifications.length === 0 ? (
-                            <p className="p-4 text-center text-gray-500">No notifications</p>
+                        ) : filteredNotifications.length === 0 ? (
+                            <p className="p-4 text-center text-gray-500">Không có thông báo</p>
                         ) : (
-                            notifications.map((notification) => (
+                            filteredNotifications.map((notification) => (
                                 <div
                                     key={notification.id}
                                     className={`p-3 cursor-pointer hover:bg-gray-50 transition-all 
                                     ${notification.isRead ? 'bg-white' : 'bg-blue-50'}`}
                                     onClick={() => handleNotificationClick(notification)}
+
                                 >
                                     <div className="flex items-start space-x-3">
                                         {getNotificationIcon(notification.type)}
@@ -186,7 +174,7 @@ const Notification = () => {
                                                 </p>
                                             </div>
                                             <div className="flex items-center space-x-2 mt-1">
-                                            <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                <MessageSquare className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                                 <p className="text-xs text-gray-500">{notification.content}</p>
                                             </div>
                                             <div className="flex items-center space-x-2 mt-1">

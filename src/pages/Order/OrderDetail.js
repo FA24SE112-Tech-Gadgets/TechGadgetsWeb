@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
+import slugify from "~/ultis/config";
 
 const OrderDetail = () => {
     const { orderId } = useParams();
@@ -126,8 +127,8 @@ const OrderDetail = () => {
 
                         <h3 className="font-semibold text-red-700 ">Đơn hàng của bạn đã bị hủy</h3>
                         <p className="text-sm text-gray-600">
-                        Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
-                           
+                            Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
+
                         </p>
 
                     </div>
@@ -141,8 +142,8 @@ const OrderDetail = () => {
                     <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-green-700 ">Đơn hàng của bạn đã được giao thành công</h3>
                         <p className="text-sm text-gray-600">
-                        Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
-                   
+                            Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
+
                         </p>
                     </div>
                 </div>
@@ -155,7 +156,7 @@ const OrderDetail = () => {
                         <h3 className="font-semibold text-yellow-700 ">Đơn hàng của bạn đang chờ xử lý</h3>
                         <p className="text-sm text-gray-600">
                             Ngày đặt hàng: {formatDate(orderDetails.sellerOrderCreatedAt)}{" "}
-                     
+
                         </p>
                     </div>
                 </div>
@@ -207,7 +208,13 @@ const OrderDetail = () => {
                         </thead>
                         <tbody>
                             {orderItems.map((item) => (
-                                <tr key={item.sellerOrderItemId} className="hover:bg-gray-50">
+                                <tr key={item.sellerOrderItemId}
+                                    onClick={() => navigate(`/gadget/detail/${slugify(item.name)}`, {
+                                        state: {
+                                            productId: item.gadgetId,
+                                        }
+                                    })}
+                                    className="hover:bg-gray-50">
                                     <td className="py-2 px-4 border-b">
                                         <div className="flex items-center space-x-4">
                                             <img
@@ -215,7 +222,8 @@ const OrderDetail = () => {
                                                 alt={item.name}
                                                 className="w-24 h-24 object-contain rounded"
                                             />
-                                            <div className="flex-grow">
+                                            <div
+                                                className="flex-grow">
                                                 <p className="font-semibold">{item.name}</p>
                                             </div>
                                         </div>

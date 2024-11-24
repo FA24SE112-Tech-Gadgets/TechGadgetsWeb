@@ -102,7 +102,6 @@ const OrderConfirmation = ({ product, quantity, onCancel }) => {
             </div>
         );
     }
-console.log('data nè:',product);
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
@@ -208,11 +207,9 @@ const DetailGadgetPage = () => {
         const apiClient = isAuthenticated ? AxiosInterceptor : axios;
         const fetchProduct = async () => {
             try {
-                console.log("Fetching product with ID:", productId);
                 const response = await apiClient(`${apiBase}api/gadgets/${productId}`);
-                console.log("API Response:", response.data);
                 setProduct(response.data);
-                setPrice(response.price);
+                setPrice(response.price); 
             } catch (error) {
                 console.error("Error fetching product details:", error);
                 setError("Failed to fetch product details.");
@@ -223,7 +220,6 @@ const DetailGadgetPage = () => {
             try {
                 const response = await AxiosInterceptor.get(`/api/reviews/gadget/${productId}`);
                 setReviews(response.data.items.slice(0, 2)); // Show only the first 2 reviews
-                console.log("Reviews:", response.data.items);
 
             } catch (error) {
                 toast.error('Failed to fetch reviews');
@@ -270,15 +266,12 @@ const DetailGadgetPage = () => {
 
     const handleAddToCart = async () => {
         const totalPrice = price * quantity;
-        console.log("giá", price);
-        console.log("số lượng", quantity)
 
         try {
             const response = await AxiosInterceptor.post("/api/cart", {
                 gadgetId: productId,
                 quantity,
             });
-            console.log("Product added to cart", response);
             toast.success("Thêm sản phẩm thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -600,7 +593,7 @@ const DetailGadgetPage = () => {
                         ) : product.isForSale === false && (
                             <div className="relative">
                                 <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-lg">
-                                    Ngừng kinh doanh
+                                    Ngừng bán
                                 </div>
                             </div>
                         )}

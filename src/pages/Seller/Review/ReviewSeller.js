@@ -19,7 +19,6 @@ const ReviewSeller = () => {
       });
 
       const { items, totalCount } = response.data;
-      console.log("data seller", response.data);
 
       setOrders(items);
       setTotalPages(Math.ceil(totalCount / 10));

@@ -19,7 +19,6 @@ const SellerHeader = () => {
   const [showWalletAmount, setShowWalletAmount] = useState(false);
   const { deleteDeviceToken } = useDeviceToken();
   const handleLogout = async () => {
-    console.log("Logout clicked");
     await deleteDeviceToken(); 
     logout();
   };
@@ -31,7 +30,6 @@ const SellerHeader = () => {
     try {
       const response = await AxiosInterceptor.get('/api/users/current');
       setWalletAmount(response.data.wallet.amount);
-      console.log("wallet seller", response.data.wallet.amount);
 
     } catch (error) {
       console.error('Error fetching wallet amount:', error);

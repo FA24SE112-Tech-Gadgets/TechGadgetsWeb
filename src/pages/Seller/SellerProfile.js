@@ -120,7 +120,7 @@ const SellerProfilePage = () => {
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">              
             <div>
                 <button
-                   onClick={() => navigate('/seller/Order-management')}
+                   onClick={() => navigate(-1)}
                     className="text-black  cursor-pointer"
                 >
                     <ArrowBack /> 

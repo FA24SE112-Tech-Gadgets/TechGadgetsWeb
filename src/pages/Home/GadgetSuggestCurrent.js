@@ -105,7 +105,7 @@ const SuggestGadgetCurrent = () => {
               </div>
             ) : product.isForSale === false && (
               <div className="absolute top-1/3 left-0 transform -translate-y-1/2 w-full bg-red-500 text-white text-sm font-bold text-center py-1 rounded">
-                Ngừng kinh doanh
+                Ngừng bán
               </div>
             )}
             <div className="p-2 flex-grow cursor-pointer">

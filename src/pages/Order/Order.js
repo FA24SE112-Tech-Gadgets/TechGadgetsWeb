@@ -25,7 +25,6 @@ const OrderHistory = () => {
 
       setOrders(items);
       setTotalPages(Math.ceil(totalCount / 10));
-      console.log("data", items);
 
     } catch (error) {
       if (error.response && error.response.data && error.response.data.reasons) {

@@ -77,7 +77,6 @@ const ProfilePage = () => {
       try {
         const response = await AxiosInterceptor.get('/api/users/current');
         const userData = response.data.customer;
-        console.log(response.data);
 
         setProfile({
           name: userData.fullName,

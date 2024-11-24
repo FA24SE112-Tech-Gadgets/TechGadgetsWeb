@@ -21,7 +21,6 @@ const navigate = useNavigate();
         setRefunds(response.data.items);
         setTotalItems(response.data.totalItems);
         setLoading(false);
-        console.log("data", response.data.items);
         
       } catch (err) {
         setError('Không thể lấy lịch sử hoàn tiền');
@@ -114,18 +113,37 @@ const navigate = useNavigate();
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
-        <nav className="flex items-center space-x-2">
-          {Array.from({ length: Math.ceil(totalItems / pageSize) }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-4 py-2 rounded-md ${i + 1 === currentPage ? 'bg-primary/70 text-white' : 'bg-gray-200 text-gray-700'}`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </nav>
+      <div className="mt-4">
+        <div className="flex justify-center mt-4">
+          <nav className="flex items-center space-x-2">
+            {(() => {
+              const maxVisiblePages = 5;
+              const totalPages = Math.ceil(totalItems / pageSize);
+              let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+              let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+              if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+              }
+
+              return Array.from({ length: totalPages }, (_, index) => index + 1)
+                .filter(number => number >= startPage && number <= endPage)
+                .map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => setCurrentPage(number)}
+                    className={`px-4 py-2 rounded-md ${
+                      number === currentPage 
+                        ? "bg-primary/70 text-white" 
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                ));
+            })()}
+          </nav>
+        </div>
       </div>
     </div>
   );

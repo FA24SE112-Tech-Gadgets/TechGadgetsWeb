@@ -54,6 +54,8 @@ import AdminLayout from "./components/layout/AdminLayout";
 import AdminPage from "./pages/Admin/AdminPage";
 import SellerDashboard from "./pages/Seller/Dashboard/SellerDashboard";
 import ManagerDashboard from "./pages/Manager/Dashboard/ManagerDashboard";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+
 
 
 
@@ -236,6 +238,9 @@ function App() {
       <Route element={<AdminLayout />}>
           <Route path='/admin/manage-users' element={
          <AdminPage/>
+        } />
+        <Route path='/admin/dashboard' element={
+         <AdminDashboard/>
         } />
       </Route>
     </Routes>

@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
+import slugify from "~/ultis/config";
 
 const OrderTable = ({ orders, onOrderCancelled }) => {
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -121,7 +122,13 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
               {/* Products Column */}
               <td className="py-2 px-4 border-b">
                 {order.gadgets.map((gadget) => (
-                  <div key={gadget.sellerOrderItemId} className="flex items-center space-x-4 py-2">
+                  <div key={gadget.sellerOrderItemId} 
+                  onClick={() => navigate(`/gadget/detail/${slugify(gadget.name)}`, {
+                    state: {
+                        productId: gadget.gadgetId,
+                    }
+                })}
+                  className="flex items-center space-x-4 py-2">
                     <img
                       src={gadget.thumbnailUrl}
                       alt={gadget.name}

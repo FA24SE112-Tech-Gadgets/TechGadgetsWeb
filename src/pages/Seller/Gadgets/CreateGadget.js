@@ -150,7 +150,6 @@ const CreateGadget = () => {
         specIndex++;
       });
     });
-    console.log("Submitting gadget data:", gadgetData);
 
     try {
       await AxiosInterceptor.post('/api/gadgets', formData, {
@@ -202,7 +201,6 @@ const CreateGadget = () => {
   };
 
   const handleBrandChange = (e) => {
-    console.log("Selected Brand ID:", e.target.value);
     setGadgetData((prev) => ({
       ...prev,
       brandId: e.target.value,

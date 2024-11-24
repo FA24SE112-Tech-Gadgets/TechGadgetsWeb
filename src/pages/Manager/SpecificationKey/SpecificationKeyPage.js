@@ -54,7 +54,6 @@ export default function SpecificationKeyPage() {
         name: newSpecName,
         specificationUnits: newSpecUnits.filter(unit => unit.trim() !== '')
       })
-      console.log(response)
 
       toast.success('Thông số đã được tạo thành công')
 

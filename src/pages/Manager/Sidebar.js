@@ -13,17 +13,16 @@ const Sidebar = ({ minHeight = 'min-h-screen' }) => {
     const { logout, error } = useAuth();
 
     const handleLogout = async () => {
-        console.log("Logout clicked");
         await deleteDeviceToken(); 
         logout();
     };
 
     const menuItems = [
+        { path: '/manage-dashboard', icon: QueryStatsIcon, text: 'Thống kê bán hàng' },
+        { path: '/manage-gadget', icon: FaProductHunt, text: 'Quản lý sản phẩm' },
+        { path: '/manage-seller-application', icon: FaWpforms, text: 'Quản lý đơn người bán' },
         { path: '/specification-key', icon: FaRegSun, text: 'Quản lý thông số' },
         { path: '/brand', icon: FaWrench, text: 'Quản lý thương hiệu' },
-        { path: '/manage-seller-application', icon: FaWpforms, text: 'Quản lý đơn người bán' },
-        { path: '/manage-gadget', icon: FaProductHunt, text: 'Quản lý sản phẩm' },
-        { path: '/manage-dashboard', icon: QueryStatsIcon, text: 'Thống kê bán hàng' },
     ];
 
     const MenuItem = ({ path, icon: Icon, text }) => {

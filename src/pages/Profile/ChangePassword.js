@@ -20,7 +20,6 @@ const ChangePassword = ({ closeModal }) => { // Accept closeModal as prop
         oldPassword,
         newPassword
       });
-      console.log("dd", response);
       if (response.status >= 200 && response.status < 300) {
         toast.success('Mật khẩu đã được thay đổi thành công!'); 
         setTimeout(() => {
@@ -29,9 +28,7 @@ const ChangePassword = ({ closeModal }) => { // Accept closeModal as prop
         setNewPassword('');
         setConfirmPassword('');
         closeModal(); 
-        console.log("dd", response);
-        
-        
+           
       } 
       else if (response.status >= 400 && response.status < 500) {
         const errorMessage = response.data.reasons?.[0]?.message || 'Vui lòng thử lại.'; 
