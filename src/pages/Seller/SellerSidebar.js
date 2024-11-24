@@ -4,12 +4,15 @@ import icon from "~/assets/icon.ico";
 import { ShoppingCartCheckoutOutlined, StackedBarChartOutlined } from '@mui/icons-material';
 import { AppstoreAddOutlined } from '@ant-design/icons';
 import { SquarePen } from 'lucide-react';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
 const menuItems = [
   { path: '/seller/Order-management', icon: ShoppingCartCheckoutOutlined, text: 'Quản lý đơn hàng' },
   { path: '/all-products', icon: AppstoreAddOutlined, text: 'Danh sách sản phẩm' },
   { path: '/seller/manage-reviews-gadgets', icon: SquarePen, text: 'Đánh giá sản phẩm' },
   { path: '/seller/transaction-history', icon: StackedBarChartOutlined, text: 'Lịch sử giao dịch' },
+  { path: '/seller/dashboard', icon: QueryStatsIcon, text: 'Thống kê bán hàng' },
+  
 ];
 
 const SellerSidebar = ({ minHeight = 'min-h-screen' }) => {

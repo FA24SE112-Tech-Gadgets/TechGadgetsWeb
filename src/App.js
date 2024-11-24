@@ -16,7 +16,7 @@ import Main from "./pages/Manager/Main";
 import AuthRoute from "./components/auth/AuthRoute";
 import RoleBaseRoute from "./components/auth/RoleBaseRoute";
 import DetailGadgetPage from "./pages/DetailGadget/DetailGadgetPage";
-import SpecificationUnitPage from "./pages/Manager/SpecificationUnit/SpecificationUnitPage";
+import SpecificationKeyPage from "./pages/Manager/SpecificationKey/SpecificationKeyPage";
 import CategoryPage from "./pages/Manager/Category/CategoryPage";
 import BrandPage from "./pages/Manager/Brand/brand";
 import SellerApplication from "./pages/Seller/SellerApplication";
@@ -52,6 +52,8 @@ import SellerPage from "./pages/SellerPage/SellerPage";
 import ManageGadgetPage from "./pages/Manager/Gadget/ManageGadgetPage";
 import AdminLayout from "./components/layout/AdminLayout";
 import AdminPage from "./pages/Admin/AdminPage";
+import SellerDashboard from "./pages/Seller/Dashboard/SellerDashboard";
+import ManagerDashboard from "./pages/Manager/Dashboard/ManagerDashboard";
 
 
 
@@ -168,6 +170,10 @@ function App() {
       <Route element={<SellerLayout />}>
         <Route path='/seller/gadgets/update/:gadgetId' element={<UpdateGadget />} />
       </Route>
+      <Route element={<SellerLayout />}>
+        <Route path='/seller/dashboard' element={<SellerDashboard />} />
+      </Route>
+
       <Route path="/sellerProfile" element={
         <AuthRoute>
           <RoleBaseRoute accessibleRoles={["Seller"]}>
@@ -203,8 +209,8 @@ function App() {
             </div>
           </div>
         } />
-        <Route path='/specification-unit' element={
-          <SpecificationUnitPage />
+        <Route path='/specification-key' element={
+          <SpecificationKeyPage />
         } />
         <Route path='/category' element={
           <CategoryPage />
@@ -220,6 +226,9 @@ function App() {
         } />
           <Route path='/gadget/detail-manager/:name' element={
           <GadgetDetailSeller/>
+        } />
+        <Route path='/manage-dashboard' element={
+          <ManagerDashboard />
         } />
       </Route>
 

@@ -62,15 +62,11 @@ const OrderDetail = () => {
     };
 
     const handleCancelOrder = async () => {
-        if (!cancelReason.trim()) {
-            toast.error("Vui lòng điền lý do hủy");
-            return;
-        }
 
         try {
             setIsLoading(true);
             await AxiosInterceptor.put(`/api/seller-order/${orderId}/cancel`, {
-                reason: cancelReason.trim(),
+                reason: cancelReason.trim() || "",
             });
 
             setOrderDetails((prevDetails) => ({

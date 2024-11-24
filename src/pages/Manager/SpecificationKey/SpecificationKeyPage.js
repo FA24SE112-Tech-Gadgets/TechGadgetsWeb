@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Laptop, Headphones, Speaker, Smartphone, Plus, X, Redo2,Trash2, Search, List, PlusCircle } from 'lucide-react'
+import { Laptop, Headphones, Speaker, Smartphone, Plus, X, Redo2, Trash2, Search, List, PlusCircle } from 'lucide-react'
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import AxiosInterceptor from '~/components/api/AxiosInterceptor'
@@ -11,7 +11,7 @@ const categories = [
   { id: "ea4183e8-5a94-401c-865d-e000b5d2b72d", name: "Điện thoại", icon: Smartphone }
 ]
 
-export default function SpecificationUnitPage() {
+export default function SpecificationKeyPage() {
   const [selectedCategory, setSelectedCategory] = useState(categories[0].id)
   const [isOpen, setIsOpen] = useState(false)
   const [newSpecName, setNewSpecName] = useState('')
@@ -20,7 +20,6 @@ export default function SpecificationUnitPage() {
   const [specificationKeys, setSpecificationKeys] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [dropdownOpen, setDropdownOpen] = useState(null)
   const [deleteMode, setDeleteMode] = useState({})
@@ -33,6 +32,17 @@ export default function SpecificationUnitPage() {
   const handleCategoryChange = (id) => {
     setSelectedCategory(id)
     setCurrentPage(1)
+  }
+
+  const handleSearch = () => {
+    setCurrentPage(1)
+    fetchSpecificationKeys()
+  }
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
   }
 
   const handleCreateSpec = async () => {
@@ -85,8 +95,8 @@ export default function SpecificationUnitPage() {
     try {
       setIsLoading(true)
       let url = `/api/specification-keys/categories/${selectedCategory}?Page=1&PageSize=100`
-      if (debouncedSearch) {
-        url += `&Name=${encodeURIComponent(debouncedSearch)}`
+      if (searchTerm) {
+        url += `&Name=${encodeURIComponent(searchTerm)}`
       }
       const response = await AxiosInterceptor.get(url)
       setSpecificationKeys(response.data.items)
@@ -99,16 +109,8 @@ export default function SpecificationUnitPage() {
   }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm)
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchTerm])
-
-  useEffect(() => {
     fetchSpecificationKeys()
-  }, [selectedCategory, debouncedSearch])
+  }, [selectedCategory])
 
   const handleDeleteSpecificationKey = async (id) => {
     try {
@@ -218,11 +220,10 @@ export default function SpecificationUnitPage() {
                 <button
                   key={category.id}
                   onClick={() => handleCategoryChange(category.id)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                    selectedCategory === category.id
-                      ? "bg-primary/75 text-white"
-                      : "text-gray-600 hover:bg-gray-200"
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${selectedCategory === category.id
+                    ? "bg-primary/75 text-white"
+                    : "text-gray-600 hover:bg-gray-200"
+                    }`}
                 >
                   <IconComponent className="inline-block mr-2" />
                   {category.name}
@@ -239,10 +240,14 @@ export default function SpecificationUnitPage() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={handleKeyPress}
             placeholder="Tìm kiếm thông số..."
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary/80"
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 cursor-pointer"
+            onClick={handleSearch}
+          />
         </div>
       </div>
 
@@ -268,7 +273,7 @@ export default function SpecificationUnitPage() {
                     Đơn vị
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Thao tác
+                    Hành động
                   </th>
                 </tr>
               </thead>
@@ -299,11 +304,11 @@ export default function SpecificationUnitPage() {
                           }}
                           className="text-gray-500 hover:text-gray-700 focus:outline-none"
                         >
-                          <List className="h-5 w-5" />
+                          <List className="h-5 w-5 ml-5" />
                         </button>
 
                         {dropdownOpen === specKey.id && (
-                          <div 
+                          <div
                             className="fixed w-48 bg-white rounded-md shadow-lg z-[9999]"
                             style={{
                               top: `${dropdownPosition.top}px`,
@@ -313,12 +318,12 @@ export default function SpecificationUnitPage() {
                             <div className="py-1">
                               {deleteMode[specKey.id] ? (
                                 <button
-                                onClick={() => toggleDeleteMode(specKey.id)}
-                                className="flex items-center px-4 py-2 text-sm text-blue-600 bg-blue-100 hover:bg-blue-200 w-full"
-                              >
-                                <Redo2 className="h-4 w-4 mr-2" />
-                                Hủy xóa
-                              </button>
+                                  onClick={() => toggleDeleteMode(specKey.id)}
+                                  className="flex items-center px-4 py-2 text-sm text-blue-600 bg-blue-100 hover:bg-blue-200 w-full"
+                                >
+                                  <Redo2 className="h-4 w-4 mr-2" />
+                                  Hủy xóa
+                                </button>
                               ) : (
                                 <button
                                   onClick={() => toggleDeleteMode(specKey.id)}
@@ -358,11 +363,10 @@ export default function SpecificationUnitPage() {
               <button
                 key={pageNumber}
                 onClick={() => setCurrentPage(pageNumber)}
-                className={`px-4 py-2 rounded-md ${
-                  pageNumber === currentPage
-                    ? 'bg-primary/80 text-white'
-                    : 'bg-gray-200 text-gray-700'
-                }`}
+                className={`px-4 py-2 rounded-md ${pageNumber === currentPage
+                  ? 'bg-primary/80 text-white'
+                  : 'bg-gray-200 text-gray-700'
+                  }`}
                 disabled={isLoading}
               >
                 {pageNumber}

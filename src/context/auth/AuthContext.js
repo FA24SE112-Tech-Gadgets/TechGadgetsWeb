@@ -119,7 +119,7 @@ const AuthProvider = ({ children }) => {
 						if (clientRole === "Admin") {
 							navigate("/admin/manage-users");
 						} else if (clientRole === "Manager") {
-							navigate("/specification-unit");
+							navigate("/specification-key");
 						} else if (clientRole === "Seller") {
 							if (resData.data.seller === null) {
 								console.log('day ne', resData.data.seller);

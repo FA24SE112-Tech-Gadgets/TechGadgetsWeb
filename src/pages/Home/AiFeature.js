@@ -23,8 +23,8 @@ const AiFeature = () => {
                                 Khám phá tính năng tìm kiếm sản phẩm bằng ngôn ngữ tự nhiện
                             </h1>
                             <p className="text-lg text-white mb-8 leading-relaxed drop-shadow-md">
-                                Tính năng tìm kiếm sản phẩm bằng ngôn ngữ tự nhiên giúp bạn dễ dàng tìm thấy sản phẩm một cách nhanh chóng và chính xác. Hệ thống có
-                                khả năng hiểu ý định tìm kiếm, phân tích từ khóa và gợi ý những sản phẩm phù hợp nhất với nhu cầu của bạn.
+                                Tính năng tìm kiếm sản phẩm bằng ngôn ngữ tự nhiên giúp bạn dễ dàng tìm thấy sản phẩm và cửa hàng một cách nhanh chóng và chính xác. Hệ thống có
+                                khả năng hiểu ý định tìm kiếm, phân tích từ khóa và gợi ý những sản phẩm, cửa hàng phù hợp nhất với nhu cầu của bạn.
                             </p>
                             <button
                                 onClick={() => navigate("/search-by-natural-language")}
