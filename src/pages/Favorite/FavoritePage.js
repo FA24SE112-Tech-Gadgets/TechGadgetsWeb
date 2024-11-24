@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, MenuItem, IconButton } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { useNavigate } from 'react-router-dom';
 import slugify from '~/ultis/config';
@@ -13,6 +13,9 @@ function FavoritePage() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [scrollPositions, setScrollPositions] = useState({});
     const [loading, setLoading] = useState(false);
+    const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+    const [shopAnchorEl, setShopAnchorEl] = useState(null);
+    const [selectedShop, setSelectedShop] = useState(null);
     const navigate = useNavigate();
     useEffect(() => {
         const fetchFavorites = async () => {
@@ -125,6 +128,18 @@ function FavoritePage() {
         handleClose();
     };
 
+    const handleDeleteAll = async () => {
+        try {
+            await AxiosInterceptor.delete("/api/favorite-gadgets");
+            setGroupedFavorites([]);
+            toast.success("Đã xóa tất cả sản phẩm yêu thích");
+        } catch (error) {
+            console.error("Error deleting all favorites:", error);
+            toast.error("Không thể xóa tất cả sản phẩm yêu thích");
+        }
+        setOpenConfirmDialog(false);
+    };
+
     const handleClick = (event, product) => {
         setAnchorEl(event.currentTarget);
         setSelectedProduct(product);
@@ -135,13 +150,77 @@ function FavoritePage() {
         setSelectedProduct(null);
     };
 
+    const handleShopMenuClick = (event, shop) => {
+        event.stopPropagation();
+        setShopAnchorEl(event.currentTarget);
+        setSelectedShop(shop);
+    };
+
+    const handleShopMenuClose = () => {
+        setShopAnchorEl(null);
+        setSelectedShop(null);
+    };
+
+    const handleDeleteByShop = async (sellerId) => {
+        try {
+            await AxiosInterceptor.delete(`/api/favorite-gadgets/sellers/${sellerId}`);
+            setGroupedFavorites(prevGroups => 
+                prevGroups.filter(group => group.shopInfo.id !== sellerId)
+            );
+            toast.success("Đã xóa tất cả sản phẩm của cửa hàng");
+        } catch (error) {
+            console.error("Error deleting shop products:", error);
+            toast.error("Không thể xóa sản phẩm của cửa hàng");
+        }
+        handleShopMenuClose();
+    };
+
     return (
-        <div className="min-h-screen  dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
             <ToastContainer />
             <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
-                    Danh sách yêu thích
-                </h1>
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold text-indigo-900 dark:text-white">
+                        Danh sách yêu thích
+                    </h1>
+                    {groupedFavorites.length > 0 && (
+                        <button 
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                            onClick={() => setOpenConfirmDialog(true)}
+                        >
+                            Xóa tất cả
+                        </button>
+                    )}
+                </div>
+
+                {/* Custom Tailwind Modal */}
+                {openConfirmDialog && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4">
+                            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                                Xác nhận xóa
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-300 mb-6">
+                                Bạn có chắc chắn muốn xóa tất cả sản phẩm yêu thích?
+                            </p>
+                            <div className="flex justify-end space-x-4">
+                                <button
+                                    onClick={() => setOpenConfirmDialog(false)}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    onClick={handleDeleteAll}
+                                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                                >
+                                    Xóa tất cả
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {groupedFavorites.length === 0 ? (
 
                     <div className="text-center text-gray-500 dark:text-gray-300">
@@ -151,10 +230,39 @@ function FavoritePage() {
                     groupedFavorites.map((shop) => (
                         <div key={shop.shopInfo.shopName} className="mb-10">
                             <div className="bg-40 rounded-lg shadow-md">
-                                <div className="p-3 bg-primary/40 dark:bg-gray-700 rounded-t-lg">
-                                    <h2 className="text-lg font-semiboldtext-indigo-900 dark:text-white">{shop.shopInfo.shopName}</h2>
-                                    <p className="text-sm text-indigo-900 dark:text-white">{shop.shopInfo.shopAddress}</p>
+                                <div className="p-3 bg-primary/40 dark:bg-gray-700 rounded-t-lg flex justify-between items-center">
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-indigo-900 dark:text-white">{shop.shopInfo.shopName}</h2>
+                                        <p className="text-sm text-indigo-900 dark:text-white">{shop.shopInfo.shopAddress}</p>
+                                    </div>
+                                    <IconButton
+                                        onClick={(e) => handleShopMenuClick(e, shop.shopInfo)}
+                                        size="small"
+                                        className="text-gray-500"
+                                    >
+                                        <MoreVertical className="w-5 h-5" />
+                                    </IconButton>
                                 </div>
+                                
+                                {/* Shop Menu */}
+                                <Menu
+                                    anchorEl={shopAnchorEl}
+                                    open={Boolean(shopAnchorEl) && selectedShop?.id === shop.shopInfo.id}
+                                    onClose={handleShopMenuClose}
+                                    anchorOrigin={{
+                                        vertical: "bottom",
+                                        horizontal: "right",
+                                    }}
+                                    transformOrigin={{
+                                        vertical: "top",
+                                        horizontal: "right",
+                                    }}
+                                >
+                                    <MenuItem onClick={() => handleDeleteByShop(shop.shopInfo.id)}>
+                                        Xóa tất cả sản phẩm của cửa hàng
+                                    </MenuItem>
+                                </Menu>
+
                                 <div className="relative">
                                     {/* Container sản phẩm có thể scroll */}
                                     <div
