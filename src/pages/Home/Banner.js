@@ -1,8 +1,9 @@
 import React from "react";
 import BannerImg from "../../assets/hero/blackfriday.png";
-import { GrSecure } from "react-icons/gr";
-import { IoFastFood } from "react-icons/io5";
-import { GiFoodTruck } from "react-icons/gi";
+import { HiOutlineSpeakerphone } from "react-icons/hi";
+import { VscLaw } from "react-icons/vsc";
+import { RiSecurePaymentLine } from "react-icons/ri";
+import { HiOutlineTag } from "react-icons/hi";
 
 const Banner = () => {
   return (
@@ -31,19 +32,19 @@ const Banner = () => {
             </p>
             <div className="flex flex-col gap-4">
               <div data-aos="fade-up" className="flex items-center gap-4">
-                <GrSecure className="text-4xl h-12 w-12 shadow-sm p-4 rounded-full bg-violet-100 dark:bg-violet-400" />
+                <HiOutlineSpeakerphone className="text-4xl h-12 w-12 shadow-sm p-4 rounded-full bg-violet-100 dark:bg-violet-400" />
                 <p>Những sản phẩm chất lượng</p>
               </div>
               <div data-aos="fade-up" className="flex items-center gap-4">
-                <IoFastFood className="text-4xl h-12 w-12 shadow-sm p-4 rounded-full bg-orange-100 dark:bg-orange-400" />
-                <p>Giao hàng nhanh</p>
+                <VscLaw className="text-4xl h-12 w-12 shadow-sm p-4 rounded-full bg-orange-100 dark:bg-orange-400" />
+                <p>Giá cả cạnh tranh</p>
               </div>
               <div data-aos="fade-up" className="flex items-center gap-4">
-                <GiFoodTruck className="text-4xl h-12 w-12 shadow-sm p-4 rounded-full bg-green-100 dark:bg-green-400" />
+                <RiSecurePaymentLine className="text-4xl h-12 w-12 shadow-sm p-4 rounded-full bg-green-100 dark:bg-green-400" />
                 <p>Phương thức thanh toán đơn giản</p>
               </div>
               <div data-aos="fade-up" className="flex items-center gap-4">
-                <GiFoodTruck className="text-4xl h-12 w-12 shadow-sm p-4 rounded-full bg-yellow-100 dark:bg-yellow-400" />
+                <HiOutlineTag className="text-4xl h-12 w-12 shadow-sm p-4 rounded-full bg-yellow-100 dark:bg-yellow-400" />
                 <p>Nhận nhiều ưu đãi</p>
               </div>
             </div>

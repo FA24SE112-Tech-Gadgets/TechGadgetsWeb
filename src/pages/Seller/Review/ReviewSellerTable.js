@@ -106,6 +106,18 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
   const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(orders.length / itemsPerPage);
 
+  const getPaginationRange = () => {
+    const maxVisible = 5; // Số lượng nút hiển thị
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(start + maxVisible - 1, totalPages);
+
+    // Điều chỉnh start nếu end đã chạm giới hạn
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
   const handleChangePage = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -195,18 +207,20 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
       ))}
 
       {/* Pagination Controls */}
-      <div className="flex justify-center mt-4">
-        <nav className="flex items-center space-x-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => handleChangePage(i + 1)}
-              className={`px-4 py-2 rounded-md ${i + 1 === currentPage ? 'bg-primary/70 text-white' : 'bg-gray-200 text-gray-700'}`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </nav>
+      <div className="flex justify-center mt-6 space-x-2">
+        {getPaginationRange().map((pageNumber) => (
+          <button
+            key={pageNumber}
+            onClick={() => handleChangePage(pageNumber)}
+            className={`px-4 py-2 rounded-md ${
+              pageNumber === currentPage
+                ? 'bg-primary/80 text-white'
+                : 'bg-gray-200 text-gray-700'
+            }`}
+          >
+            {pageNumber}
+          </button>
+        ))}
       </div>
 
       {showModal && (

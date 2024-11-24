@@ -42,18 +42,18 @@ const ManageGadgetPage = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Quản lý sản phẩm</h1>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-4">
+        <div className="mb-8">
+        <div className="flex space-x-2 overflow-x-auto bg-primary/10 p-1 rounded-lg">
             {Object.entries(categoryIds).map(([key, id]) => {
               const IconComponent = categoryIcons[id];
               return (
                 <button
                   key={key}
                   onClick={() => handleCategoryChange(id)}
-                  className={`px-4 py-2 rounded flex items-center transition duration-200 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     selectedCategory === id 
                       ? "bg-primary/80 text-white" 
-                      : "bg-gray-100 hover:bg-gray-200"
+                      : "text-gray-600 hover:bg-primary/20"
                   }`}
                 >
                   <IconComponent className="inline-block mr-2" />

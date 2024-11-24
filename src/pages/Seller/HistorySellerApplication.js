@@ -92,10 +92,10 @@ const HistorySellerApplication = () => {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="w-7 h-7 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center animate-spin">
+      <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
         <div className="h-4 w-4 bg-white rounded-full"></div>
       </div>
-      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+      <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
         Loading...
       </span>
     </div>
@@ -132,11 +132,10 @@ const HistorySellerApplication = () => {
                         app.businessModel === 'Company' ? 'Công Ty' : app.businessModel}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      app.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                      app.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${app.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                        app.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'
+                      }`}>
                       {app.status === 'Pending' ? 'Đang Chờ' : app.status === 'Approved' ? 'Đã Duyệt' : 'Bị Từ Chối'}
                     </span>
                   </td>

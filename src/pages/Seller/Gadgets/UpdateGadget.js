@@ -251,7 +251,6 @@ const GadgetUpdate = () => {
         setIsLoading(true);
         try {
             const formData = new FormData();
-            console.log('lien tuc', gadgetData);
 
             formData.append('brandId', gadgetData.brandId);
             formData.append('name', gadgetData.name);

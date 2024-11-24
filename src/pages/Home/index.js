@@ -9,11 +9,11 @@ import Subscribe from "./Subscribe";
 import Testimonials from "./Testimonials";
 import Popup from "./Popup";
 import Footer from "~/components/layout/Footer";
-import Notifications from "~/Notification/Notification";
-import { onMessageListener, requestForToken } from "~/ultis/firebase";
 import GadgetHistory from "../Gadgets/GadgetHistory";
 import AiFeature from "./AiFeature";
 import useAuth from "~/context/auth/useAuth";
+import PosterBanner1 from "./Poster";
+import SuggestGadgetCurrent from "./GadgetSuggestCurrent";
 
 function Home() {
   const [orderPopup, setOrderPopup] = React.useState(false);
@@ -43,15 +43,17 @@ const{isAuthenticated}=useAuth();
   return (
     <div className="bg-white dark:bg-gray-900 dark:text-white duration-200">
       <HeroSection handleOrderPopup={handleOrderPopup} />
-      
+     
       {isAuthenticated && <AiFeature />}
-
+     <PosterBanner1/>
       <Products />
-      {isAuthenticated && <GadgetHistory />}
+   
       <TopProducts handleOrderPopup={handleOrderPopup} />
       <Banner />
-      <Subscribe />
+      {isAuthenticated && <SuggestGadgetCurrent />}
+      {isAuthenticated && <GadgetHistory />}
       <Testimonials />
+
       <Footer />
       <Popup orderPopup={orderPopup} setOrderPopup={setOrderPopup} />
     </div>

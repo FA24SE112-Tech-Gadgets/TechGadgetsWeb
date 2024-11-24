@@ -13,7 +13,9 @@ const OrderHistory = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sortByDate, setSortByDate] = useState('DESC');
+  const [isLoading, setIsLoading] = useState(false);
   const fetchOrders = async (pageNumber = 1, statusFilter = status) => {
+    setIsLoading(true);
     try {
       const response = await AxiosInterceptor.get(`/api/seller-orders?SortByDate=${sortByDate}`, {
         params: { Page: pageNumber, PageSize: 100, Status: statusFilter },
@@ -23,8 +25,7 @@ const OrderHistory = () => {
 
       setOrders(items);
       setTotalPages(Math.ceil(totalCount / 10));
-      console.log("data", items);
-      
+
     } catch (error) {
       if (error.response && error.response.data && error.response.data.reasons) {
         const reasons = error.response.data.reasons;
@@ -35,6 +36,8 @@ const OrderHistory = () => {
           toast.error("Có lỗi xảy ra vui lòng thử lại ");
         }
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,7 +67,8 @@ const OrderHistory = () => {
       <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white mb-8">
         Đơn hàng của bạn
       </h1>
-      <div className="mb-4">
+      <div className="flex justify-between items-center mb-6">
+        <div className="mb-4">
           <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-3">Sắp xếp theo ngày</label>
           <select
             id="sort-by-date"
@@ -79,49 +83,48 @@ const OrderHistory = () => {
             <option value="ASC">Cũ nhất</option>
           </select>
         </div>
-      <ToastContainer />
-      <div className="flex space-x-4 mb-6 justify-end">
-        <table className="w-full border-collapse">
-          <tbody>
-            <tr>
-              <td className="px-4 py-2 border">
-                <button
-                  onClick={() => handleStatusChange("")}
-                  className={`w-full px-4 py-2 rounded ${status === "" ? "bg-primary/80 text-white" : "bg-gray-100"}`}
-                >
-                  <ShoppingCart className="inline-block mr-2" /> Tất cả
-                </button>
-              </td>
-              <td className="px-4 py-2 border">
-                <button
-                  onClick={() => handleStatusChange("Pending")}
-                  className={`w-full px-4 py-2 rounded ${status === "Pending" ? "bg-blue-500 text-white" : "bg-gray-100"}`}
-                >
-                  <PendingOutlined className="inline-block mr-2" /> Đang chờ
-                </button>
-              </td>
-              <td className="px-4 py-2 border">
-                <button
-                  onClick={() => handleStatusChange("Success")}
-                  className={`w-full px-4 py-2 rounded ${status === "Success" ? "bg-green-500 text-white" : "bg-gray-100"}`}
-                >
-                  <CheckCircle className="inline-block mr-2" /> Thành công
-                </button>
-              </td>
-              <td className="px-4 py-2 border">
-                <button
-                  onClick={() => handleStatusChange("Cancelled")}
-                  className={`w-full px-4 py-2 rounded ${status === "Cancelled" ? "bg-red-500 text-white" : "bg-gray-100"}`}
-                >
-                  <XCircle className="inline-block mr-2" /> Đã hủy
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
+        <ToastContainer />
+        <div className="flex space-x-2 overflow-x-auto bg-primary/10 p-1 rounded-lg mb-6">
+          <button
+            onClick={() => handleStatusChange("")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center
+            ${status === "" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
+          >
+            <ShoppingCart className="w-4 h-4 mr-2" /> Tất cả
+          </button>
+          <button
+            onClick={() => handleStatusChange("Pending")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center
+            ${status === "Pending" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
+          >
+            <PendingOutlined className="w-4 h-4 mr-2" /> Đang chờ
+          </button>
+          <button
+            onClick={() => handleStatusChange("Success")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center
+            ${status === "Success" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
+          >
+            <CheckCircle className="w-4 h-4 mr-2" /> Thành công
+          </button>
+          <button
+            onClick={() => handleStatusChange("Cancelled")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center
+            ${status === "Cancelled" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
+          >
+            <XCircle className="w-4 h-4 mr-2" /> Đã hủy
+          </button>
+        </div>
       </div>
-
+      {isLoading && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+            <div className="h-4 w-4 bg-white rounded-full"></div>
+          </div>
+          <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+            Loading...
+          </span>
+        </div>
+      )}
       {filteredOrders.length === 0 ? (
         <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
       ) : (

@@ -18,60 +18,72 @@ const ManageSellerApplicationPage = () => {
   const [totalPages, setTotalPages] = useState(0);
 
   const fetchApplications = useCallback(async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const baseUrl = process.env.NODE_ENV === "development"
-        ? `${process.env.REACT_APP_DEV_API}/api/seller-applications`
-        : `${process.env.REACT_APP_PRO_API}/api/seller-applications`;
+      const baseUrl = process.env.NODE_ENV === "development" 
+        ? `${process.env.REACT_APP_DEV_API}/api/seller-applications` 
+        : `${process.env.REACT_APP_PRO_API}/api/seller-applications`
 
-      const response = await AxiosInterceptor.get(`${baseUrl}?SortByDate=${sortByDate}&Status=${status === 'All' ? '' : status}&Page=${page}&PageSize=${pageSize}`);
-      setApplications(response.data.items);
-      setTotalPages(Math.ceil(response.data.totalItems / pageSize));
+      const response = await AxiosInterceptor.get(
+        `${baseUrl}?SortByDate=${sortByDate}&Status=${status === 'All' ? '' : status}&Page=${page}&PageSize=${pageSize}`
+      )
+      setApplications(response.data.items)
+      setTotalPages(Math.ceil(response.data.totalItems / pageSize))
     } catch (err) {
-      setError('Không thể lấy danh sách đơn đăng ký');
-      toast.error('Không thể lấy danh sách đơn đăng ký');
+      setError('Không thể lấy danh sách đơn đăng ký')
+      toast.error('Không thể lấy danh sách đơn đăng ký')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [page, pageSize, sortByDate, status]);
+  }, [page, pageSize, sortByDate, status])
 
-  useEffect(() => { // Sử dụng useEffect trực tiếp
-    fetchApplications();
-  }, [fetchApplications]);
+  useEffect(() => {
+    fetchApplications()
+  }, [fetchApplications])
 
   const handleViewDetails = async (id) => {
     try {
-      const baseUrl = process.env.NODE_ENV === "development"
-        ? `${process.env.REACT_APP_DEV_API}/api/seller-applications`
-        : `${process.env.REACT_APP_PRO_API}/api/seller-applications`;
+      const baseUrl = process.env.NODE_ENV === "development" 
+        ? `${process.env.REACT_APP_DEV_API}/api/seller-applications` 
+        : `${process.env.REACT_APP_PRO_API}/api/seller-applications`
 
-      const response = await AxiosInterceptor.get(`${baseUrl}/${id}`);
-      setSelectedApplication(response.data);
-      setIsPopupOpen(true);
+      const response = await AxiosInterceptor.get(`${baseUrl}/${id}`)
+      setSelectedApplication(response.data)
+      setIsPopupOpen(true)
     } catch (err) {
-      console.error('Không thể lấy chi tiết đơn đăng ký', err);
-      toast.error('Không thể lấy chi tiết đơn đăng ký');
+      console.error('Không thể lấy chi tiết đơn đăng ký', err)
+      toast.error('Không thể lấy chi tiết đơn đăng ký')
     }
-  };
+  }
 
   const handleClosePopup = () => {
-    setIsPopupOpen(false);
-    fetchApplications();
-  };
+    setIsPopupOpen(false)
+    fetchApplications()
+  }
 
-  if (error) return <div className="text-center mt-8 text-red-600">{error}</div>;
+  const handleSortChange = (e) => {
+    setSortByDate(e.target.value)
+    setPage(1)  // Reset page to 1 when sort changes
+  }
+
+  const handleStatusChange = (e) => {
+    setStatus(e.target.value)
+    setPage(1)  // Reset page to 1 when status filter changes
+  }
+
+  if (error) return <div className="text-center mt-8 text-red-600">{error}</div>
 
   return (
     <div className="container mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">Quản Lý Đơn Đăng Ký</h2>
-      
+
       <div className="flex flex-col sm:flex-row justify-between mb-6 space-y-4 sm:space-y-0 sm:space-x-4">
         <div className="flex flex-col space-y-2">
           <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700">Sắp xếp theo ngày</label>
           <select
             id="sort-by-date"
             value={sortByDate}
-            onChange={(e) => setSortByDate(e.target.value)}
+            onChange={handleSortChange}
             className="w-full sm:w-[180px] px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
           >
             <option value="DESC">Mới nhất</option>
@@ -83,7 +95,7 @@ const ManageSellerApplicationPage = () => {
           <select
             id="status-filter"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={handleStatusChange}
             className="w-full sm:w-[180px] px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
           >
             <option value="All">Tất cả</option>
@@ -112,7 +124,7 @@ const ManageSellerApplicationPage = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {applications.map((app) => (
-                <tr key={app.id}>
+                <tr key={app.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">{app.shopName}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {app.businessModel === 'BusinessHousehold' ? 'Hộ Kinh Doanh' :
@@ -165,7 +177,7 @@ const ManageSellerApplicationPage = () => {
       </div>
       <ToastContainer />
     </div>
-  );
-};
+  )
+}
 
 export default ManageSellerApplicationPage;

@@ -81,23 +81,27 @@ const GadgetSearchHistory = () => {
                     </h3>
                     <div className="flex items-center">
                       {item.gadget.discountPercentage > 0 ? (
-                        <div className="flex flex-col">
-                          <div className="text-red-500 font-semibold text-sm">
+                        <>
+                          <div className="text-red-500 font-semibold text-sm mr-2">
                             {item.gadget.discountPrice.toLocaleString()}₫
                           </div>
                           <span className="line-through text-gray-500 text-xs">
                             {item.gadget.price.toLocaleString()}₫
                           </span>
-                        </div>
+                        </>
                       ) : (
                         <div className="text-gray-800 font-semibold text-sm">
                           {item.gadget.price.toLocaleString()}₫
                         </div>
                       )}
                     </div>
-                    {!item.gadget.isForSale && (
+                    {item.gadget.status === "Inactive" ? (
+                    <div className="text-red-500 font-semibold text-sm">
+                        Sản phẩm đã bị khóa do vi phạm chính sách TechGadget
+                      </div>
+                    ) : !item.gadget.isForSale && (
                       <div className="text-red-500 font-semibold text-sm">
-                        Ngừng kinh doanh
+                       Ngừng bán
                       </div>
                     )}
                   </div>

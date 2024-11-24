@@ -11,13 +11,15 @@ import StarRatings from 'react-star-ratings';
 import { Star } from 'lucide-react';
 import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
 import GadgetSuggest from '../Gadgets/GadgetSuggest';
-import user from "~/assets/R.png"
+import users from "~/assets/R.png"
 
-const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
+const OrderConfirmation = ({ product, quantity, onCancel }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(false);
     const navigate = useNavigate();
     const popupRef = useRef(null);
+    const unitPrice = product.discountPrice || product.price;
+    const totalPrice = unitPrice * quantity;
 
     const handleClickOutside = (event) => {
         if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -43,8 +45,6 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
                 quantity,
             });
             setOrderSuccess(true);
-            console.log("Buy success", response);
-            // toast.success("Mua sản phẩm thành công");
         } catch (error) {
             console.error("Error placing order:", error);
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -53,9 +53,23 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
                 // Display the message from the first reason
                 if (reasons.length > 0) {
                     const reasonMessage = reasons[0].message;
-                    toast.error(reasonMessage);
+                    onCancel(); // Close the confirmation modal first
+                    setTimeout(() => {
+                        toast.error(reasonMessage, {
+                            position: "top-right",
+                            autoClose: 3000,
+                            style: { zIndex: 9999 }
+                        });
+                    }, 100);
                 } else {
-                    toast.error("Đặt hàng thất bại. Vui lòng thử lại.");
+                    onCancel(); // Close the confirmation modal first
+                    setTimeout(() => {
+                        toast.error("Đặt hàng thất bại. Vui lòng thử lại.", {
+                            position: "top-right",
+                            autoClose: 3000,
+                            style: { zIndex: 9999 }
+                        });
+                    }, 100);
                 }
             }
         } finally {
@@ -98,12 +112,12 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
 
                 <div className="mb-6 border-b pb-4">
                     <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center flex-grow mr-4">
+                        <div className="flex items-center flex-grow mr-4">                          
                             <img src={product.thumbnailUrl} alt={product.name} className="w-12 h-12 object-contain mr-2" />
                             <span className="text-gray-600">{product.name} x {quantity}</span>
                         </div>
                         <span className="font-medium text-gray-800 ml-4">
-                            {totalPrice.toLocaleString()}₫
+                            {unitPrice.toLocaleString()}₫
                         </span>
                     </div>
                 </div>
@@ -135,7 +149,7 @@ const OrderConfirmation = ({ product, quantity, totalPrice, onCancel }) => {
 
 // const ProfileWarningModal = ({ isOpen, onClose }) => {
 //     const navigate = useNavigate();
-    
+
 //     return (
 //         <Modal
 //             title="Thông tin cá nhân chưa đầy đủ"
@@ -174,15 +188,13 @@ const DetailGadgetPage = () => {
     const [showProfileWarning, setShowProfileWarning] = useState(false);
     const navigate = useNavigate();
     // const {user} = useAuth()
-    const [isOpen, setIsOpen] = useState(false); 
-const [user, setUser] = useState(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const [user, setUser] = useState(null);
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const response = await AxiosInterceptor.get('/api/users/current');
                 setUser(response.data.customer);
-                console.log("data nè", response.data.customer);
-                
             } catch (error) {
                 console.error("Error fetching user data:", error);
             }
@@ -195,13 +207,9 @@ const [user, setUser] = useState(null);
         const apiClient = isAuthenticated ? AxiosInterceptor : axios;
         const fetchProduct = async () => {
             try {
-                console.log("Fetching product with ID:", productId);
                 const response = await apiClient(`${apiBase}api/gadgets/${productId}`);
-                console.log("API Response:", response.data);
                 setProduct(response.data);
-                setPrice(response.price);
-                console.log("giá", response.data.price);
-
+                setPrice(response.price); 
             } catch (error) {
                 console.error("Error fetching product details:", error);
                 setError("Failed to fetch product details.");
@@ -212,7 +220,6 @@ const [user, setUser] = useState(null);
             try {
                 const response = await AxiosInterceptor.get(`/api/reviews/gadget/${productId}`);
                 setReviews(response.data.items.slice(0, 2)); // Show only the first 2 reviews
-                console.log("Reviews:", response.data.items);
 
             } catch (error) {
                 toast.error('Failed to fetch reviews');
@@ -222,6 +229,11 @@ const [user, setUser] = useState(null);
         fetchProduct();
         fetchReviews();
     }, [productId, isAuthenticated, apiBase]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [productId]);  // This will run whenever productId changes
+
     const imgRef = useRef(null); // Tạo ref để tham chiếu đến hình ảnh chính
 
     const handleImageClick = (imageUrl) => {
@@ -230,9 +242,14 @@ const [user, setUser] = useState(null);
         }
     };
     if (error) return <div>{error}</div>;
-    if (!product) return <div className="fixed inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-        <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-    </div>;
+    if (!product) return    <div className="flex items-center justify-center min-h-screen">
+    <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+      <div className="h-4 w-4 bg-white rounded-full"></div>
+    </div>
+    <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+      Loading...
+    </span>
+  </div>;
 
     const handleQuantityChange = (type) => {
         setQuantity(prev => type === 'increment' ? prev + 1 : Math.max(1, prev - 1));
@@ -249,24 +266,24 @@ const [user, setUser] = useState(null);
 
     const handleAddToCart = async () => {
         const totalPrice = price * quantity;
-        console.log("giá", price);
-        console.log("số lượng", quantity)
 
         try {
             const response = await AxiosInterceptor.post("/api/cart", {
                 gadgetId: productId,
                 quantity,
             });
-
-
-
-
-            console.log("Product added to cart", response);
             toast.success("Thêm sản phẩm thành công");
         } catch (error) {
-            console.error("Error adding product to cart:", error);
-            toast.error("Thêm sản phẩm thất bại");
-        }
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
+                if (reasons.length > 0) {
+                  const reasonMessage = reasons[0].message;
+                  toast.error(reasonMessage);
+                } else {
+                  toast.error("Thêm sản phẩm thất bại, vui lòng thử lại");
+                }
+              }
+            }
     };
 
     const handleBuyNow = () => {
@@ -280,7 +297,7 @@ const [user, setUser] = useState(null);
     const onClose = () => {
         setIsOpen(false);
     };
-    
+
     const handleCancelOrder = () => {
         setShowConfirmation(false);
     };
@@ -323,7 +340,18 @@ const [user, setUser] = useState(null);
                 ]}
             />
 
-            <ToastContainer autoClose={3000}/>
+            <ToastContainer 
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                style={{ zIndex: 9999 }}
+            />
             <Modal
                 title="Thông tin cá nhân chưa đầy đủ"
                 open={isOpen}
@@ -387,38 +415,38 @@ const [user, setUser] = useState(null);
                             </button>
                         </div>
                         {activeTab === 'specifications' && (
-                              <div className="space-y-4">
-                              {product.specificationValues && (() => {
-                                  // Group specifications by their keys
-                                  const groupedSpecs = product.specificationValues.reduce((acc, spec) => {
-                                      const keyName = spec.specificationKey?.name || 'N/A';
-                                      if (!acc[keyName]) {
-                                          acc[keyName] = [];
-                                      }
-                                      acc[keyName].push(spec);
-                                      return acc;
-                                  }, {});
+                            <div className="space-y-4">
+                                {product.specificationValues && (() => {
+                                    // Group specifications by their keys
+                                    const groupedSpecs = product.specificationValues.reduce((acc, spec) => {
+                                        const keyName = spec.specificationKey?.name || 'N/A';
+                                        if (!acc[keyName]) {
+                                            acc[keyName] = [];
+                                        }
+                                        acc[keyName].push(spec);
+                                        return acc;
+                                    }, {});
 
-                                  // Render grouped specifications
-                                  return Object.entries(groupedSpecs).map(([keyName, specs]) => (
-                                      <div key={keyName}
-                                          className="flex items-start text-sm border-b border-gray-200 py-3 last:border-0"
-                                      >
-                                          <div className="w-1/3 text-gray-600">
-                                              {keyName}
-                                          </div>
-                                          <div className="w-2/3 font-medium text-gray-900">
-                                              {specs.map((spec, index) => (
-                                                  <div key={spec.id}>
-                                                      {spec.value || 'N/A'} {spec.specificationUnit?.name || ''}
-                                                  </div>
-                                              ))}
-                                          </div>
-                                      </div>
-                                  ));
-                              })()}
-                          </div>
-                        
+                                    // Render grouped specifications
+                                    return Object.entries(groupedSpecs).map(([keyName, specs]) => (
+                                        <div key={keyName}
+                                            className="flex items-start text-sm border-b border-gray-200 py-3 last:border-0"
+                                        >
+                                            <div className="w-1/3 text-gray-600">
+                                                {keyName}
+                                            </div>
+                                            <div className="w-2/3 font-medium text-gray-900">
+                                                {specs.map((spec, index) => (
+                                                    <div key={spec.id}>
+                                                        {spec.value || 'N/A'} {spec.specificationUnit?.name || ''}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ));
+                                })()}
+                            </div>
+
                         )}
                         {activeTab === 'review' && (
                             <div className="space-y-4">
@@ -490,7 +518,7 @@ const [user, setUser] = useState(null);
                                     <div key={review.id} className="mb-6 p-6 border border-gray-200 rounded-lg shadow-sm">
                                         <div className="flex items-center mb-4">
                                             <img
-                                                src={review.customer.avatarUrl || user}
+                                                src={review.customer.avatarUrl || users}
                                                 alt={review.customer.fullName}
                                                 className="w-12 h-12 rounded-full mr-4"
                                             />
@@ -556,10 +584,16 @@ const [user, setUser] = useState(null);
                                 </div>
                             )}
                         </div>
-                        {product.isForSale === false && (
+                        {product.status === "Inactive" ? (
+                            <div className="relative">
+                                <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-sm font-bold py-1 px-2 rounded-full shadow-lg">
+                                    Sản phẩm đã bị khóa
+                                </div>
+                            </div>
+                        ) : product.isForSale === false && (
                             <div className="relative">
                                 <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-lg">
-                                    Ngừng kinh doanh
+                                    Ngừng bán
                                 </div>
                             </div>
                         )}
@@ -651,6 +685,7 @@ const [user, setUser] = useState(null);
                 onClose={() => setShowProfileWarning(false)}
             /> */}
         </div>
+
     );
 };
 

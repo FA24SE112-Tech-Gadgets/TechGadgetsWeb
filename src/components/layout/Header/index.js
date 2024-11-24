@@ -29,7 +29,6 @@ const Header = () => {
   };
 
   const handleLogout = async () => {
-    console.log("Logout clicked");
     await deleteDeviceToken(); 
     logout();
   };
