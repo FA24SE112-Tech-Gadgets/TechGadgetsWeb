@@ -439,7 +439,7 @@ const AdminPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     {user.status === "Pending" ? (
-                      <span className="px-2 py-1 rounded-full text-white text-sm bg-yellow-500">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                         Đang chờ
                       </span>
                     ) : (

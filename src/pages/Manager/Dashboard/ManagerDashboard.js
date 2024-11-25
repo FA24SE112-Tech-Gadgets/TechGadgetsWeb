@@ -84,7 +84,7 @@ const ManagerDashboard = () => {
     const adjustedDate = new Date(date);
 
     // Subtract 7 hours to adjust for Vietnam time
-    adjustedDate.setHours(adjustedDate.getHours() - 7);
+    adjustedDate.setHours(adjustedDate.getHours() + 7);
 
     // Format the adjusted date as ISO string and add 'Z' for UTC
     return adjustedDate.toISOString().split('.')[0] + 'Z';
@@ -95,6 +95,7 @@ const ManagerDashboard = () => {
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
+console.log('start',startOfDay,'end',endOfDay);
 
     try {
       const [revenue, orders] = await Promise.all([
