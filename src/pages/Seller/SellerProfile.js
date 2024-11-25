@@ -250,7 +250,7 @@ const SellerProfilePage = () => {
 
             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                    <ChangePassword onClose={closeModal} />
+                    <ChangePassword closeModal={closeModal} />
                 </div>
             )}
         </div>

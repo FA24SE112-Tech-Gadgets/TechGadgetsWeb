@@ -28,11 +28,17 @@ const ManageGadget = ({ categoryId }) => {
   const [selectedBrand, setSelectedBrand] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [gadgetToToggle, setGadgetToToggle] = useState(null);
+  const [brandPage, setBrandPage] = useState(1);
+  const [brandPageSize, setBrandPageSize] = useState(100);
+  const [totalBrandPages, setTotalBrandPages] = useState(0);
 
-  const fetchBrands = async () => {
+  const fetchBrands = async (page = brandPage, pageSize = brandPageSize) => {
     try {
-      const response = await AxiosInterceptor.get(`/api/brands/categories/${categoryId}?Page=1&PageSize=100`);
+      const response = await AxiosInterceptor.get(
+        `/api/brands/categories/${categoryId}?Page=${page}&PageSize=${pageSize}`
+      );
       setBrands(response.data.items);
+      setTotalBrandPages(Math.ceil(response.data.totalCount / pageSize));
     } catch (error) {
       console.error("Error fetching brands:", error);
       toast.error("Failed to fetch brands");
@@ -77,16 +83,9 @@ const ManageGadget = ({ categoryId }) => {
         : `/api/gadgets/${gadgetToToggle.id}/activate`;
       
       await AxiosInterceptor.put(endpoint);
-
-      setGadgets(prev => prev.map(gadget => {
-        if (gadget.id === gadgetToToggle.id) {
-          return {
-            ...gadget,
-            gadgetStatus: gadgetToToggle.gadgetStatus === "Active" ? "Inactive" : "Active"
-          };
-        }
-        return gadget;
-      }));
+      
+      // Fetch the updated data instead of modifying the state directly
+      await fetchGadgets();
       
       toast.success("Cập nhật trạng thái thành công");
     } catch (error) {
@@ -138,9 +137,9 @@ const ManageGadget = ({ categoryId }) => {
 
   // Add useEffect for fetching brands when categoryId changes
   useEffect(() => {
-    fetchBrands();
+    fetchBrands(brandPage, brandPageSize);
     setSelectedBrand(''); // Reset selected brand when category changes
-  }, [categoryId]);
+  }, [categoryId, brandPage, brandPageSize]);
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-screen">

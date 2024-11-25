@@ -186,7 +186,7 @@ const SuggestGadgetCurrent = () => {
         <div className="mt-6 flex justify-center">
           <span
             onClick={handleShowMore}
-            className=" text-gray font-semibold py-2 px-4 rounded "
+            className=" text-gray font-semibold py-2 px-4 rounded cursor-pointer"
           >
             Xem thêm
           </span>

@@ -13,6 +13,12 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  const isContentValid = (content, originalContent = '') => {
+    return content && content.trim() !== '' && content.trim() !== originalContent.trim();
+  };
+
+
+
   const handleOpenModal = (order, isEdit = false) => {
     setCurrentOrder(order);
     setContents((prev) => ({
@@ -38,6 +44,11 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
 
   const handleSubmitReview = async (order) => {
     const content = contents[order.review.id] || '';
+    
+    if (!isContentValid(content)) {
+      toast.error('Nội dung phản hồi không được để trống');
+      return;
+    }
 
     try {
       await AxiosInterceptor.post(`/api/seller-reply/review/${order.review.id}`, {
@@ -59,6 +70,14 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
   };
 
   const handleUpdateReview = async () => {
+    const newContent = contents[currentOrder.review.sellerReply.id];
+    const originalContent = currentOrder.review.sellerReply.content;
+
+    if (!isContentValid(newContent, originalContent)) {
+      toast.error('Nội dung phản hồi mới không được trống hoặc giống với nội dung cũ');
+      return;
+    }
+
     try {
       await AxiosInterceptor.patch(`/api/seller-reply/${currentOrder.review.sellerReply.id}`, {
         Content: contents[currentOrder.review.sellerReply.id],
@@ -179,7 +198,10 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
                     />
                     <button
                       onClick={() => handleSubmitReview(order)}
-                      className="mt-2 px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary-600"
+                      className={`mt-2 px-4 py-2 bg-primary/80 text-white rounded ${
+                        !isContentValid(contents[order.review.id]) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-600'
+                      }`}
+                      disabled={!isContentValid(contents[order.review.id])}
                     >
                       Gửi phản hồi
                     </button>
@@ -238,7 +260,17 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
             </div>
             <div className="flex justify-end space-x-2">
               <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Hủy</button>
-              <button onClick={handleUpdateReview} className="px-4 py-2 bg-primary/75 text-white rounded hover:bg-secondary/85">Cập nhật</button>
+              <button 
+                onClick={handleUpdateReview} 
+                className={`px-4 py-2 bg-primary/75 text-white rounded ${
+                  !isContentValid(contents[currentOrder.review.sellerReply.id], currentOrder.review.sellerReply.content) 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-secondary/85'
+                }`}
+                disabled={!isContentValid(contents[currentOrder.review.sellerReply.id], currentOrder.review.sellerReply.content)}
+              >
+                Cập nhật
+              </button>
             </div>
           </div>
         </div>

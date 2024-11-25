@@ -206,19 +206,43 @@ function BrandGadgetPage() {
 
       <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <Breadcrumb className="w-full">
-          <Breadcrumb.Item>
-            {/* <span onClick={handleNavigation} className="hover:underline cursor-pointer"> */}
-            <p>
-              {category}
+        <Breadcrumb
+          className="w-full"
+          items={[
+            {
+              title: (
+                  <p
+                      className="hover:cursor-pointer"
+                      onClick={() => {
+                          navigate("/");
+                      }}
+                  >
+                     Trang chủ
+                  </p>
+              ),
+          },
+            {
+              title: (
+                <p
+                  onClick={() =>
+                    navigate(`/gadgets/${category}`, {
+                      state: {
+                        categoryId: categoryId,
+                      },
+                    })
+                  }
+                  className="hover:underline cursor-pointer"
+                >
+                  {category}
+                </p>
+              ),
+            },
+            {
+              title: <p>{brand}</p>,
+            },
+          ]}
+        />
 
-            </p>
-            {/* </span> */}
-          </Breadcrumb.Item>
-          <Breadcrumb.Item>
-            <p>{brand}</p>
-          </Breadcrumb.Item>
-        </Breadcrumb>
         <div className="p-2"></div>
         <PosterBanner />
         <div className="flex ">

@@ -12,6 +12,7 @@ import { Star } from 'lucide-react';
 import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
 import GadgetSuggest from '../Gadgets/GadgetSuggest';
 import users from "~/assets/R.png"
+import { CART_ACTIONS } from '~/constants/cartEvents';
 
 const OrderConfirmation = ({ product, quantity, onCancel }) => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -264,13 +265,16 @@ const DetailGadgetPage = () => {
 
 
     const handleAddToCart = async () => {
-        const totalPrice = price * quantity;
-
         try {
-            const response = await AxiosInterceptor.post("/api/cart", {
+            await AxiosInterceptor.post("/api/cart", {
                 gadgetId: productId,
                 quantity,
             });
+            
+            window.dispatchEvent(new CustomEvent('cartUpdate', { 
+                detail: { type: CART_ACTIONS.ADD }
+            }));
+            
             toast.success("Thêm sản phẩm thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -328,10 +332,49 @@ const DetailGadgetPage = () => {
                 className="w-full"
                 items={[
                     {
-                        title: <p>{product.category?.name}</p>,
+                        title: (
+                            <p
+                                className="hover:cursor-pointer"
+                                onClick={() => {
+                                    navigate("/");
+                                }}
+                            >
+                                Trang chủ
+                            </p>
+                        ),
                     },
                     {
-                        title: <p>{product.brand?.name}</p>,
+                        title: (
+                            <p
+                                className="hover:cursor-pointer"
+                                onClick={() => {
+                                    navigate(`/gadgets/${slugify(product.category?.name)}`, {
+                                        state: {
+                                            categoryId: product.category.id,
+                                        },
+                                    });
+                                }}
+                            >
+                                {product.category?.name}
+                            </p>
+                        ),
+                    },
+                    {
+                        title: (
+                            <p
+                                className="hover:cursor-pointer"
+                                onClick={() => {
+                                    navigate(`/gadgets/${slugify(product.category?.name)}/${slugify(product.brand?.name)}`, {
+                                        state: {
+                                            categoryId: product.category.id,
+                                            brandId: product.brand.id,
+                                        },
+                                    });
+                                }}
+                            >
+                                {product.brand?.name}
+                            </p>
+                        ),
                     },
                     {
                         title: <p>{product.name}</p>,
@@ -533,23 +576,21 @@ const DetailGadgetPage = () => {
                                             <span className="text-yellow-500 text-lg">{'★'.repeat(review.rating)}</span>
                                             <span className="text-gray-300 text-lg">{'★'.repeat(5 - review.rating)}</span>
                                         </div>
-                                        <p className="text-sm text-gray-700 mb-4 flex items-center">
-                                            {review.content}
+                                        <div className="mt-2 flex items-center text-gray-700">
+                                            <p>{review.content}</p>
                                             {review.isUpdated && (
-                                                <span className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</span>
+                                                <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
                                             )}
-                                        </p>
+                                        </div>
                                         {review.sellerReply && (
                                             <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                 <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
-                                                <div>
-                                                    <p className="text-gray-700 flex items-center">
-                                                        {review.sellerReply.content}
-                                                        {review.sellerReply.isUpdated && (
-                                                            <span className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</span>
-                                                        )}
-                                                    </p>
-                                                    <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
+                                                <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
+                                                <div className="mt-2 flex items-center text-gray-700">
+                                                    <p>{review.sellerReply.content}</p>
+                                                    {review.sellerReply.isUpdated && (
+                                                        <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}

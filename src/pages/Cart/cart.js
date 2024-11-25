@@ -8,6 +8,34 @@ import slugify from '~/ultis/config';
 import { TrashIcon } from 'lucide-react';
 import useAuth from '~/context/auth/useAuth';
 import { Modal } from 'antd';
+import { CART_ACTIONS } from '~/constants/cartEvents';
+
+const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+    if (!isOpen) return null;
+    
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
+                <h3 className="text-xl font-bold mb-4 text-gray-800">{title}</h3>
+                <p className="text-gray-600 mb-6">{message}</p>
+                <div className="flex justify-end space-x-4">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200"
+                    >
+                        Hủy
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
+                    >
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const OrderConfirmation = ({ selectedItems, cartItemsBySeller, totalPrice, onCancel }) => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -20,6 +48,11 @@ const OrderConfirmation = ({ selectedItems, cartItemsBySeller, totalPrice, onCan
             const listGadgetItems = Object.values(selectedItems).flat();
             await AxiosInterceptor.post('/api/order', { listGadgetItems });
             setOrderSuccess(true);
+            
+            // Dispatch event to reset cart count after successful order
+            window.dispatchEvent(new CustomEvent('cartUpdate', { 
+                detail: { type: CART_ACTIONS.REMOVE_ITEMS, items: listGadgetItems }
+            }));
         } catch (error) {
             console.error("Error placing order:", error);
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -123,6 +156,12 @@ const CartPage = () => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [user, setUser] = useState(null);
     const [isOpen, setIsOpen] = useState(false);  // rename from isModalVisible
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null
+    });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -190,6 +229,14 @@ const CartPage = () => {
                 gadgetId: productId,
                 quantity: newQuantity
             });
+
+            const totalItems = Object.values(cartItemsBySeller).reduce((sum, items) => {
+                return sum + items.length;
+            }, 0);
+            
+            window.dispatchEvent(new CustomEvent('cartUpdate', { 
+                detail: { count: totalItems } 
+            }));
         } catch (error) {
             console.error("Error updating quantity:", error);
             toast.error("Failed to update item quantity. Please try again.");
@@ -210,63 +257,98 @@ const CartPage = () => {
         }
     };
 
-    const handleRemoveItemsForSeller = async (sellerId) => {
-        try {
-            await AxiosInterceptor.delete(`/api/cart/seller/${sellerId}`);
+    const handleRemoveItemsForSeller = (sellerId) => {
+        const seller = sellers.find(s => s.id === sellerId);
+        setConfirmModal({
+            isOpen: true,
+            title: 'Xác nhận xóa tất cả sản phẩm',
+            message: `Bạn có chắc chắn muốn xóa tất cả sản phẩm của ${seller?.shopName || 'người bán này'}?`,
+            onConfirm: async () => {
+                try {
+                    await AxiosInterceptor.delete(`/api/cart/seller/${sellerId}`);
+                    setCartItemsBySeller(prev => {
+                        const updatedCart = {
+                            ...prev,
+                            [sellerId]: []
+                        };
 
-            setCartItemsBySeller(prev => ({
-                ...prev,
-                [sellerId]: []
-            }));
+                        // Calculate new total after removal
+                        const newTotal = Object.values(updatedCart).reduce((sum, items) => {
+                            return sum + items.reduce((itemSum, item) => itemSum + item.quantity, 0);
+                        }, 0);
 
-            toast.success("Xóa tất cả sản phẩm khỏi giỏ hàng thành công");
-        } catch (error) {
-            console.error(`Error removing items from seller ${sellerId}:`, error);
-            toast.error("Xóa tất cả sản phẩm khỏi giỏ hàng thất bại.");
-        }
-    };
-    const handleRemoveItem = async (gadgetId, quantity) => {
-        try {
-            await AxiosInterceptor.delete('/api/cart', {
-                data: {
-                    gadgetId: gadgetId,
-                    quantity: quantity
+                        // Dispatch event with new count
+                        window.dispatchEvent(new CustomEvent('cartUpdate', { 
+                            detail: { type: CART_ACTIONS.REMOVE }
+                        }));
+
+                        return updatedCart;
+                    });
+                    toast.success("Xóa tất cả sản phẩm khỏi giỏ hàng thành công");
+                } catch (error) {
+                    console.error(`Error removing items from seller ${sellerId}:`, error);
+                    toast.error("Xóa tất cả sản phẩm khỏi giỏ hàng thất bại.");
                 }
-            });
-
-            // Cập nhật cartItemsBySeller
-            setCartItemsBySeller(prev => {
-                const updatedCart = {};
-                Object.keys(prev).forEach(sellerId => {
-                    updatedCart[sellerId] = prev[sellerId].filter(item => item.gadget.id !== gadgetId);
-                });
-                return updatedCart;
-            });
-
-            // Cập nhật selectedItems
-            setSelectedItems(prev => {
-                const updatedSelected = { ...prev };
-                Object.keys(updatedSelected).forEach(sellerId => {
-                    updatedSelected[sellerId] = updatedSelected[sellerId].filter(id => id !== gadgetId);
-                    if (updatedSelected[sellerId].length === 0) {
-                        delete updatedSelected[sellerId];
-                    }
-                });
-                return updatedSelected;
-            });
-
-            toast.success("Xóa sản phẩm khỏi giỏ hàng thành công");
-        } catch (error) {
-            if (error.response && error.response.data && error.response.data.reasons) {
-                const reasons = error.response.data.reasons;
-                if (reasons.length > 0) {
-                    const reasonMessage = reasons[0].message;
-                    toast.error(reasonMessage);
-                } else {
-                    toast.error("Có lỗi xảy ra vui lòng thử lại");
-                }
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
             }
-        }
+        });
+    };
+
+    const handleRemoveItem = (gadgetId, quantity, gadgetName) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Xác nhận xóa sản phẩm',
+            message: `Bạn có chắc chắn muốn xóa sản phẩm "${gadgetName}" khỏi giỏ hàng?`,
+            onConfirm: async () => {
+                try {
+                    await AxiosInterceptor.delete('/api/cart', {
+                        data: { gadgetId, quantity }
+                    });
+                    
+                    window.dispatchEvent(new CustomEvent('cartUpdate', { 
+                        detail: { type: CART_ACTIONS.REMOVE }
+                    }));
+
+                    // Update cart items state
+                    setCartItemsBySeller(prev => {
+                        const updatedCart = {};
+                        Object.keys(prev).forEach(sellerId => {
+                            updatedCart[sellerId] = prev[sellerId].filter(item => item.gadget.id !== gadgetId);
+                        });
+
+                        // Calculate new total items (not quantities)
+                        const newTotal = Object.values(updatedCart).reduce((sum, items) => {
+                            return sum + items.length;
+                        }, 0);
+
+                        window.dispatchEvent(new CustomEvent('cartUpdate', { 
+                            detail: { count: newTotal } 
+                        }));
+
+                        return updatedCart;
+                    });
+
+                    setSelectedItems(prev => {
+                        const updatedSelected = { ...prev };
+                        Object.keys(updatedSelected).forEach(sellerId => {
+                            updatedSelected[sellerId] = updatedSelected[sellerId].filter(id => id !== gadgetId);
+                            if (updatedSelected[sellerId].length === 0) {
+                                delete updatedSelected[sellerId];
+                            }
+                        });
+                        return updatedSelected;
+                    });
+                    toast.success("Xóa sản phẩm khỏi giỏ hàng thành công");
+                } catch (error) {
+                    if (error.response?.data?.reasons?.[0]?.message) {
+                        toast.error(error.response.data.reasons[0].message);
+                    } else {
+                        toast.error("Có lỗi xảy ra vui lòng thử lại");
+                    }
+                }
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            }
+        });
     };
 
     const handleSelectItem = (sellerId, productId) => {
@@ -366,6 +448,25 @@ const CartPage = () => {
 
     const selectedItemCount = Object.values(selectedItems).flat().length;
 
+    // Add this useEffect to update cart count in header when cart items change
+    useEffect(() => {
+        const updateCartCount = async () => {
+            try {
+                if (sellers.length > 0) {
+                    const totalUniqueItems = Object.values(cartItemsBySeller).reduce((sum, items) => {
+                        return sum + items.length; // Only count each item once, regardless of quantity
+                    }, 0);
+                    const event = new CustomEvent('cartUpdate', { detail: { count: totalUniqueItems } });
+                    window.dispatchEvent(event);
+                }
+            } catch (error) {
+                console.error("Error updating cart count:", error);
+            }
+        };
+
+        updateCartCount();
+    }, [sellers, cartItemsBySeller]);
+
     return (
         <div className="max-w-7xl mx-auto p-4">
             <ToastContainer />
@@ -452,7 +553,7 @@ const CartPage = () => {
                                                     />
 
                                                     <div className="flex-grow flex flex-col space-y-2">
-                                                        <h4 className="font-bold"
+                                                        <h4 className="font-bold cursor-pointer"
                                                             onClick={() => navigate(`/gadget/detail/${slugify(item.gadget.name)}`, {
                                                                 state: {
                                                                     productId: item.gadget.id,
@@ -521,7 +622,7 @@ const CartPage = () => {
                                                     </div>
                                                     <div className='flex justify-end mt-2'>
                                                         <button
-                                                            onClick={() => handleRemoveItem(item.gadget.id, item.quantity)}
+                                                            onClick={() => handleRemoveItem(item.gadget.id, item.quantity, item.gadget.name)}
                                                             className="text-red-500 hover:underline"
                                                         >
                                                             <TrashIcon />
@@ -567,6 +668,13 @@ const CartPage = () => {
                     onCancel={handleCancelOrder}
                 />
             )}
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+            />
         </div>
     );
 };
