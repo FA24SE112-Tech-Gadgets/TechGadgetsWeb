@@ -83,16 +83,9 @@ const ManageGadget = ({ categoryId }) => {
         : `/api/gadgets/${gadgetToToggle.id}/activate`;
       
       await AxiosInterceptor.put(endpoint);
-
-      setGadgets(prev => prev.map(gadget => {
-        if (gadget.id === gadgetToToggle.id) {
-          return {
-            ...gadget,
-            gadgetStatus: gadgetToToggle.gadgetStatus === "Active" ? "Inactive" : "Active"
-          };
-        }
-        return gadget;
-      }));
+      
+      // Fetch the updated data instead of modifying the state directly
+      await fetchGadgets();
       
       toast.success("Cập nhật trạng thái thành công");
     } catch (error) {

@@ -19,8 +19,10 @@ const GadgetDetailManager = () => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5; // Number of reviews per page
+    const itemsPerPage = 2; // Number of reviews per page
     const [actionLoading, setActionLoading] = useState({});
+    const [sortByDate, setSortByDate] = useState('');
+    const [sortByRating, setSortByRating] = useState('');
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -55,7 +57,14 @@ const GadgetDetailManager = () => {
 
     const fetchReviews = async () => {
         try {
-            const response = await AxiosInterceptor.get(`/api/reviews/gadget/${gadgetId}/manager?Page=1&PageSize=100`);
+            const response = await AxiosInterceptor.get(`/api/reviews/gadget/${gadgetId}/manager`, {
+                params: {
+                    Page: 1,
+                    PageSize: 100,
+                    SortByDate: sortByDate,
+                    SortByRating: sortByRating,
+                },
+            });
             setReviews(response.data.items);
         } catch (error) {
             console.error("Error fetching reviews:", error);
@@ -109,7 +118,7 @@ const GadgetDetailManager = () => {
         if (activeTab === 'manageReview') {
             fetchReviews();
         }
-    }, [gadgetId, activeTab]);
+    }, [gadgetId, activeTab, sortByDate, sortByRating]);
 
     const handleImageClick = (imageUrl) => {
         if (imgRef.current) {
@@ -226,6 +235,34 @@ const GadgetDetailManager = () => {
                         )}
                         {activeTab === 'manageReview' && (
                             <div className="space-y-4">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div className="mb-4">
+                                        <label htmlFor="sort-by-date" className="text-sm font-medium text-gray-700 mr-3">Sắp xếp theo ngày</label>
+                                        <select
+                                            id="sort-by-date"
+                                            value={sortByDate}
+                                            onChange={(e) => setSortByDate(e.target.value)}
+                                            className="w-full sm:w-[180px] px-1 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
+                                        >
+                                            <option value="">---</option>
+                                            <option value="DESC">Mới</option>
+                                            <option value="ASC">Cũ</option>
+                                        </select>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label htmlFor="sort-by-rating" className="text-sm font-medium text-gray-700 mr-3">Đánh giá theo</label>
+                                        <select
+                                            id="sort-by-rating"
+                                            value={sortByRating}
+                                            onChange={(e) => setSortByRating(e.target.value)}
+                                            className="w-full sm:w-[180px] px-1 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
+                                        >
+                                            <option value="">---</option>
+                                            <option value="DESC">Cao nhất</option>
+                                            <option value="ASC">Thấp nhất</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 {currentReviews.length > 0 ? (
                                     <>
                                         {currentReviews.map((review) => (
