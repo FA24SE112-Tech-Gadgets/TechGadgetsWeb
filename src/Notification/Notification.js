@@ -74,15 +74,20 @@ const Notification = () => {
 
     const handleNotificationClick = (notification) => {
         markAsRead(notification.id);
-
-        if (notification.type === 'SellerOrder'
-
-        ) {
+    
+        if (notification.type === 'SellerOrder') {
             navigate(`/order/detail/${notification.sellerOrderId}`);
         } else if (notification.type === 'WalletTracking') {
-            navigate(`/deposit-history`);
+            if (notification.title === "Nạp ví TechGadget") {
+                navigate(`/deposit-history`);
+            } else {
+                navigate(`/refund-history`);
+            }
+        } else if (notification.type === 'Order') {
+            navigate(`/payment-history`);
         }
     };
+    
 
     const getNotificationIcon = (type) => {
         const iconClass = "w-10 h-10 p-2.5"; // Chuẩn hóa kích thước icon

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaPencilAlt, FaSave, FaKey } from 'react-icons/fa';
+import { CgSpinner } from 'react-icons/cg';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import ChangePassword from '~/pages/Profile/ChangePassword';
 import { toast, ToastContainer } from 'react-toastify';
@@ -42,6 +43,8 @@ const SellerProfilePage = () => {
         taxCode: '',
     });
     const [originalProfile, setOriginalProfile] = useState({});
+    const [hasChanges, setHasChanges] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const getCurrentUser = async () => {
@@ -61,7 +64,7 @@ const SellerProfilePage = () => {
                 };
 
                 setProfile(loadedProfile);
-                setOriginalProfile(loadedProfile); // Store original data for comparison
+                setOriginalProfile(loadedProfile);
             } catch (error) {
                 console.error('Error fetching seller profile:', error);
             }
@@ -70,26 +73,33 @@ const SellerProfilePage = () => {
         getCurrentUser();
     }, []);
 
+    useEffect(() => {
+        const hasChanged = Object.keys(profile).some(key => 
+            JSON.stringify(profile[key]) !== JSON.stringify(originalProfile[key])
+        );
+        setHasChanges(hasChanged);
+    }, [profile, originalProfile]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setProfile({ ...profile, [name]: value });
     };
 
     const handleSave = async () => {
+        if (!hasChanges) {
+            toast.info('Không có thay đổi nào để lưu.');
+            return;
+        }
+
+        setIsSaving(true);
         try {
             const formData = new FormData();
 
-            // Only add fields that have been modified
-            if (profile.companyName !== originalProfile.companyName) formData.append('CompanyName', profile.companyName);
-            if (profile.shopName !== originalProfile.shopName) formData.append('ShopName', profile.shopName);
-            if (profile.shopAddress !== originalProfile.shopAddress) formData.append('ShopAddress', profile.shopAddress);
-            if (profile.phoneNumber !== originalProfile.phoneNumber) formData.append('PhoneNumber', profile.phoneNumber);
-
-            // Skip API call if there are no changes
-            if (Array.from(formData.keys()).length === 0) {
-                toast.info('Không có thay đổi nào để lưu.');
-                return;
-            }
+            ['companyName', 'shopName', 'shopAddress', 'phoneNumber'].forEach(key => {
+                if (profile[key] !== originalProfile[key]) {
+                    formData.append(key.charAt(0).toUpperCase() + key.slice(1), profile[key]);
+                }
+            });
 
             const response = await AxiosInterceptor.patch('/api/seller', formData, {
                 headers: {
@@ -99,7 +109,7 @@ const SellerProfilePage = () => {
 
             if (response.status >= 200 && response.status < 300) {
                 setIsEditing(false);
-                setOriginalProfile(profile); // Update original profile after successful save
+                setOriginalProfile(profile);
                 toast.success('Cập nhật thông tin thành công!');
             } else {
                 const errorMessage = response.data.reasons?.[0]?.message || 'Vui lòng thử lại.';
@@ -108,24 +118,27 @@ const SellerProfilePage = () => {
         } catch (error) {
             const errorMessage = error.response?.data?.reasons?.[0]?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.';
             toast.error(`${errorMessage}`);
+        } finally {
+            setIsSaving(false);
         }
     };
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
     const navigate = useNavigate();
+
     return (
         <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-primary/40 to-secondary/40">
             <ToastContainer />
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">              
-            <div>
-                <button
-                   onClick={() => navigate(-1)}
-                    className="text-black  cursor-pointer"
-                >
-                    <ArrowBack /> 
-                </button>
-            </div> 
+                <div>
+                    <button
+                       onClick={() => navigate(-1)}
+                        className="text-black cursor-pointer"
+                    >
+                        <ArrowBack /> 
+                    </button>
+                </div> 
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-2">
                         <h1 className="text-2xl font-bold">Thông tin cá nhân</h1>
@@ -140,7 +153,6 @@ const SellerProfilePage = () => {
                 <div className="grid grid-cols-2 gap-8">
                     {/* Editable Fields */}
                     <div>
-                        {/* Conditionally render companyName if businessModel is not Personal */}
                         {profile.businessModel !== 'Personal' && (
                             <div className="mb-4">
                                 <label className="flex items-center text-gray-700">
@@ -163,7 +175,6 @@ const SellerProfilePage = () => {
                             </div>
                         )}
 
-                        {/* Other editable fields */}
                         {['shopName', 'shopAddress', 'phoneNumber'].map((key) => (
                             <div key={key} className="mb-4">
                                 <label className="flex items-center text-gray-700">
@@ -221,9 +232,17 @@ const SellerProfilePage = () => {
                     <div className="flex justify-center">
                         <button
                             onClick={handleSave}
-                            className="mt-4 bg-black text-white p-2 rounded flex items-center"
+                            disabled={!hasChanges || isSaving}
+                            className={`mt-4 bg-black text-white p-2 rounded flex items-center ${
+                                !hasChanges || isSaving ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
                         >
-                            <FaSave className="mr-2" /> Lưu
+                            {isSaving ? (
+                                <CgSpinner className="animate-spin mr-2" />
+                            ) : (
+                                <FaSave className="mr-2" />
+                            )}
+                            {isSaving ? 'Đang lưu...' : 'Lưu'}
                         </button>
                     </div>
                 )}
@@ -231,7 +250,7 @@ const SellerProfilePage = () => {
 
             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                    <ChangePassword onClose={closeModal} />
+                    <ChangePassword closeModal={closeModal} />
                 </div>
             )}
         </div>

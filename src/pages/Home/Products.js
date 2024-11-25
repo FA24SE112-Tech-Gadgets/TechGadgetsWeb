@@ -144,7 +144,7 @@ export default function ProductPage() {
     <div className="parent-container overflow-hidden p-2">
       <div
         key={product.id}
-        className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105 hover:border-primary/50 dark:bg-gray-800 dark:border-gray-700"
+        className="border-2 rounded-2xl shadow-sm flex flex-col justify-between relative transition-transform duration-200 transform hover:scale-105 hover:border-primary/50 dark:bg-gray-800 dark:border-gray-700 cursor-pointer"
         onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
           state: {
             productId: product.id,

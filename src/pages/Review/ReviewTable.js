@@ -16,6 +16,10 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
   const [sellerReplies, setSellerReplies] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const isContentValid = (content, originalContent = '') => {
+    return content && content.trim() !== '' && content.trim() !== originalContent.trim();
+  };
+
   const handleOpenModal = (order, isEdit = false) => {
     setCurrentOrder(order);
     setRatings((prev) => ({
@@ -58,6 +62,10 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
   const handleSubmitReview = async (order) => {
     const rating = ratings[order.sellerOrderItemId] || 0;
     const content = contents[order.sellerOrderItemId] || '';
+    if (!isContentValid(content)) {
+      toast.error('Nội dung phản hồi không được để trống');
+      return;
+    }
 
     if (rating < 0 || rating > 5 || content.trim() === '') {
       toast.error('Rating phải từ 0 đến 5 và nội dung không được để trống.');
@@ -85,6 +93,15 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
   };
 
   const handleUpdateReview = async () => {
+    const newContent = contents[currentOrder.review.id];
+    const originalContent = currentOrder.review.content;
+
+    if (ratings[currentOrder.id] === currentOrder.review.rating &&
+      contents[currentOrder.id].trim() === currentOrder.review.content.trim()) {
+      toast.error('Vui lòng thay đổi nội dung hoặc số sao trước khi cập nhật.');
+      return;
+    }
+
     if (ratings[currentOrder.id] < 0 || ratings[currentOrder.id] > 5 || contents[currentOrder.id].trim() === '') {
       toast.error('Rating phải từ 0 đến 5 và nội dung không được để trống.');
       return;
@@ -128,6 +145,26 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
       minute: '2-digit',
     });
   };
+  const isUpdateValid = () => {
+    if (!currentOrder || !currentOrder.review) return false;
+
+    const newRating = ratings[currentOrder.id];
+    const newContent = contents[currentOrder.id]?.trim() || '';
+
+    // Check if content is empty or rating is invalid
+    if (newContent === '' || newRating < 0 || newRating > 5) {
+      return false;
+    }
+
+    // Check if content and rating are unchanged
+    if (newRating === currentOrder.review.rating &&
+      newContent === currentOrder.review.content.trim()) {
+      return false;
+    }
+
+    return true;
+  };
+
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -150,6 +187,8 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
+
+
   return (
     <div className="container max-w-6xl mx-auto p-4 flex flex-col gap-4">
       {currentOrders.map((order) => (
@@ -159,7 +198,7 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
               productId: order.gadgetId,
             }
           })}
-          className="bg-white p-4 rounded-lg shadow-md flex relative">
+          className="bg-white p-4 rounded-lg shadow-md flex relative cursor-pointer hover:bg-gray-50 transition-colors duration-200">
           <img src={order.thumbnailUrl} alt={order.name} className="w-24 h-24 object-contain rounded mr-4" />
           <div className="flex-1">
             <h3 className="text-lg font-semibold mb-2">{order.name}</h3>
@@ -184,7 +223,7 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
                       onChange={(e) => handleContentChange(order.sellerOrderItemId, e.target.value)}
                       className="w-full h-8 overflow-hidden px-3 py-2 pr-10 border rounded focus:outline-none focus:ring-2 focus:ring-primary mt-2 resize-none"
                       rows={4} // Adjust number of rows as needed
-                      placeholder="Enter your review..."
+                      placeholder="Đánh giá của bạn..."
 
                     />
                     <button
@@ -214,9 +253,11 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
 
                 <p className="mt-2 text-gray-500 text-sm">{formatDate(order.review.createdAt)}</p>
 
-                <button onClick={() => handleOpenModal(order, true)} className="text-primary/70 hover:text-secondary/80 mt-2">
-                  <Edit className="h-5 w-5 absolute top-4 right-4" />
-                </button>
+                {!order.review.isUpdated && (
+                  <button onClick={() => handleOpenModal(order, true)} className="text-primary/70 hover:text-secondary/80 mt-2">
+                    <Edit className="h-5 w-5 absolute top-4 right-4" />
+                  </button>
+                )}
               </div>
             )}
             {/* Seller Reply Section */}
@@ -226,11 +267,11 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
                 <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
 
                 <div className="mt-2 flex items-center text-gray-700">
-                      <p className="text-gray-700">{order.review.sellerReply.content}</p>
-                      {order.review.sellerReply.isUpdated && (
-                        <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
-                      )}
-                    </div>
+                  <p className="text-gray-700">{order.review.sellerReply.content}</p>
+                  {order.review.sellerReply.isUpdated && (
+                    <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -242,12 +283,11 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
           <button
             key={pageNumber}
             onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${
-              pageNumber === currentPage
-                ? 'bg-primary/80 text-white'
-                : 'bg-gray-200 text-gray-700'
-            }`}
-            // disabled={isLoading}
+            className={`px-4 py-2 rounded-md ${pageNumber === currentPage
+              ? 'bg-primary/80 text-white'
+              : 'bg-gray-200 text-gray-700'
+              }`}
+          // disabled={isLoading}
           >
             {pageNumber}
           </button>
@@ -277,7 +317,10 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
             </div>
             <div className="flex justify-end space-x-2">
               <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Hủy</button>
-              <button onClick={handleUpdateReview} className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary/50">Cập nhật</button>
+              <button onClick={handleUpdateReview} disabled={!isUpdateValid()} className={`px-4 py-2 bg-primary/75 text-white rounded ${isUpdateValid()
+                ? 'hover:bg-secondary/85'
+                : 'opacity-50 cursor-not-allowed'
+                }`}>Cập nhật</button>
             </div>
           </div>
         </div>

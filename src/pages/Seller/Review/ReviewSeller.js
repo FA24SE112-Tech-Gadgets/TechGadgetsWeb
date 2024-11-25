@@ -80,7 +80,7 @@ const ReviewSeller = () => {
     <div className="container mx-auto p-4">
       <ToastContainer />
       <h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-white ">
-          Đánh giá của bạn
+        Phản hồi của bạn
       </h1>
       <div className="flex justify-between items-center mb-6">
         <div className="mb-4">
@@ -107,14 +107,14 @@ const ReviewSeller = () => {
           </button>
           <button
             onClick={() => handleStatusChange("Replied")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center ${status === "Replied" ?"bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center ${status === "Replied" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
             <MessageSquareMore className="inline-block mr-2" /> Đã trả lời
           </button>
         </div>
       </div>
       {filteredOrders.length === 0 ? (
-        <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
+        <p className="text-center text-gray-500">Không có phản hồi nào.</p>
       ) : (
         <ReviewSellerTable orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} onOrderUpdateStatusChanged={handleOrderUpdateStatus} />
       )}

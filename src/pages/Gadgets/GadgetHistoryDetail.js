@@ -76,7 +76,7 @@ const GadgetHistoryDetail = () => {
                       state: { productId: gadget.id },
                     })
                   }
-                  className="relative p-2 border rounded-lg shadow-md w-full max-w-sm" /* Thay đổi w-76 thành w-full và max-w-sm */
+                  className="relative p-2 border rounded-lg shadow-md w-full max-w-sm cursor-pointer" /* Thay đổi w-76 thành w-full và max-w-sm */
                 >
                   <div className="flex">
                     <img

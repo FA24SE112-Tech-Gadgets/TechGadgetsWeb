@@ -265,7 +265,7 @@ const OrderDetailSeller = () => {
         <div className="flex justify-end mt-4 space-x-4">
           <button
             onClick={handleConfirmOrderClick}
-            className="bg-primary/80 text-white rounded px-4 py-2 hover:bg-primary/70"
+            className="bg-primary/75 text-white rounded px-4 py-2 hover:bg-secondary/85"
             disabled={isLoading}
           >
             Xác nhận đơn hàng
@@ -297,7 +297,7 @@ const OrderDetailSeller = () => {
                   handleConfirmOrder();
                   setShowConfirmModal(false);
                 }}
-                className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary/70"
+                className="px-4 py-2 bg-primary/75 text-white rounded hover:bg-secondary/85"
                 disabled={isLoading}
               >
                 Xác nhận
@@ -333,7 +333,7 @@ const OrderDetailSeller = () => {
                 </button>
                 <button
                   onClick={handleCancelOrder}
-                  className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary/70"
+                  className="px-4 py-2 bg-primary/75 text-white rounded hover:bg-secondary/85"
                   disabled={isLoading}
                 >
                   Xác nhận hủy

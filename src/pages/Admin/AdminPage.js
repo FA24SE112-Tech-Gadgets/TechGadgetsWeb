@@ -372,7 +372,7 @@ const AdminPage = () => {
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-primary/70 text-white rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:ring-offset-2"
+            className="px-4 py-2 bg-primary/75 text-white rounded hover:bg-secondary/85 focus:ring-offset-2"
           >
             <Search className="h-5 w-5" />
           </button>

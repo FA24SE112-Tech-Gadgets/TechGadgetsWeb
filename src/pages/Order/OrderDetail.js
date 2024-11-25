@@ -214,7 +214,7 @@ const OrderDetail = () => {
                                             productId: item.gadgetId,
                                         }
                                     })}
-                                    className="hover:bg-gray-50">
+                                    className="hover:bg-gray-50 cursor-pointer">
                                     <td className="py-2 px-4 border-b">
                                         <div className="flex items-center space-x-4">
                                             <img

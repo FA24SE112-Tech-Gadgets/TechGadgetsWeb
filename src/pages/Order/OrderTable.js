@@ -128,7 +128,7 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
                         productId: gadget.gadgetId,
                     }
                 })}
-                  className="flex items-center space-x-4 py-2">
+                  className="flex items-center space-x-4 py-2 cursor-pointer">
                     <img
                       src={gadget.thumbnailUrl}
                       alt={gadget.name}
