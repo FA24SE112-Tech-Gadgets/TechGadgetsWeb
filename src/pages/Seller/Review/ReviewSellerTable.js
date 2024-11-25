@@ -17,12 +17,7 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
     return content && content.trim() !== '' && content.trim() !== originalContent.trim();
   };
 
-  const isWithinEditWindow = (dateString) => {
-    const createdAt = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = (now - createdAt) / 1000 / 60;
-    return diffInMinutes <= 10;
-  };
+
 
   const handleOpenModal = (order, isEdit = false) => {
     setCurrentOrder(order);
@@ -222,14 +217,12 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
                       )}
                     </div>
                     <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
-                    {isWithinEditWindow(order.review.sellerReply.createdAt) && (
                       <button 
                         onClick={() => handleOpenModal(order, true)} 
                         className="text-primary/70 hover:text-secondary/80 mt-2 flex items-center"
                       >
                         <Edit className="h-5 w-5 absolute top-100 right-4" />
                       </button>
-                    )}
                   </div>
                 )}
               </div>
