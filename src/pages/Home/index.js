@@ -54,7 +54,6 @@ const{isAuthenticated}=useAuth();
       {isAuthenticated && <GadgetHistory />}
       <Testimonials />
 
-      <Footer />
       <Popup orderPopup={orderPopup} setOrderPopup={setOrderPopup} />
     </div>
   )
