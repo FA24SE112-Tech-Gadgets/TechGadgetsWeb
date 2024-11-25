@@ -80,7 +80,14 @@ const SellerDashboard = () => {
   };
 
   const formatDateForAPI = (date) => {
-    return date.toISOString().split('.')[0] + 'Z';
+    // Create a new Date object to avoid modifying the original date
+    const adjustedDate = new Date(date);
+    
+    // Subtract 7 hours to adjust for Vietnam time
+    adjustedDate.setHours(adjustedDate.getHours() - 7);
+    
+    // Format the adjusted date as ISO string and add 'Z' for UTC
+    return adjustedDate.toISOString().split('.')[0] + 'Z';
   };
 
   const fetchDayData = async (date) => {
