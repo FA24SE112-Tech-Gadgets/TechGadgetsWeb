@@ -138,7 +138,7 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
             {/* Buyer Review Section */}
             <div className="border-b pb-4 mb-4">
               <div className="flex items-center ml-4 mb-2">
-              <img src={order.review.customer.avatarUrl || user} alt={order.review.customer.fullName} className="w-10 h-10 rounded-full mr-2" />
+                <img src={order.review.customer.avatarUrl || user} alt={order.review.customer.fullName} className="w-10 h-10 rounded-full mr-2" />
                 <div>
                   <p className="text-sm font-semibold">{order.review.customer.fullName}</p>
                 </div>
@@ -195,9 +195,11 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
                       )}
                     </div>
                     <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
-                    <button onClick={() => handleOpenModal(order, true)} className="text-primary/70 hover:text-secondary/80 mt-2 flex items-center">
-                      <Edit className="h-5 w-5 absolute top-100 right-4" />
-                    </button>
+                    {!order.review.sellerReply.isUpdated && (
+                      <button onClick={() => handleOpenModal(order, true)} className="text-primary/70 hover:text-secondary/80 mt-2 flex items-center">
+                        <Edit className="h-5 w-5 absolute top-100 right-4" />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -212,11 +214,10 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
           <button
             key={pageNumber}
             onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${
-              pageNumber === currentPage
+            className={`px-4 py-2 rounded-md ${pageNumber === currentPage
                 ? 'bg-primary/80 text-white'
                 : 'bg-gray-200 text-gray-700'
-            }`}
+              }`}
           >
             {pageNumber}
           </button>
@@ -237,7 +238,7 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
             </div>
             <div className="flex justify-end space-x-2">
               <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Hủy</button>
-              <button onClick={handleUpdateReview} className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary-600">Cập nhật</button>
+              <button onClick={handleUpdateReview} className="px-4 py-2 bg-primary/75 text-white rounded hover:bg-secondary/85">Cập nhật</button>
             </div>
           </div>
         </div>

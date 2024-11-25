@@ -159,7 +159,7 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
               productId: order.gadgetId,
             }
           })}
-          className="bg-white p-4 rounded-lg shadow-md flex relative">
+          className="bg-white p-4 rounded-lg shadow-md flex relative cursor-pointer hover:bg-gray-50 transition-colors duration-200">
           <img src={order.thumbnailUrl} alt={order.name} className="w-24 h-24 object-contain rounded mr-4" />
           <div className="flex-1">
             <h3 className="text-lg font-semibold mb-2">{order.name}</h3>
@@ -214,9 +214,11 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
 
                 <p className="mt-2 text-gray-500 text-sm">{formatDate(order.review.createdAt)}</p>
 
-                <button onClick={() => handleOpenModal(order, true)} className="text-primary/70 hover:text-secondary/80 mt-2">
-                  <Edit className="h-5 w-5 absolute top-4 right-4" />
-                </button>
+                {!order.review.isUpdated && (
+                  <button onClick={() => handleOpenModal(order, true)} className="text-primary/70 hover:text-secondary/80 mt-2">
+                    <Edit className="h-5 w-5 absolute top-4 right-4" />
+                  </button>
+                )}
               </div>
             )}
             {/* Seller Reply Section */}
@@ -226,11 +228,11 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
                 <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
 
                 <div className="mt-2 flex items-center text-gray-700">
-                      <p className="text-gray-700">{order.review.sellerReply.content}</p>
-                      {order.review.sellerReply.isUpdated && (
-                        <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
-                      )}
-                    </div>
+                  <p className="text-gray-700">{order.review.sellerReply.content}</p>
+                  {order.review.sellerReply.isUpdated && (
+                    <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -242,12 +244,11 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
           <button
             key={pageNumber}
             onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${
-              pageNumber === currentPage
+            className={`px-4 py-2 rounded-md ${pageNumber === currentPage
                 ? 'bg-primary/80 text-white'
                 : 'bg-gray-200 text-gray-700'
-            }`}
-            // disabled={isLoading}
+              }`}
+          // disabled={isLoading}
           >
             {pageNumber}
           </button>
@@ -277,7 +278,7 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
             </div>
             <div className="flex justify-end space-x-2">
               <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Hủy</button>
-              <button onClick={handleUpdateReview} className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary/50">Cập nhật</button>
+              <button onClick={handleUpdateReview} className="px-4 py-2 bg-primary/75 text-white rounded hover:bg-secondary/85">Cập nhật</button>
             </div>
           </div>
         </div>

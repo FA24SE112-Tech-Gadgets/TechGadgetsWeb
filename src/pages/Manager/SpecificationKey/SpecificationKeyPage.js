@@ -113,7 +113,7 @@ export default function SpecificationKeyPage() {
 
   const handleDeleteSpecificationKey = async (id) => {
     try {
-      await AxiosInterceptor.delete(`https://tech-gadgets-dev.xyz/api/specification-keys/${id}`)
+      await AxiosInterceptor.delete(`/api/specification-keys/${id}`)
       toast.success('Đã xóa thông số thành công')
       fetchSpecificationKeys()
       setDeleteMode(prev => ({ ...prev, [id]: false }))
@@ -125,7 +125,7 @@ export default function SpecificationKeyPage() {
 
   const handleDeleteSpecificationUnit = async (id) => {
     try {
-      await AxiosInterceptor.delete(`https://tech-gadgets-dev.xyz/api/specification-units/${id}`)
+      await AxiosInterceptor.delete(`/api/specification-units/${id}`)
       toast.success('Đã xóa đơn vị thành công')
       fetchSpecificationKeys()
     } catch (error) {
@@ -136,7 +136,7 @@ export default function SpecificationKeyPage() {
 
   const handleAddSpecificationUnit = async (specificationKeyId) => {
     try {
-      await AxiosInterceptor.post('https://tech-gadgets-dev.xyz/api/specification-units', {
+      await AxiosInterceptor.post('/api/specification-units', {
         specificationKeyId: specificationKeyId,
         name: newUnitName
       })

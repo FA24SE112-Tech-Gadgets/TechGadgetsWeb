@@ -145,7 +145,7 @@ function FavoritePage() {
                 {groupedFavorites.length === 0 ? (
 
                     <div className="text-center text-gray-500 dark:text-gray-300">
-                        Danh sách này trống
+                        Danh sách yêu thích trống
                     </div>
                 ) : (
                     groupedFavorites.map((shop) => (

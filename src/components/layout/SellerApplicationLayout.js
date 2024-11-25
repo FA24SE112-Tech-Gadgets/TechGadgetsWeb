@@ -7,7 +7,7 @@ const SellerApplicationLayout = () => {
     return (
 
             <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-            <SellerHeader />
+           
             <div style={{ display: 'flex', flex: 1 }}>
                 <SellerDashboard />
                 <div style={{ flex: 1, padding: '20px' }}>
