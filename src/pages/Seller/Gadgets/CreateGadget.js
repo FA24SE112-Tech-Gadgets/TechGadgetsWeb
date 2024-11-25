@@ -199,7 +199,15 @@ const CreateGadget = () => {
       }));
     }
   };
+  const filterPassedTime = (time) => {
+    const currentDate = new Date();
+    const selectedDate = new Date(time);
 
+    if (selectedDate.toDateString() === currentDate.toDateString()) {
+      return selectedDate.getTime() >= currentDate.getTime();
+    }
+    return true;
+  };
   const handleBrandChange = (e) => {
     setGadgetData((prev) => ({
       ...prev,
@@ -486,6 +494,7 @@ const CreateGadget = () => {
                         timeIntervals={15}
                         dateFormat="dd/MM/yyyy HH:mm"
                         minDate={new Date()}
+                        filterTime={filterPassedTime}
                         className={inputClassName}
                         placeholderText="Chọn ngày và giờ"
                       />
