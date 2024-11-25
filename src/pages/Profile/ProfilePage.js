@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaPencilAlt, FaSave, FaKey } from 'react-icons/fa';
+import { CgSpinner } from 'react-icons/cg';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import ChangePassword from './ChangePassword';
 import { toast, ToastContainer } from 'react-toastify';
@@ -70,7 +71,10 @@ const ProfilePage = () => {
     email: '',
     avatar: ''
   });
+  const [originalProfile, setOriginalProfile] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -78,7 +82,7 @@ const ProfilePage = () => {
         const response = await AxiosInterceptor.get('/api/users/current');
         const userData = response.data.customer;
 
-        setProfile({
+        const newProfile = {
           name: userData.fullName,
           address: userData.address || '',
           cccd: userData.cccd || '',
@@ -87,7 +91,10 @@ const ProfilePage = () => {
           phoneNumber: userData.phoneNumber || '',
           email: response.data.email,
           avatar: userData.avatarUrl || ''
-        });
+        };
+
+        setProfile(newProfile);
+        setOriginalProfile(newProfile);
       } catch (error) {
         console.error('Error fetching user profile:', error);
       }
@@ -95,6 +102,11 @@ const ProfilePage = () => {
 
     getCurrentUser();
   }, []);
+
+  useEffect(() => {
+    const hasChanged = Object.keys(profile).some(key => profile[key] !== originalProfile[key]);
+    setHasChanges(hasChanged || previewImage !== null);
+  }, [profile, originalProfile, previewImage]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -105,11 +117,12 @@ const ProfilePage = () => {
     const file = e.target.files[0];
     if (file) {
       setProfile({ ...profile, avatar: file });
-      setPreviewImage(file);
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       const formData = new FormData();
 
@@ -118,7 +131,6 @@ const ProfilePage = () => {
       if (profile.cccd) formData.append('CCCD', profile.cccd);
       if (profile.gender) formData.append('Gender', reverseTranslateGender(profile.gender));
 
-      // Chuyển đổi ngày từ DD/MM/YYYY sang YYYY/MM/DD
       const [day, month, year] = profile.dateOfBirth.split('/');
       const formattedDate = `${year}/${month}/${day}`;
       formData.append('DateOfBirth', formattedDate);
@@ -136,6 +148,14 @@ const ProfilePage = () => {
       });
 
       if (response.status >= 200 && response.status < 300) {
+        // Cập nhật avatar URL từ response nếu có
+        const updatedProfile = { ...profile };
+        if (response.data && response.data.avatarUrl) {
+          updatedProfile.avatar = response.data.avatarUrl;
+        }
+        
+        setProfile(updatedProfile);
+        setOriginalProfile(updatedProfile);
         setIsEditing(false);
         toast.success('Cập nhật thông tin thành công!');
       } else if (response.status >= 400 && response.status < 500) {
@@ -147,6 +167,8 @@ const ProfilePage = () => {
     } catch (error) {
       const errorMessage = error.response?.data?.reasons?.[0]?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.';
       toast.error(`${errorMessage}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -154,6 +176,7 @@ const ProfilePage = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const navigate = useNavigate()
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-primary/40 to-secondary/40">
       <ToastContainer />
@@ -177,15 +200,15 @@ const ProfilePage = () => {
             onClick={openModal}
             className="text-gray-500 hover:text-gray-700 text-xl"
           >
-            <FaKey /> {/* Icon cho đổi mật khẩu */}
+            <FaKey />
           </button>
         </div>
         <div className="flex">
           <div className="w-1/3 flex flex-col items-center">
-            <img
-              src={previewImage ? URL.createObjectURL(previewImage) : (profile.avatar || DefaultAvatar)}
+          <img
+              src={previewImage || profile.avatar || DefaultAvatar}
               alt="User Avatar"
-              className="rounded-full w-40 h-40 mb-4 bg-gray-100"
+              className="rounded-full w-40 h-40 mb-4 bg-gray-100 object-cover"
             />
 
             {isEditing ? (
@@ -268,9 +291,17 @@ const ProfilePage = () => {
               <div className="flex justify-center">
                 <button
                   onClick={handleSave}
-                  className="mt-4 bg-black text-white p-2 rounded flex items-center"
+                  disabled={!hasChanges || isSaving}
+                  className={`mt-4 bg-black text-white p-2 rounded flex items-center ${
+                    !hasChanges || isSaving ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
-                  <FaSave className="mr-2" /> Lưu
+                  {isSaving ? (
+                    <CgSpinner className="animate-spin mr-2" />
+                  ) : (
+                    <FaSave className="mr-2" />
+                  )}
+                  {isSaving ? 'Đang lưu...' : 'Lưu'}
                 </button>
               </div>
             )}
@@ -278,7 +309,6 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"

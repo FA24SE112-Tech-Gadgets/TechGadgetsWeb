@@ -14,8 +14,13 @@ const LottieAnimation = () => {
     };
 
     return (
-        <div>
-            <Lottie options={defaultOptions} height={320} width={300} />
+        <div style={{ cursor: 'default' }}>
+            <Lottie
+                options={defaultOptions}
+                height={320}
+                width={300}
+                style={{ cursor: 'default' }}
+            />
         </div>
     );
 };

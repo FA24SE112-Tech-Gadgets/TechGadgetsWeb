@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import React, { createContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AxiosInterceptor from '../../components/api/AxiosInterceptor';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -28,6 +28,7 @@ const AuthProvider = ({ children }) => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	useEffect(() => {
 		const fetchUser = async () => {
@@ -41,6 +42,19 @@ const AuthProvider = ({ children }) => {
 						setUser(res.data);
 						setAuthenticated(true);
 						setError(null);
+
+						// Check for deposit-related URL parameters
+						const queryParams = new URLSearchParams(location.search);
+						const isSuccess = queryParams.get('isSuccess');
+						const status = queryParams.get('status');
+
+						if (isSuccess === 'True' || status === 'PAID') {
+							navigate('/deposit-success', { replace: true });
+							return;
+						} else if (queryParams.has('isSuccess') || queryParams.has('status')) {
+							navigate('/deposit-fail', { replace: true });
+							return;
+						}
 
 						// Navigate based on role
 						switch (res.data.role) {
@@ -116,7 +130,7 @@ const AuthProvider = ({ children }) => {
 						}
 					}
 					);
-					
+
 				} catch (error) {
 					await logout();
 					setIsLoading(false);
@@ -145,7 +159,7 @@ const AuthProvider = ({ children }) => {
 						} else {
 							navigate("/");
 						}
-						
+
 					} else {
 						await logout();
 						setError({

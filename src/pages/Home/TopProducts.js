@@ -19,7 +19,7 @@ const ProductsData = [
   {
     id: 2,
     img: Img2,
-    title: "Loa Bluetooth",
+    title: "Loa",
     title1: "Loa",
     description:
       "Đắm chìm trong âm thanh sống động với loa Bluetooth cao cấp. Thiết kế hiện đại, âm thanh chất lượng vượt trội – lựa chọn hoàn hảo cho mọi không gian.",
@@ -29,7 +29,7 @@ const ProductsData = [
   {
     id: 3,
     img: Img3,
-    title: "Tai nghe không dây",
+    title: "Tai nghe",
     title1: "Tai nghe",
     description:
       "Thưởng thức âm thanh chất lượng cao và kết nối liền mạch với tai nghe không dây cao cấp của chúng tôi.",
@@ -71,7 +71,7 @@ const TopProducts = ({ handleOrderPopup }) => {
               }}
             >
               {/* image section */}
-              <div className="h-[100px]">
+              <div className="h-[100px] cursor-pointer">
                 <img
                   src={data.img}
                   alt=""
@@ -79,7 +79,7 @@ const TopProducts = ({ handleOrderPopup }) => {
                 />
               </div>
               {/* details section */}
-              <div className="p-4 text-center">
+              <div className="p-4 text-center cursor-pointer">
                 {/* star rating */}
                 <div className="w-full flex items-center justify-center gap-1">
                   <FaStar className="text-yellow-500" />

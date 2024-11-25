@@ -12,6 +12,7 @@ import { Star } from 'lucide-react';
 import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
 import GadgetSuggest from '../Gadgets/GadgetSuggest';
 import users from "~/assets/R.png"
+import { CART_ACTIONS } from '~/constants/cartEvents';
 
 const OrderConfirmation = ({ product, quantity, onCancel }) => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -112,7 +113,7 @@ const OrderConfirmation = ({ product, quantity, onCancel }) => {
 
                 <div className="mb-6 border-b pb-4">
                     <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center flex-grow mr-4">                          
+                        <div className="flex items-center flex-grow mr-4">
                             <img src={product.thumbnailUrl} alt={product.name} className="w-12 h-12 object-contain mr-2" />
                             <span className="text-gray-600">{product.name} x {quantity}</span>
                         </div>
@@ -209,7 +210,7 @@ const DetailGadgetPage = () => {
             try {
                 const response = await apiClient(`${apiBase}api/gadgets/${productId}`);
                 setProduct(response.data);
-                setPrice(response.price); 
+                setPrice(response.price);
             } catch (error) {
                 console.error("Error fetching product details:", error);
                 setError("Failed to fetch product details.");
@@ -219,8 +220,7 @@ const DetailGadgetPage = () => {
         const fetchReviews = async () => {
             try {
                 const response = await AxiosInterceptor.get(`/api/reviews/gadget/${productId}`);
-                setReviews(response.data.items.slice(0, 2)); // Show only the first 2 reviews
-
+                setReviews(response.data.items.slice(0, 2)); // Show only the first 2 reviews             
             } catch (error) {
                 toast.error('Failed to fetch reviews');
             }
@@ -242,14 +242,14 @@ const DetailGadgetPage = () => {
         }
     };
     if (error) return <div>{error}</div>;
-    if (!product) return    <div className="flex items-center justify-center min-h-screen">
-    <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
-      <div className="h-4 w-4 bg-white rounded-full"></div>
-    </div>
-    <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-      Loading...
-    </span>
-  </div>;
+    if (!product) return <div className="flex items-center justify-center min-h-screen">
+        <div className="w-7 h-7 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center animate-spin">
+            <div className="h-4 w-4 bg-white rounded-full"></div>
+        </div>
+        <span className="ml-2 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+            Loading...
+        </span>
+    </div>;
 
     const handleQuantityChange = (type) => {
         setQuantity(prev => type === 'increment' ? prev + 1 : Math.max(1, prev - 1));
@@ -265,25 +265,28 @@ const DetailGadgetPage = () => {
 
 
     const handleAddToCart = async () => {
-        const totalPrice = price * quantity;
-
         try {
-            const response = await AxiosInterceptor.post("/api/cart", {
+            await AxiosInterceptor.post("/api/cart", {
                 gadgetId: productId,
                 quantity,
             });
+            
+            window.dispatchEvent(new CustomEvent('cartUpdate', { 
+                detail: { type: CART_ACTIONS.ADD }
+            }));
+            
             toast.success("Thêm sản phẩm thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
                 const reasons = error.response.data.reasons;
                 if (reasons.length > 0) {
-                  const reasonMessage = reasons[0].message;
-                  toast.error(reasonMessage);
+                    const reasonMessage = reasons[0].message;
+                    toast.error(reasonMessage);
                 } else {
-                  toast.error("Thêm sản phẩm thất bại, vui lòng thử lại");
+                    toast.error("Thêm sản phẩm thất bại, vui lòng thử lại");
                 }
-              }
             }
+        }
     };
 
     const handleBuyNow = () => {
@@ -329,10 +332,49 @@ const DetailGadgetPage = () => {
                 className="w-full"
                 items={[
                     {
-                        title: <p>{product.category?.name}</p>,
+                        title: (
+                            <p
+                                className="hover:cursor-pointer"
+                                onClick={() => {
+                                    navigate("/");
+                                }}
+                            >
+                                Trang chủ
+                            </p>
+                        ),
                     },
                     {
-                        title: <p>{product.brand?.name}</p>,
+                        title: (
+                            <p
+                                className="hover:cursor-pointer"
+                                onClick={() => {
+                                    navigate(`/gadgets/${slugify(product.category?.name)}`, {
+                                        state: {
+                                            categoryId: product.category.id,
+                                        },
+                                    });
+                                }}
+                            >
+                                {product.category?.name}
+                            </p>
+                        ),
+                    },
+                    {
+                        title: (
+                            <p
+                                className="hover:cursor-pointer"
+                                onClick={() => {
+                                    navigate(`/gadgets/${slugify(product.category?.name)}/${slugify(product.brand?.name)}`, {
+                                        state: {
+                                            categoryId: product.category.id,
+                                            brandId: product.brand.id,
+                                        },
+                                    });
+                                }}
+                            >
+                                {product.brand?.name}
+                            </p>
+                        ),
                     },
                     {
                         title: <p>{product.name}</p>,
@@ -340,7 +382,7 @@ const DetailGadgetPage = () => {
                 ]}
             />
 
-            <ToastContainer 
+            <ToastContainer
                 position="top-right"
                 autoClose={3000}
                 hideProgressBar={false}
@@ -472,6 +514,7 @@ const DetailGadgetPage = () => {
                             </div>
                         )}
                     </div>
+
                     <div className="mt-7 ">
                         <h2 className="text-sm font-bold mb-4 text-center">Đánh giá sản phẩm {product.name}</h2>
                         {reviews.length === 0 ? (
@@ -513,7 +556,9 @@ const DetailGadgetPage = () => {
                             </div>
                         )}
                         <div className="mt-8">
+
                             {reviews.length > 0 ? (
+
                                 reviews.map((review) => (
                                     <div key={review.id} className="mb-6 p-6 border border-gray-200 rounded-lg shadow-sm">
                                         <div className="flex items-center mb-4">
@@ -531,13 +576,21 @@ const DetailGadgetPage = () => {
                                             <span className="text-yellow-500 text-lg">{'★'.repeat(review.rating)}</span>
                                             <span className="text-gray-300 text-lg">{'★'.repeat(5 - review.rating)}</span>
                                         </div>
-                                        <p className="text-sm text-gray-700 mb-4">{review.content}</p>
+                                        <div className="mt-2 flex items-center text-gray-700">
+                                            <p>{review.content}</p>
+                                            {review.isUpdated && (
+                                                <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                                            )}
+                                        </div>
                                         {review.sellerReply && (
                                             <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                 <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
-                                                <div>
-                                                    <p className="text-gray-700">{review.sellerReply.content}</p>
-                                                    <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
+                                                <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
+                                                <div className="mt-2 flex items-center text-gray-700">
+                                                    <p>{review.sellerReply.content}</p>
+                                                    {review.sellerReply.isUpdated && (
+                                                        <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}

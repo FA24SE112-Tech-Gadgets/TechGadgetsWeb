@@ -104,18 +104,18 @@ const Review = () => {
             onClick={() => handleStatusChange("NotReview")}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center ${status === "NotReview" ? "bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <MessageSquareOff className="inline-block mr-2" /> Chưa trả lời
+            <MessageSquareOff className="inline-block mr-2" /> Chưa đánh giá
           </button>
           <button
             onClick={() => handleStatusChange("Reviewed")}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex items-center ${status === "Reviewed" ?"bg-primary/80 text-white" : "text-gray-600 hover:bg-primary/20"}`}
           >
-            <MessageSquareMore className="inline-block mr-2" /> Đã trả lời
+            <MessageSquareMore className="inline-block mr-2" /> Đã đánh giá
           </button>
         </div>
       </div>
       {filteredOrders.length === 0 ? (
-        <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
+        <p className="text-center text-gray-500">Không có đánh giá nào.</p>
       ) : (
         <ReviewTable orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} onOrderUpdateStatusChanged={handleOrderUpdateStatus}/>
       )}

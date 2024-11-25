@@ -55,6 +55,7 @@ import AdminPage from "./pages/Admin/AdminPage";
 import SellerDashboard from "./pages/Seller/Dashboard/SellerDashboard";
 import ManagerDashboard from "./pages/Manager/Dashboard/ManagerDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import GadgetDetailManager from "./pages/Manager/Gadget/GadgetDetailManager";
 
 
 
@@ -227,7 +228,7 @@ function App() {
           <ManageGadgetPage />
         } />
           <Route path='/gadget/detail-manager/:name' element={
-          <GadgetDetailSeller/>
+          <GadgetDetailManager/>
         } />
         <Route path='/manage-dashboard' element={
           <ManagerDashboard />

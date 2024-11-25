@@ -185,13 +185,13 @@ const ManagerDashboard = () => {
           color="border-l-4 border-green-500"
         />
         <StatCard
-          title="Số đơn đặt hàng"
+          title="Số đơn thành công"
           value={stats.totalOfSellerOrders}
           icon={ShoppingBag}
           color="border-l-4 border-blue-500"
         />
         <StatCard
-          title="Số lượng bán"
+          title="Số sản phẩm bán ra"
           value={stats.numberOfSoldGadgets}
           icon={Package}
           color="border-l-4 border-yellow-500"

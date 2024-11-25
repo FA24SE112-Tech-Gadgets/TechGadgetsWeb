@@ -246,6 +246,14 @@ function CategoryGadgetPage() {
             <ToastContainer />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Breadcrumb className="w-full">
+                <Breadcrumb.Item>
+                        <p
+                         className="hover:cursor-pointer"
+                         onClick={() => {
+                            navigate("/");
+                        }}
+                        >Trang chủ</p>
+                    </Breadcrumb.Item>
                     <Breadcrumb.Item>
                         <p>{category}</p>
                     </Breadcrumb.Item>

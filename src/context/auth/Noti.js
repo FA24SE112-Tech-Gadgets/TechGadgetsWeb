@@ -313,6 +313,33 @@ export function NotiProvider({ children }) {
     };
   }, [isAuthenticated]); // Chỉ re-run khi auth state thay đổi
 
+  // Add this new function to reset all states
+  const resetState = useCallback(() => {
+    setNotifications([]);
+    setUnreadCount(0);
+    setIsFetching(false);
+    setHasMore(true);
+    setHasNewNotification(false);
+    setNotificationCount(0);
+    setDeviceToken(null);
+  }, []);
+
+  // Modify the authentication effect
+  useEffect(() => {
+    if (!isAuthenticated) {
+      resetState();
+      return;
+    }
+
+    // Only fetch notifications if user is authenticated
+    fetchNotifications(1).then(response => {
+      if (response?.items) {
+        const unreadCount = response.items.filter(n => !n.isRead).length;
+        setNotificationCount(unreadCount);
+      }
+    });
+  }, [isAuthenticated, resetState]);
+
   return (
     <NotiContext.Provider value={{
       deviceToken,
@@ -332,7 +359,8 @@ export function NotiProvider({ children }) {
       setHasNewNotification,
       setupMessageListener, // Add this back
       notificationCount,
-      resetNotificationCount
+      resetNotificationCount,
+      resetState,
     }}>
       {children}
     </NotiContext.Provider>

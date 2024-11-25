@@ -58,12 +58,12 @@ const SellerHeader = () => {
       </Menu.Item>
       <Menu.Item key="wallet" icon={<Wallet />}>
         <div className=" rounded-lg w-full">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center cursor-default">
             <span>Ví của tôi:</span>
             <span className={`font-bold ml-2 ${showWalletAmount ? 'text-green-600 dark:text-green-400' : 'text-black'}`}>
               {showWalletAmount ? formatWalletAmount(walletAmount) : '******'}
             </span>
-            <button onClick={handleToggleWalletAmount} className="focus:outline-none ml-2">
+            <button onClick={handleToggleWalletAmount} className="focus:outline-none ml-2 cursor-pointer">
               {showWalletAmount ? (
                 <FaEyeSlash className="text-gray-500" />
               ) : (
