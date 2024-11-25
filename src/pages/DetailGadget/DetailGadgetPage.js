@@ -12,6 +12,7 @@ import { Star } from 'lucide-react';
 import GadgetHistoryDetail from '../Gadgets/GadgetHistoryDetail';
 import GadgetSuggest from '../Gadgets/GadgetSuggest';
 import users from "~/assets/R.png"
+import { CART_ACTIONS } from '~/constants/cartEvents';
 
 const OrderConfirmation = ({ product, quantity, onCancel }) => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -265,13 +266,16 @@ const DetailGadgetPage = () => {
 
 
     const handleAddToCart = async () => {
-        const totalPrice = price * quantity;
-
         try {
-            const response = await AxiosInterceptor.post("/api/cart", {
+            await AxiosInterceptor.post("/api/cart", {
                 gadgetId: productId,
                 quantity,
             });
+            
+            window.dispatchEvent(new CustomEvent('cartUpdate', { 
+                detail: { type: CART_ACTIONS.ADD }
+            }));
+            
             toast.success("Thêm sản phẩm thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {

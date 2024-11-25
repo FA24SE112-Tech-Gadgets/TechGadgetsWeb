@@ -74,7 +74,7 @@ const GadgetDetailManager = () => {
             
             await AxiosInterceptor.put(endpoint);
             await fetchReviews();
-            toast.success("Review status updated successfully");
+            toast.success("Thay đổi trạng thái thành công");
         } catch (error) {
             console.error("Error toggling review status:", error);
             toast.error("Failed to update review status");
@@ -92,7 +92,7 @@ const GadgetDetailManager = () => {
             
             await AxiosInterceptor.put(endpoint);
             await fetchReviews();
-            toast.success("Reply status updated successfully");
+           toast.success("Thay đổi trạng thái thành công");
         } catch (error) {
             console.error("Error toggling reply status:", error);
             toast.error("Failed to update reply status");
