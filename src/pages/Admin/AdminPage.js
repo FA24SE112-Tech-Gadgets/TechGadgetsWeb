@@ -438,22 +438,27 @@ const AdminPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{getRoleInVietnamese(user.role)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
-                    {loadingStates[user.id] ? (
-                      <Loader className="h-5 w-5 animate-spin text-primary" />
+                    {user.status === "Pending" ? (
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Đang chờ
+                      </span>
                     ) : (
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={user.status === "Active"}
-                          onChange={() => handleStatusToggleClick(user)}
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                      </label>
+                      <>
+                        {loadingStates[user.id] ? (
+                          <Loader className="h-5 w-5 animate-spin text-primary" />
+                        ) : (
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={user.status === "Active"}
+                              onChange={() => handleStatusToggleClick(user)}
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                          </label>
+                        )}
+                      </>
                     )}
-                    {/* <span className={`px-2 py-1 rounded-full text-white text-sm ${getStatusColor(user.status)}`}>
-                      {user.status}
-                    </span> */}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

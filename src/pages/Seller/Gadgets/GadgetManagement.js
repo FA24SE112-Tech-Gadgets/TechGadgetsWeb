@@ -90,14 +90,14 @@ const GadgetManagement = ({ categoryId }) => {
         const maxVisible = 5; // Số lượng nút hiển thị
         let start = Math.max(1, currentPage - 2);
         let end = Math.min(start + maxVisible - 1, totalPages);
-    
+
         // Điều chỉnh start nếu end đã chạm giới hạn
         if (end - start + 1 < maxVisible) {
-          start = Math.max(1, end - maxVisible + 1);
+            start = Math.max(1, end - maxVisible + 1);
         }
-    
+
         return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-      };
+    };
     const handleSaleToggle = (id, isForSale) => {
         setGadgetToToggleSale({ id, isForSale });
         setShowSaleConfirmModal(true);
@@ -105,7 +105,7 @@ const GadgetManagement = ({ categoryId }) => {
 
     const confirmSaleToggle = async () => {
         if (!gadgetToToggleSale) return;
-        
+
         setLoadingStates(prev => ({ ...prev, [gadgetToToggleSale.id]: true }));
         try {
             const endpoint = gadgetToToggleSale.isForSale
@@ -208,7 +208,15 @@ const GadgetManagement = ({ categoryId }) => {
             setFormattedDate('');
         }
     };
+    const filterPassedTime = (time) => {
+        const currentDate = new Date();
+        const selectedDate = new Date(time);
 
+        if (selectedDate.toDateString() === currentDate.toDateString()) {
+            return selectedDate.getTime() >= currentDate.getTime();
+        }
+        return true;
+    };
     const handleDiscountSubmit = async (event) => {
         event.preventDefault();
         setIsLoading(true);
@@ -739,21 +747,20 @@ const GadgetManagement = ({ categoryId }) => {
             )}
             {/* Pagination */}
             <div className="flex justify-center mt-6 space-x-2">
-        {getPaginationRange().map((pageNumber) => (
-          <button
-            key={pageNumber}
-            onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${
-              pageNumber === currentPage
-                ? 'bg-primary/80 text-white'
-                : 'bg-gray-200 text-gray-700'
-            }`}
-            disabled={isLoading}
-          >
-            {pageNumber}
-          </button>
-        ))}
-      </div>
+                {getPaginationRange().map((pageNumber) => (
+                    <button
+                        key={pageNumber}
+                        onClick={() => handleChangePage(pageNumber)}
+                        className={`px-4 py-2 rounded-md ${pageNumber === currentPage
+                                ? 'bg-primary/80 text-white'
+                                : 'bg-gray-200 text-gray-700'
+                            }`}
+                        disabled={isLoading}
+                    >
+                        {pageNumber}
+                    </button>
+                ))}
+            </div>
 
             {/* Discount Modal */}
             {isModalVisible && (
@@ -804,6 +811,7 @@ const GadgetManagement = ({ categoryId }) => {
                                         timeIntervals={15}
                                         dateFormat="dd/MM/yyyy HH:mm"
                                         minDate={new Date()}
+                                        filterTime={filterPassedTime}
                                         className="mt-1 block w-full rounded-md border-gray-200 bg-gray-100 shadow-sm focus:border-indigo-300 focus:ring focus:ring-gray-400 focus:ring-opacity-50 px-2 py-2"
                                         placeholderText="Chọn ngày và giờ"
                                         required
