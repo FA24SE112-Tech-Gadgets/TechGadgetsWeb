@@ -271,6 +271,10 @@ const DetailGadgetPage = () => {
 
 
     const handleAddToCart = async () => {
+        if (!isAuthenticated) {
+            navigate('/signin');
+            return;
+        }
         try {
             await AxiosInterceptor.post("/api/cart", {
                 gadgetId: productId,
@@ -296,6 +300,10 @@ const DetailGadgetPage = () => {
     };
 
     const handleBuyNow = () => {
+        if (!isAuthenticated) {
+            navigate('/signin');
+            return;
+        }
         if (!user?.address || !user?.phoneNumber) {
             setIsOpen(true);
             return;

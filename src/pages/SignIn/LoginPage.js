@@ -108,7 +108,6 @@ function LogIn() {
               <span className="text-base font-semibold text-gray-600">Mật khẩu</span>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
                   name="password"
                   id="password"
                   className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
