@@ -113,7 +113,7 @@ function SignUp() {
             <input
               type={showPassword ? "text" : "password"}
               name="password"
-              className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
+              className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
               value={user.password}
               onChange={(e) => handleChangeValue("password", e.target.value)}
               required
