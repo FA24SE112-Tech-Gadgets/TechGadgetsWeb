@@ -5,6 +5,7 @@ import { Eye, X } from 'lucide-react';
 import DetailApplication from './DetailApplication';
 import { toast } from "react-toastify";
 import useAuth from '~/context/auth/useAuth';
+import { useDeviceToken } from '~/context/auth/Noti';
 
 const ApprovalPopup = ({ onClose, onLogout }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -37,6 +38,8 @@ const HistorySellerApplication = () => {
   const [showApprovalPopup, setShowApprovalPopup] = useState(false);
   const { logout, setLogout } = useAuth();
   const navigate = useNavigate();
+  const { deleteDeviceToken } = useDeviceToken();
+  
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -82,7 +85,8 @@ const HistorySellerApplication = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await deleteDeviceToken();
+      logout();
       navigate('/signin');
     } catch (error) {
       console.error('Logout failed', error);
