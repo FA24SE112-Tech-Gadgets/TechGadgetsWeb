@@ -119,7 +119,18 @@ export default function SpecificationKeyPage() {
       setDeleteMode(prev => ({ ...prev, [id]: false }))
     } catch (error) {
       console.error('Error deleting specification key:', error)
-      toast.error('Không thể xóa thông số')
+      if (error.response && error.response.data && error.response.data.reasons) {
+        const reasons = error.response.data.reasons;
+
+        // Display the message from the first reason
+        if (reasons.length > 0) {
+          const reasonMessage = reasons[0].message;
+          toast.error(reasonMessage);
+        } else {
+          toast.error('Không thể xóa thông số')
+        }
+      }
+
     }
   }
 
@@ -130,7 +141,18 @@ export default function SpecificationKeyPage() {
       fetchSpecificationKeys()
     } catch (error) {
       console.error('Error deleting specification unit:', error)
-      toast.error('Không thể xóa đơn vị')
+      if (error.response && error.response.data && error.response.data.reasons) {
+        const reasons = error.response.data.reasons;
+
+        // Display the message from the first reason
+        if (reasons.length > 0) {
+          const reasonMessage = reasons[0].message;
+          toast.error(reasonMessage);
+        } else {
+          toast.error('Không thể xóa đơn vị')
+        }
+      }
+
     }
   }
 

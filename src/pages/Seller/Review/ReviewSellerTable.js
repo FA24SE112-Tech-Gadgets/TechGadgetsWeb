@@ -44,7 +44,7 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
 
   const handleSubmitReview = async (order) => {
     const content = contents[order.review.id] || '';
-    
+
     if (!isContentValid(content)) {
       toast.error('Nội dung phản hồi không được để trống');
       return;
@@ -155,34 +155,35 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
             <h3 className="text-lg font-semibold mb-2">{order.name}</h3>
 
             {/* Buyer Review Section */}
-            <div className="border-b pb-4 mb-4">
-              <div className="flex items-center ml-4 mb-2">
-                <img src={order.review.customer.avatarUrl || user} alt={order.review.customer.fullName} className="w-10 h-10 rounded-full mr-2" />
-                <div>
-                  <p className="text-sm font-semibold">{order.review.customer.fullName}</p>
+            {order.review && order.review.status === 'Active' && (
+              <div className="border-b pb-4 mb-4">
+                <div className="flex items-center ml-4 mb-2">
+                  <img src={order.review.customer.avatarUrl || user} alt={order.review.customer.fullName} className="w-10 h-10 rounded-full mr-2" />
+                  <div>
+                    <p className="text-sm font-semibold">{order.review.customer.fullName}</p>
+                  </div>
                 </div>
+                <div className="flex items-center mb-2">
+                  <StarRatings
+                    rating={order.review ? order.review.rating : 0}
+                    starRatedColor="gold"
+                    numberOfStars={5}
+                    starDimension="20px"
+                    starSpacing="2px"
+                  />
+                </div>
+
+
+                <div className="mt-2 flex items-center text-gray-700">
+                  <p className="text-gray-700">{order.review ? order.review.content : 'No review content'}</p>
+                  {order.review.isUpdated && (
+                    <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                  )}
+                </div>
+                <p className="text-gray-500 text-sm">{order.review ? formatDate(order.review.createdAt) : ''}</p>
+
               </div>
-              <div className="flex items-center mb-2">
-                <StarRatings
-                  rating={order.review ? order.review.rating : 0}
-                  starRatedColor="gold"
-                  numberOfStars={5}
-                  starDimension="20px"
-                  starSpacing="2px"
-                />
-              </div>
-
-
-              <div className="mt-2 flex items-center text-gray-700">
-                <p className="text-gray-700">{order.review ? order.review.content : 'No review content'}</p>
-                {order.review.isUpdated && (
-                  <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
-                )}
-              </div>
-              <p className="text-gray-500 text-sm">{order.review ? formatDate(order.review.createdAt) : ''}</p>
-
-            </div>
-
+            )}
             {/* Seller Reply Section */}
             {order.review && (order.review.sellerReply || isWithinTenMinutes(order.review.createdAt)) && (
               <div className="mt-4 bg-gray-50 p-4 rounded-lg">
@@ -198,9 +199,8 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
                     />
                     <button
                       onClick={() => handleSubmitReview(order)}
-                      className={`mt-2 px-4 py-2 bg-primary/80 text-white rounded ${
-                        !isContentValid(contents[order.review.id]) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-600'
-                      }`}
+                      className={`mt-2 px-4 py-2 bg-primary/80 text-white rounded ${!isContentValid(contents[order.review.id]) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-600'
+                        }`}
                       disabled={!isContentValid(contents[order.review.id])}
                     >
                       Gửi phản hồi
@@ -214,6 +214,9 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
                       <p className="text-gray-700">{order.review.sellerReply.content}</p>
                       {order.review.sellerReply.isUpdated && (
                         <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                      )}
+                      {order.review.sellerReply.status === 'Inactive' && (
+                        <p className="ml-2 text-red-500 text-xs">Đánh giá của bạn đã bị khóa</p>
                       )}
                     </div>
                     <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
@@ -237,8 +240,8 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
             key={pageNumber}
             onClick={() => handleChangePage(pageNumber)}
             className={`px-4 py-2 rounded-md ${pageNumber === currentPage
-                ? 'bg-primary/80 text-white'
-                : 'bg-gray-200 text-gray-700'
+              ? 'bg-primary/80 text-white'
+              : 'bg-gray-200 text-gray-700'
               }`}
           >
             {pageNumber}
@@ -260,13 +263,12 @@ const ReviewSellerTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusCh
             </div>
             <div className="flex justify-end space-x-2">
               <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Hủy</button>
-              <button 
-                onClick={handleUpdateReview} 
-                className={`px-4 py-2 bg-primary/75 text-white rounded ${
-                  !isContentValid(contents[currentOrder.review.sellerReply.id], currentOrder.review.sellerReply.content) 
-                    ? 'opacity-50 cursor-not-allowed' 
+              <button
+                onClick={handleUpdateReview}
+                className={`px-4 py-2 bg-primary/75 text-white rounded ${!isContentValid(contents[currentOrder.review.sellerReply.id], currentOrder.review.sellerReply.content)
+                    ? 'opacity-50 cursor-not-allowed'
                     : 'hover:bg-secondary/85'
-                }`}
+                  }`}
                 disabled={!isContentValid(contents[currentOrder.review.sellerReply.id], currentOrder.review.sellerReply.content)}
               >
                 Cập nhật
