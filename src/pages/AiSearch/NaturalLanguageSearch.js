@@ -10,6 +10,7 @@ import { CiHeart } from 'react-icons/ci';
 import { toast, ToastContainer } from 'react-toastify';
 import { LoadingOutlined, SendOutlined } from '@ant-design/icons';
 import { FaCircle, FaDotCircle } from 'react-icons/fa';
+import axios from 'axios';
 
 const NaturalLanguageSearch = () => {
     const [searchText, setSearchText] = useState('');
@@ -25,6 +26,7 @@ const NaturalLanguageSearch = () => {
     const [isListening, setIsListening] = useState(false);
     const [searchTimeout, setSearchTimeout] = useState(null);
     const [reviewData, setReviewData] = useState({});
+    const [userLocation, setUserLocation] = useState(null);
     const {
         transcript,
         listening,
@@ -69,6 +71,85 @@ const NaturalLanguageSearch = () => {
             setIsListening(true);
         }
     };
+//khoảng cách 
+    const getGeocode = async (address) => {
+        try {
+            const response = await axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json`, {
+                params: {
+                    access_token: 'pk.eyJ1IjoidGhuZzMxMiIsImEiOiJjbTN5ZjMyODcxZ2JjMmpzN3Z6M3M0cmRyIn0.ZG2ETG3QESh3_eVm-MiUFA',
+                    country: 'VN'
+                }
+            });
+            if (response.data.features.length > 0) {
+                return {
+                    latitude: response.data.features[0].center[1],
+                    longitude: response.data.features[0].center[0]
+                };
+            }
+        } catch (error) {
+            console.error('Geocoding error:', error);
+        }
+        return null;
+    };
+
+
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+        const R = 6371; // Radius of Earth in kilometers
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance in kilometers
+    };
+
+    useEffect(() => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                }
+            );
+        }
+    }, []);
+
+    const SPEEDS = {
+        car: 60, // km/h
+    };
+
+    const calculateTravelTime = (distance, speed) => {
+        if (!distance || !speed) return null; // Kiểm tra dữ liệu đầu vào
+        return distance / speed; // Thời gian tính bằng giờ
+    };
+
+    const formatTravelTime = (hours) => {
+        if (!hours) return 'Không thể tính thời gian';
+
+        const minutes = Math.round(hours * 60);
+        if (minutes < 60) {
+            return `${minutes} phút`;
+        } else {
+            const h = Math.floor(hours);
+            const m = Math.round((hours - h) * 60);
+            return `${h} giờ ${m > 0 ? `${m} phút` : ''}`;
+        }
+    };
+
+    const getTravelTimes = (distance) => {
+        if (!distance) return null;
+
+        return {
+            car: formatTravelTime(calculateTravelTime(distance, SPEEDS.car))
+        };
+    };
+// hêt khoảng cách
 
     const fetchGadgets = async () => {
         setLoading(true);
@@ -92,7 +173,21 @@ const NaturalLanguageSearch = () => {
                 setGadgets(response.data.gadgets);
                 setSellers([]);
             } else {
-                setSellers(response.data.sellers);
+                // Add distance calculation for sellers
+                const sellersWithDistance = await Promise.all(response.data.sellers.map(async (seller) => {
+                    const coordinates = await getGeocode(seller.shopAddress);
+                    let distance = null;
+                    if (coordinates && userLocation) {
+                        distance = calculateDistance(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                            coordinates.latitude,
+                            coordinates.longitude
+                        );
+                    }
+                    return { ...seller, distance };
+                }));
+                setSellers(sellersWithDistance);
                 setGadgets([]);
             }
         } catch (error) {
@@ -199,7 +294,6 @@ const NaturalLanguageSearch = () => {
                                 Tech Gadget
                             </button>
                         </div>
-                        <h2 className="text-center text-lg font-bold mb-4">Danh sách sản phẩm tìm kiếm dựa trên ngôn ngữ tự nhiên</h2>
                     </div>
                     {loading ? (
                         <p className="text-center text-gray-500">Đang tải...</p>
@@ -305,7 +399,7 @@ const NaturalLanguageSearch = () => {
                     ) : (
                         sellers.length > 0 ? (
                             <div className="container w-full max-w-screen-lg h-[550px] mx-auto overflow-y-auto">
-                                <div className="grid grid-cols-1 gap-4 p-4">
+                                <div className="grid grid-cols-1 gap-4 p-4 cursor-pointer">
                                     {sellers.map((seller) => (
                                         <div key={seller.id}
                                             onClick={() => handleSellerClick(seller)}
@@ -326,25 +420,39 @@ const NaturalLanguageSearch = () => {
 
                                             </div>
                                             <div className="space-y-2 text-gray-600">
-                                                <p className="flex items-center gap-2">
-                                                    <span className="font-semibold min-w-[100px]">Địa chỉ:</span>
+                                                <p className="flex items-center gap-2 ">
+                                                    <span className="font-semibold ">Địa chỉ:</span>
                                                     <span className="text-gray-700">{seller.shopAddress}</span>
-                                                </p>
-                                                <p className="flex items-center gap-2">
-                                                    <span className="font-semibold min-w-[100px]">Mã số thuế:</span>
-                                                    <span className="text-gray-700">{seller.taxCode}</span>
                                                 </p>
                                                 <p className="flex items-center gap-2">
                                                     <span className="font-semibold min-w-[100px]">Số điện thoại:</span>
                                                     <span className="text-gray-700">{seller.phoneNumber}</span>
                                                 </p>
+
+                                                {/* khoảng cách */}
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-semibold min-w-[100px]">Khoảng cách:</span>
+                                                    <div className="text-gray-700 flex ">
+                                                        <span>
+                                                            {seller.distance
+                                                                ? `${seller.distance.toFixed(1)} km`
+                                                                : 'Không thể tính khoảng cách'
+                                                            }
+                                                        </span>
+                                                        {seller.distance && (
+                                                            <span className="ml-3">
+                                                                {getTravelTimes(seller.distance).car}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         ) : (
-                            <p className="text-center text-gray-500 mt-4">Không tìm thấy người bán nào phù hợp</p>
+                            <p className="text-center text-gray-500 mt-4">Không tìm thấy cửa hàng nào phù hợp</p>
                         )
                     )}
                 </div>
