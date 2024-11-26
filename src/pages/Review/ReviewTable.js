@@ -249,6 +249,9 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
                   {order.review.isUpdated && (
                     <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
                   )}
+                  {order.review.status === 'Inactive' && (
+                    <p className="ml-2 text-red-500 text-xs">Đánh giá của bạn đã bị khóa</p>
+                  )}
                 </div>
 
                 <p className="mt-2 text-gray-500 text-sm">{formatDate(order.review.createdAt)}</p>
@@ -261,7 +264,7 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
               </div>
             )}
             {/* Seller Reply Section */}
-            {order.review && order.review.sellerReply && (
+            {order.review && order.review.sellerReply && order.review.sellerReply.status === 'Active' && (
               <div className=" bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
                 <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>

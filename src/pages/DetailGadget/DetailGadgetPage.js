@@ -193,6 +193,9 @@ const DetailGadgetPage = () => {
     const [user, setUser] = useState(null);
     useEffect(() => {
         const fetchUserData = async () => {
+            if (!isAuthenticated) {
+                return;
+              }
             try {
                 const response = await AxiosInterceptor.get('/api/users/current');
                 setUser(response.data.customer);
@@ -218,6 +221,9 @@ const DetailGadgetPage = () => {
         };
 
         const fetchReviews = async () => {
+            if (!isAuthenticated) {
+                return;
+              }
             try {
                 const response = await AxiosInterceptor.get(`/api/reviews/gadget/${productId}`);
                 setReviews(response.data.items.slice(0, 2)); // Show only the first 2 reviews             
@@ -270,11 +276,11 @@ const DetailGadgetPage = () => {
                 gadgetId: productId,
                 quantity,
             });
-            
-            window.dispatchEvent(new CustomEvent('cartUpdate', { 
+
+            window.dispatchEvent(new CustomEvent('cartUpdate', {
                 detail: { type: CART_ACTIONS.ADD }
             }));
-            
+
             toast.success("Thêm sản phẩm thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -558,44 +564,45 @@ const DetailGadgetPage = () => {
                         <div className="mt-8">
 
                             {reviews.length > 0 ? (
-
-                                reviews.map((review) => (
-                                    <div key={review.id} className="mb-6 p-6 border border-gray-200 rounded-lg shadow-sm">
-                                        <div className="flex items-center mb-4">
-                                            <img
-                                                src={review.customer.avatarUrl || users}
-                                                alt={review.customer.fullName}
-                                                className="w-12 h-12 rounded-full mr-4"
-                                            />
-                                            <div>
-                                                <p className="font-semibold text-base">{review.customer.fullName}</p>
-                                                <p className="text-sm text-gray-500">{formatDate(review.createdAt)}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center mb-4">
-                                            <span className="text-yellow-500 text-lg">{'★'.repeat(review.rating)}</span>
-                                            <span className="text-gray-300 text-lg">{'★'.repeat(5 - review.rating)}</span>
-                                        </div>
-                                        <div className="mt-2 flex items-center text-gray-700">
-                                            <p>{review.content}</p>
-                                            {review.isUpdated && (
-                                                <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
-                                            )}
-                                        </div>
-                                        {review.sellerReply && (
-                                            <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                                <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
-                                                <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
-                                                <div className="mt-2 flex items-center text-gray-700">
-                                                    <p>{review.sellerReply.content}</p>
-                                                    {review.sellerReply.isUpdated && (
-                                                        <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
-                                                    )}
+                                reviews
+                                    .filter(review => review.status === 'Active')
+                                    .map((review) => (
+                                        <div key={review.id} className="mb-6 p-6 border border-gray-200 rounded-lg shadow-sm">
+                                            <div className="flex items-center mb-4">
+                                                <img
+                                                    src={review.customer.avatarUrl || users}
+                                                    alt={review.customer.fullName}
+                                                    className="w-12 h-12 rounded-full mr-4"
+                                                />
+                                                <div>
+                                                    <p className="font-semibold text-base">{review.customer.fullName}</p>
+                                                    <p className="text-sm text-gray-500">{formatDate(review.createdAt)}</p>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
-                                ))
+                                            <div className="flex items-center mb-4">
+                                                <span className="text-yellow-500 text-lg">{'★'.repeat(review.rating)}</span>
+                                                <span className="text-gray-300 text-lg">{'★'.repeat(5 - review.rating)}</span>
+                                            </div>
+                                            <div className="mt-2 flex items-center text-gray-700">
+                                                <p>{review.content}</p>
+                                                {review.isUpdated && (
+                                                    <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                                                )}
+                                            </div>
+                                            {review.sellerReply && review.sellerReply.status === 'Active' && (
+                                                <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                    <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
+                                                    <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
+                                                    <div className="mt-2 flex items-center text-gray-700">
+                                                        <p>{review.sellerReply.content}</p>
+                                                        {review.sellerReply.isUpdated && (
+                                                            <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
                             ) : (
                                 <div className="text-center">
                                     <p className="text-sm">Nếu đã mua sản phẩm này tại TechGadget. Hãy đánh giá ngay để giúp hàng ngàn người chọn mua hàng tốt nhất bạn nhé!</p>

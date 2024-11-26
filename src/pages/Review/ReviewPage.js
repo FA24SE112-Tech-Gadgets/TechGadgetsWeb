@@ -141,7 +141,9 @@ const ReviewPage = () => {
         </div>
       </div>
       {reviews.length > 0 ? (
-        reviews.map((review) => (
+        reviews
+          .filter(review => review.status === 'Active')
+          .map((review) => (
           <div key={review.id}
             className="mb-4 p-4 border rounded-lg">
             <div className="flex items-center mb-2">
@@ -161,7 +163,7 @@ const ReviewPage = () => {
                 <p className="ml-2 text-gray-400 text-xs">Đã chỉnh sửa</p>
               )}
             </div>
-            {review.sellerReply && (
+            {review.sellerReply && review.sellerReply.status === 'Active' && (
               <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
                 <p className="text-gray-500 text-sm">{formatDate(review.sellerReply.createdAt)}</p>
