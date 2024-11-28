@@ -10,21 +10,22 @@ const AdminPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(100);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStates, setLoadingStates] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [userToToggle, setUserToToggle] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSearchTerm, setCurrentSearchTerm] = useState('');
+  
+  // Thêm state cho phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [pageSize] = useState(10);
 
   useEffect(() => {
-    let url = `/api/users?Page=${page}&PageSize=${pageSize}`;
+    let url = `/api/users?Page=${currentPage}&PageSize=${pageSize}`;
     
     if (currentSearchTerm.trim()) {
       url += `&Name=${encodeURIComponent(currentSearchTerm.trim())}`;
@@ -40,6 +41,7 @@ const AdminPage = () => {
     AxiosInterceptor.get(url)
       .then((response) => {
         setUsers(response.data.items);
+        setTotalItems(response.data.totalItems);
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
@@ -48,7 +50,7 @@ const AdminPage = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [roleFilter, statusFilter, page, pageSize, currentSearchTerm]);
+  }, [currentPage, pageSize, roleFilter, statusFilter, currentSearchTerm]);
 
   // Add new useEffect to reset currentPage when filters change
   useEffect(() => {
@@ -325,22 +327,37 @@ const AdminPage = () => {
     setCurrentSearchTerm(searchQuery);
   };
 
-  // Pagination calculations
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(users.length / itemsPerPage);
+  // Thay thế phần pagination UI bằng cái mới
+  const renderPagination = () => {
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-  const getPaginationRange = () => {
-    const maxVisible = 5;
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(start + maxVisible - 1, totalPages);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    return (
+      <div className="flex justify-center mt-4">
+        <nav className="flex items-center space-x-2">
+          {Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index)
+            .map((number) => (
+              <button
+                key={number}
+                onClick={() => setCurrentPage(number)}
+                className={`px-4 py-2 rounded-md ${
+                  number === currentPage 
+                    ? "bg-primary/70 text-white" 
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                {number}
+              </button>
+            ))}
+        </nav>
+      </div>
+    );
   };
 
   if (isLoading) return (
@@ -432,7 +449,7 @@ const AdminPage = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {currentUsers.map((user) => (
+            {users.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{getRoleInVietnamese(user.role)}</td>
@@ -479,21 +496,8 @@ const AdminPage = () => {
         <div className="text-center p-4 text-gray-500">Không có người dùng</div>
       )}
 
-      <div className="flex justify-center mt-6 space-x-2">
-        {getPaginationRange().map((pageNumber) => (
-          <button
-            key={pageNumber}
-            onClick={() => setCurrentPage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${
-              pageNumber === currentPage
-                ? 'bg-primary/80 text-white'
-                : 'bg-gray-200 text-gray-700'
-            }`}
-            disabled={isLoading}
-          >
-            {pageNumber}
-          </button>
-        ))}
+      <div className="mt-4">
+        {renderPagination()}
       </div>
 
       {isModalOpen && selectedUser && (
