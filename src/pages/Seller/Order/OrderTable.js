@@ -16,7 +16,7 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
   const [currentPage, setCurrentPage] = useState(1);
   const [ordersPerPage, setOrdersPerPage] = useState(10);
   const [totalOrders, setTotalOrders] = useState(0);
-
+  const [copiedStates, setCopiedStates] = useState({});
   useEffect(() => {
     setOrders(initialOrders);
     setTotalOrders(initialOrders.length);
@@ -42,7 +42,21 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-
+  const handleCopy = (id, e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(id).then(() => {
+      setCopiedStates((prev) => ({
+        ...prev,
+        [id]: true, // Đánh dấu giao dịch cụ thể là đã sao chép
+      }));
+      setTimeout(() => {
+        setCopiedStates((prev) => ({
+          ...prev,
+          [id]: false, // Reset trạng thái sau 2 giây
+        }));
+      }, 2000);
+    });
+  };
   // Pagination component
   const Pagination = () => {
     const maxVisiblePages = 5;
@@ -65,9 +79,8 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
                 <button
                   key={number}
                   onClick={() => handlePageChange(number)}
-                  className={`px-4 py-2 rounded-md ${
-                    number === currentPage ? "bg-primary/70 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
+                  className={`px-4 py-2 rounded-md ${number === currentPage ? "bg-primary/70 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
                 >
                   {number}
                 </button>
@@ -114,20 +127,30 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
         <tbody>
           {currentOrders.length > 0 ? (
             currentOrders.map((order) => (
-              <tr key={order.id} 
-             
-              className="hover:bg-gray-50 cursor-pointer">
-                <td className="py-2 px-4 border-b text-center text-sm">{order.id}</td>
+              <tr key={order.id}
+
+                className="hover:bg-gray-50 cursor-pointer">
+                <td className="py-2 px-4 border-b text-center text-sm">
+                  <div className="flex items-center justify-center">
+                    <span>{order.id}</span>
+                    <button
+                      onClick={(e) => handleCopy(order.id, e)}
+                      className="ml-2 px-2 py-1 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
+                    >
+                      {copiedStates[order.id] ? 'Đã sao chép' : 'Sao chép'}
+                    </button>
+                  </div>
+                </td>
+
                 <td className="py-2 px-4 border-b text-center text-sm">{order.amount?.toLocaleString()}₫</td>
                 <td className="py-2 px-4 border-b text-center text-sm">
                   <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      order.status === "Success"
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === "Success"
                         ? "bg-green-100 text-green-800"
                         : order.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
                   >
                     {translateStatus(order.status)}
                   </span>
@@ -136,7 +159,7 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
                 <td className="py-2 px-4 border-b text-center text-sm">{formatDate(order.createdAt)}</td>
                 <td>
                   <button
-               onClick={() => navigate(`/order/detail-seller/${order.id}`)}
+                    onClick={() => navigate(`/order/detail-seller/${order.id}`)}
                     className="text-primary/70 hover:text-secondary/80"
                   >
                     <Eye className="h-5 w-5 items-center" />

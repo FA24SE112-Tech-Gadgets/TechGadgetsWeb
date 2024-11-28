@@ -1,6 +1,6 @@
 // orderId = sellerorderId 
 import { HomeOutlined, PhoneOutlined } from "@ant-design/icons";
-import { Eye } from "lucide-react";
+import { Eye, Store } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -12,9 +12,10 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
   const [cancelReason, setCancelReason] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const navigate = useNavigate();
+  const [copiedStates, setCopiedStates] = useState({});
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 3;
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -22,6 +23,11 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
   const totalPages = Math.ceil(orders.length / itemsPerPage);
   const handleChangePage = (pageNumber) => {
     setCurrentPage(pageNumber);
+    // Add scroll to top
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
   const getPaginationRange = () => {
     const maxVisible = 5; // Số lượng nút hiển thị
@@ -100,162 +106,155 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
     });
   };
 
+  const handleCopy = (id, e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(id).then(() => {
+      setCopiedStates((prev) => ({
+        ...prev,
+        [id]: true, // Đánh dấu giao dịch cụ thể là đã sao chép
+      }));
+      setTimeout(() => {
+        setCopiedStates((prev) => ({
+          ...prev,
+          [id]: false, // Reset trạng thái sau 2 giây
+        }));
+      }, 2000);
+    });
+  };
+
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full bg-white border border-gray-200 table-fixed">
-        <thead>
-          <tr>
-            <th className="py-2 px-4 border-b w-1/4">Sản phẩm</th>
-            <th className="py-2 px-4 border-b w-1/4">Tổng giá tiền</th>
-            <th className="py-2 px-4 border-b w-1/4">Trạng thái</th>
-            <th className="py-2 px-4 border-b w-1/4">Ngày đặt</th>
-            <th className="py-2 px-4 border-b w-1/4"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentOrders.map((order) => (
-            <tr
-              key={order.id}
-              className="hover:bg-gray-50"
-            
-            >
-              {/* Products Column */}
-              <td className="py-2 px-4 border-b">
-                {order.gadgets.map((gadget) => (
-                  <div key={gadget.sellerOrderItemId} 
+    <div className="container mx-auto">
+      <div className="grid grid-cols-1 gap-6  mx-auto">
+        {currentOrders.map((order) => (
+          <div
+            key={order.id}
+            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
+          >
+            {/* Order Header */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-2">
+                  <p>Mã đơn hàng:</p>
+                  <span className="font-medium text-gray-800">{order.id}</span>
+                  <button
+                      onClick={(e) => handleCopy(order.id, e)}
+                      className="ml-2 px-2 py-1 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
+                    >
+                      {copiedStates[order.id] ? 'Đã sao chép' : 'Sao chép'}
+                    </button>
+                </div>
+                <span
+                  className={`px-3 py-1 text-xs font-semibold rounded-full 
+                    ${order.status === "Success" ? "bg-green-100 text-green-800"
+                      : order.status === "Pending" ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"}`}
+                >
+                  {order.status === "Success" ? "Thành công"
+                    : order.status === "Pending" ? "Đang chờ"
+                      : order.status === "Cancelled" ? "Đã hủy"
+                        : order.status}
+                </span>
+              </div>
+              <div className="text-sm text-gray-500">
+                Ngày đặt: {formatDate(order.createdAt)}
+              </div>
+            </div>
+
+            {/* Products List */}
+            <div className="p-4">
+              {order.gadgets.map((gadget) => (
+                <div
+                  key={gadget.sellerOrderItemId}
                   onClick={() => navigate(`/gadget/detail/${slugify(gadget.name)}`, {
-                    state: {
-                        productId: gadget.gadgetId,
-                    }
-                })}
-                  className="flex items-center space-x-4 py-2 cursor-pointer">
+                    state: { productId: gadget.gadgetId }
+                  })}
+                  className="flex items-center space-x-3 py-2 cursor-pointer hover:bg-gray-50 rounded-lg p-2"
+                >
+                  <div className="relative w-16 h-16">
                     <img
                       src={gadget.thumbnailUrl}
                       alt={gadget.name}
-                      className="w-12 h-12 object-contain rounded"
+                      className="w-full h-full object-contain rounded"
                     />
-                    <div>
-                      <p className="font-semibold">{gadget.name}</p>
-                      {gadget.discountPercentage > 0 ? (
-                        <div className="flex items-center space-x-2">
-                          <p className="text-red-500 font-semibold text-sm">
-                            {gadget.quantity} x {gadget.discountPrice.toLocaleString()}₫
-                          </p>
-                          <p className="line-through text-gray-500 text-xs">
-                            {gadget.price.toLocaleString()}₫
-                          </p>
-                          <span className="bg-red-100 text-red-600 text-xs font-semibold px-1.5 py-0.5 rounded">
-                            -{gadget.discountPercentage}%
-                          </span>
+                    <span className="absolute bottom-0 right-0 bg-gray-800/75 text-white px-1.5 py-0.5 text-xs rounded-tl">
+                      x{gadget.quantity}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-gray-800">{gadget.name}</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                          <span>Được cung cấp bởi: </span>
+                          <Store className="h-4 w-4" />
+                          <span>{order.sellerInfo.shopName}</span>
                         </div>
-                      ) : (
-                        <p className="text-gray-600">
-                          {gadget.quantity} x {gadget.discountPrice.toLocaleString()}₫
-                        </p>
-                      )}
+                      </div>
+                      <div className="text-right">
+                        {gadget.discountPercentage > 0 ? (
+                          <div className="flex flex-col items-end gap-1">
+                            
+                            <div className="flex items-center gap-2">
+                           
+                              <span className="text-red-500 font-medium">
+                                {gadget.discountPrice.toLocaleString()}₫
+                              </span>
+                              <span className="line-through text-gray-400 text-sm">
+                                {gadget.price.toLocaleString()}₫
+                              </span>
+                              <span className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded">
+                              -{gadget.discountPercentage}%
+                            </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="text-gray-700">
+                              {gadget.price.toLocaleString()}₫
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                ))}
-              </td>
+                </div>
+              ))}
+            </div>
 
-              {/* Total Amount Column */}
-              <td className="py-2 px-4 border-b text-center">{order.amount.toLocaleString()}₫</td>
-
-              {/* Status Column */}
-              <td className="py-2 px-4 border-b text-center">
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-        ${order.status === "Success" ? "bg-green-100 text-green-800" : order.status === "Pending" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}
+            {/* Order Footer */}
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex flex-col items-end gap-2">
+                <div className="text-gray-700">
+                  Tổng tiền: <span className="font-semibold text-lg">{order.amount.toLocaleString()}₫</span>
+                </div>
+                <button
+                  onClick={() => handleOrderClick(order.id)}
+                  className="flex items-center gap-2 text-primary hover:text-secondary transition-colors duration-200"
                 >
-                  {order.status === "Success"
-                    ? "Thành công"
-                    : order.status === "Pending"
-                    ? "Đang chờ"
-                    : order.status === "Cancelled"
-                    ? "Đã hủy"
-                    : order.status}
-                </span>
-              </td>
+                  <Eye className="h-5 w-5" />
+                  <span>Chi tiết</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-              {/* Order Date Column */}
-              <td className="py-2 px-4 border-b text-center">{formatDate(order.createdAt)}</td>
-
-              {/* Actions Column */}
-              {/* {hasPendingOrders && (
-                <td className="py-2 px-4 border-b text-center">
-                  {order.status === "Pending" && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openCancelModal(order.id);
-                      }}
-                      className="text-primary/70 hover:text-secondary/80"
-                    >
-                      <Eye className="h-5 w-5 items-center" />
-                    </button>
-                  )}
-                </td>
-              )} */}
-                <td>
-                  <button
-                onClick={() => handleOrderClick(order.id)}
-                    className="text-primary/70 hover:text-secondary/80"
-                  >
-                    <Eye className="h-5 w-5 items-center" />
-                  </button>
-                </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {/* Pagination Controls */}
+      {/* Pagination Controls - Keep existing pagination code */}
       <div className="flex justify-center mt-6 space-x-2">
         {getPaginationRange().map((pageNumber) => (
           <button
             key={pageNumber}
             onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${
-              pageNumber === currentPage
-                ? 'bg-primary/80 text-white'
-                : 'bg-gray-200 text-gray-700'
-            }`}
-            // disabled={isLoading}
+            className={`px-4 py-2 rounded-md ${pageNumber === currentPage
+              ? 'bg-primary/80 text-white'
+              : 'bg-gray-200 text-gray-700'
+              }`}
           >
             {pageNumber}
           </button>
         ))}
       </div>
-
-      {/* Cancel Order Modal */}
-      {/* {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-lg font-semibold mb-4">Hủy đơn hàng</h2>
-            <p className="text-gray-700 mb-4">Vui lòng nhập lý do hủy :</p>
-            <textarea
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-              rows="4"
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              placeholder="Nhập lý do ở đây..."
-            ></textarea>
-            <div className="flex justify-end space-x-4">
-              <button
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={() => setShowCancelModal(false)}
-              >
-                Hủy
-              </button>
-              <button
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                onClick={handleCancelOrder}
-              >
-                Gửi
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };

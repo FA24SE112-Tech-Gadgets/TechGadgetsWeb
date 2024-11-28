@@ -16,6 +16,8 @@ const OrderDetail = () => {
     const [cancelReason, setCancelReason] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const [copiedStates, setCopiedStates] = useState({});
+    const [showFullId, setShowFullId] = useState(false);
     useEffect(() => {
         const fetchOrderDetails = async () => {
             try {
@@ -113,13 +115,43 @@ const OrderDetail = () => {
                 return "bg-gray-100 text-white-700";
         }
     };
+    const handleCopy = (id, e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(id).then(() => {
+          setCopiedStates((prev) => ({
+            ...prev,
+            [id]: true, // Đánh dấu giao dịch cụ thể là đã sao chép
+          }));
+          setTimeout(() => {
+            setCopiedStates((prev) => ({
+              ...prev,
+              [id]: false, // Reset trạng thái sau 2 giây
+            }));
+          }, 2000);
+        });
+      };
     return (
         <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg">
             <ToastContainer />
-            <h2 className="text-xl font-semibold mb-4 text-center">
-                Chi tiết đơn hàng #{orderId}
-            </h2>
-
+            <div className="flex flex-col items-center justify-center">
+        <div className="flex items-center space-x-4">
+          <h2 className="text-xl font-semibold text-gray-700">
+            Chi tiết đơn hàng #{showFullId ? orderId : `${orderId.slice(0, 8)}...`}
+          </h2>
+          <button
+            onClick={() => setShowFullId(!showFullId)}
+            className="ml-2 px-2 py-1 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
+          >
+            ({showFullId ? 'Thu gọn' : 'Xem đầy đủ'})
+          </button>
+          <button
+            onClick={(e) => handleCopy(orderId, e)}
+            className="px-4 py-2 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
+          >
+            {copiedStates[orderId] ? 'Đã sao chép' : 'Sao chép'}
+          </button>
+        </div>
+      </div>
             {/* Thông tin trạng thái đơn hàng */}
             {orderDetails.status === "Cancelled" && (
                 <div className="mt-6 p-4 bg-red-100 rounded-lg">

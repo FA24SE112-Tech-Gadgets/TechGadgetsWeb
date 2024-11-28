@@ -12,7 +12,8 @@ export default function SellerTransfer() {
   const [totalItems, setTotalItems] = useState(0);
   const [pageSize] = useState(10);
   const [sortByDate, setSortByDate] = useState('DESC');
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [copiedStates, setCopiedStates] = useState({});
   const fetchDeposits = async () => {
     try {
       const response = await AxiosInterceptor.get(`/api/wallet-trackings?SortByDate=${sortByDate}&Page=${currentPage}&PageSize=${pageSize}`);
@@ -61,7 +62,21 @@ const navigate = useNavigate();
       </span>
     </div>
   );
-
+  const handleCopy = (id, e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(id).then(() => {
+      setCopiedStates((prev) => ({
+        ...prev,
+        [id]: true, // Đánh dấu giao dịch cụ thể là đã sao chép
+      }));
+      setTimeout(() => {
+        setCopiedStates((prev) => ({
+          ...prev,
+          [id]: false, // Reset trạng thái sau 2 giây
+        }));
+      }, 2000);
+    });
+  };
   if (error) return <div className="text-center mt-8 text-red-600">{error}</div>;
 
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -96,20 +111,28 @@ const navigate = useNavigate();
         <div className="space-y-4">
           {deposits.map((deposit) => (
             <div key={deposit.id}
-            onClick={() => navigate(`/order/detail-seller/${deposit.sellerOrderId}`)}
-            className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex items-center justify-between cursor-pointer">
+              onClick={() => navigate(`/order/detail-seller/${deposit.sellerOrderId}`)}
+              className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex items-center justify-between cursor-pointer">
               <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-700">
-                  Mã giao dịch: <span className="text-gray-900">{deposit.sellerOrderId}</span>
-                </p>
+                <div className="flex items-center">
+                  <p className="text-sm font-semibold text-gray-700">
+                    Mã giao dịch: <span className="text-gray-900">{deposit.sellerOrderId}</span>
+                  </p>
+                  <button
+                    onClick={(e) => handleCopy(deposit.sellerOrderId, e)}
+                    className="ml-2 px-2 py-1 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
+                  >
+                    {copiedStates[deposit.sellerOrderId] ? 'Đã sao chép' : 'Sao chép'}
+                  </button>
+                </div>
                 <p className="text-sm text-gray-500">Loại giao dịch: Tự động</p>
                 <div className="flex items-center mt-1">
                   <p className="text-sm font-semibold text-gray-700">Trạng thái:</p>
                   <span
                     className={`ml-2 px-3 py-1 rounded-full text-xs font-semibold ${deposit.status === 'Success' ? 'bg-green-200 text-green-700' :
-                        deposit.status === 'Pending' ? 'bg-yellow-200 text-yellow-700' :
-                          deposit.status === 'Expired' ? 'bg-red-200 text-red-700' :
-                            'bg-gray-200 text-gray-700'
+                      deposit.status === 'Pending' ? 'bg-yellow-200 text-yellow-700' :
+                        deposit.status === 'Expired' ? 'bg-red-200 text-red-700' :
+                          'bg-gray-200 text-gray-700'
                       }`}
                   >
                     {deposit.status === 'Success' ? 'Hoàn thành' :
@@ -154,11 +177,10 @@ const navigate = useNavigate();
                   <button
                     key={number}
                     onClick={() => handleChangePage(number)}
-                    className={`px-4 py-2 rounded-md ${
-                      number === currentPage 
-                        ? "bg-primary/70 text-white" 
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                    className={`px-4 py-2 rounded-md ${number === currentPage
+                      ? "bg-primary/70 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
                   >
                     {number}
                   </button>
