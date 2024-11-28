@@ -133,13 +133,6 @@ const OrderTable = ({
                       <Copy className="h-4 w-4" />
                     )}
                   </button>
-                  {/* <button
-                      onClick={(e) => handleCopy(order.id, e)}
-                      className="ml-2 px-2 py-1 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
-                    >
-                      {copiedStates[order.id] ? 'Đã sao chép' : 'Sao chép'}
-                    </button> */}
-
                 </div>
                 <span
                   className={`px-3 py-1 text-xs font-semibold rounded-full 

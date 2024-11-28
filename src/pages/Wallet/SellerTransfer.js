@@ -3,6 +3,7 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import { Check, Copy } from 'lucide-react';
 
 export default function SellerTransfer() {
   const [deposits, setDeposits] = useState([]);
@@ -120,9 +121,17 @@ export default function SellerTransfer() {
                   </p>
                   <button
                     onClick={(e) => handleCopy(deposit.sellerOrderId, e)}
-                    className="ml-2 px-2 py-1 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
+                    className={`p-1 mb-1 ml-2 rounded-md transition-colors duration-200 ${copiedStates[deposit.sellerOrderId]
+                      ? 'bg-green-500 text-white'
+                      : 'bg-primary/75 text-white hover:bg-secondary/85'
+                      }`}
+                    aria-label={copiedStates[deposit.sellerOrderId] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
                   >
-                    {copiedStates[deposit.sellerOrderId] ? 'Đã sao chép' : 'Sao chép'}
+                    {copiedStates[deposit.sellerOrderId] ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 <p className="text-sm text-gray-500">Loại giao dịch: Tự động</p>

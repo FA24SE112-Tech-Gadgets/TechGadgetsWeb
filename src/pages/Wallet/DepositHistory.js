@@ -240,62 +240,88 @@ export default function DepositHistory() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {['Phương thức', 'Số tiền', 'Trạng thái', 'Thời gian nạp tiền', 'Ngày tạo giao dịch'].map((header) => (
-                    <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {deposits.map((deposit) => (
-                  <tr key={deposit.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">{deposit.paymentMethod}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(deposit.amount)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        deposit.status === 'Success' ? 'bg-green-100 text-green-800' :
-                        deposit.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                        deposit.status === 'Expired' ? 'bg-red-100 text-red-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {deposit.status === 'Success' ? 'Thành công' :
-                         deposit.status === 'Pending' ? 'Đang chờ' :
-                         deposit.status === 'Expired' ? 'Đã hết hạn' :
-                         deposit.status === 'Cancelled' ? 'Đã hủy' :
-                         deposit.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {deposit.status === 'Pending' && deposit.depositedAt === null ? 'Đang chờ...' :
-                       deposit.status === 'Cancelled' && deposit.depositedAt === null ? 'Đã hủy' :
-                       deposit.status === 'Expired' && deposit.depositedAt === null ? 'Đã hết hạn' :
-                       deposit.depositedAt ? formatDate(deposit.depositedAt) : 'Đang chờ...'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
-                      {formatDate(deposit.createdAt)}
-                      {deposit.status === 'Pending' && (
-                        <div className="absolute top-1/2 right-2 mr-3 -translate-y-1/2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setCancelDepositId(deposit.id);
-                              setShowCancelConfirmModal(true);
-                            }}
-                            className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                          >
-                            <CircleEllipsis size={22} />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+       
+<table className="min-w-full divide-y divide-gray-200">
+  <thead className="bg-gray-50">
+    <tr>
+      {[
+        'Phương thức',
+        'Số dư trước',
+        'Biến động',
+        'Trạng thái',
+        'Thời gian nạp tiền',
+        'Ngày tạo giao dịch'
+      ].map((header) => (
+        <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          {header}
+        </th>
+      ))}
+    </tr>
+  </thead>
+  <tbody className="bg-white divide-y divide-gray-200">
+    {deposits.map((deposit) => (
+      <tr key={deposit.id}>
+        <td className="px-6 py-4 whitespace-nowrap">{deposit.paymentMethod}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          {deposit.balanceBeforeChange !== null ? (
+            formatCurrency(deposit.balanceBeforeChange)
+          ) : (
+            <span className="text-gray-400">--</span>
+          )}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="flex items-center space-x-1">
+            <span className={`text-sm ${deposit.status === 'Success' ? 'text-green-600' : 'text-gray-600'}`}>
+              {deposit.status === 'Success' ? '+' : ''}{formatCurrency(deposit.amount)}
+            </span>
+            {deposit.balanceBeforeChange !== null && deposit.status === 'Success' && (
+              <span className="text-xs text-gray-400">
+                → {formatCurrency(deposit.balanceBeforeChange + deposit.amount)}
+              </span>
+            )}
+          </div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            deposit.status === 'Success' ? 'bg-green-100 text-green-800' :
+            deposit.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+            deposit.status === 'Expired' ? 'bg-red-100 text-red-800' :
+            'bg-red-100 text-red-800'
+          }`}>
+            {deposit.status === 'Success' ? 'Thành công' :
+             deposit.status === 'Pending' ? 'Đang chờ' :
+             deposit.status === 'Expired' ? 'Đã hết hạn' :
+             deposit.status === 'Cancelled' ? 'Đã hủy' :
+             deposit.status}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          {deposit.status === 'Pending' && deposit.depositedAt === null ? 'Đang chờ...' :
+           deposit.status === 'Cancelled' && deposit.depositedAt === null ? 'Đã hủy' :
+           deposit.status === 'Expired' && deposit.depositedAt === null ? 'Đã hết hạn' :
+           deposit.depositedAt ? formatDate(deposit.depositedAt) : 'Đang chờ...'}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+          {formatDate(deposit.createdAt)}
+          {deposit.status === 'Pending' && (
+            <div className="absolute top-1/2 right-2 mr-3 -translate-y-1/2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCancelDepositId(deposit.id);
+                  setShowCancelConfirmModal(true);
+                }}
+                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                <CircleEllipsis size={22} />
+              </button>
+            </div>
+          )}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
           </div>
         )}
       </div>
