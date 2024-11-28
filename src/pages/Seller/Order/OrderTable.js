@@ -1,4 +1,4 @@
-import { Eye } from "lucide-react";
+import { Eye, Copy, Check } from 'lucide-react';
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -85,6 +85,7 @@ const OrderTableSeller = ({
       </div>
     );
   if (error) return <div className="text-center mt-8 text-red-600">{error}</div>;
+  
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString("vi-VN", {
       year: "numeric",
@@ -94,64 +95,92 @@ const OrderTableSeller = ({
       minute: "2-digit",
     });
   };
+
+  const formatCurrency = (amount) => {
+    return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full bg-white border-2 border-gray-200 table-fixed">
         <thead>
-          <tr>
-            <th className="py-2 px-4 border-b text-sm">Mã đơn hàng</th>
-            <th className="py-2 px-4 border-b text-sm">Tổng giá tiền</th>
-            <th className="py-2 px-4 border-b text-sm">Trạng thái</th>
-            <th className="py-2 px-4 border-b text-sm">Ngày đặt</th>
-            <th className="py-2 px-4 border-b text-sm"></th>
+          <tr className="bg-gray-100">
+            <th className="py-2 px-4 border-b text-sm font-semibold text-center">Mã đơn hàng</th>
+            <th className="py-2 px-4 border-b text-sm font-semibold text-center">Tổng số lượng</th>
+            <th className="py-2 px-4 border-b text-sm font-semibold text-center">Tổng giá tiền</th>
+            <th className="py-2 px-4 border-b text-sm font-semibold text-center">Trạng thái</th>
+            <th className="py-2 px-4 border-b text-sm font-semibold text-center">Ngày đặt</th>
+            <th className="py-2 px-4 border-b text-sm font-semibold text-center">Chi tiết</th>
           </tr>
         </thead>
         <tbody>
           {orders.length > 0 ? (
             orders.map((order) => (
-              <tr key={order.id}
-
-                className="hover:bg-gray-50 cursor-pointer">
-                <td className="py-2 px-4 border-b text-center text-sm">
-                  <div className="flex items-center justify-center">
-                    <span>{order.id}</span>
+              <tr key={order.id} className="hover:bg-gray-50 cursor-pointer">
+                <td className="py-2 px-4 border-b text-sm text-center">
+                  <div className="flex items-center justify-center bg-gray-50 rounded-md p-2 w-fit mx-auto">
+                    <span className="font-medium text-sm mr-2">{order.id}</span>
                     <button
                       onClick={(e) => handleCopy(order.id, e)}
-                      className="ml-2 px-2 py-1 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
+                      className={`p-1 rounded-md transition-colors duration-200 ${
+                        copiedStates[order.id]
+                          ? 'bg-green-500 text-white'
+                          : 'bg-primary/75 text-white hover:bg-secondary/85'
+                      }`}
+                      aria-label={copiedStates[order.id] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
                     >
-                      {copiedStates[order.id] ? 'Đã sao chép' : 'Sao chép'}
+                      {copiedStates[order.id] ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                 </td>
-
-                <td className="py-2 px-4 border-b text-center text-sm">{order.amount?.toLocaleString()}₫</td>
+                <td className="py-2 px-4 border-b text-center text-sm">{order.totalQuantity}</td>
+                <td className="py-2 px-4 border-b text-center text-sm">
+                  <div className="flex flex-col items-center">
+                    {order.beforeAppliedDiscountAmount !== order.amount ? (
+                      <>
+                        <span className="line-through text-gray-500 text-xs">
+                          {formatCurrency(order.beforeAppliedDiscountAmount)}
+                        </span>
+                        <span className="font-semibold text-green-600">
+                          {formatCurrency(order.amount)}
+                        </span>
+                      </>
+                    ) : (
+                      <span>{formatCurrency(order.amount)}</span>
+                    )}
+                  </div>
+                </td>
                 <td className="py-2 px-4 border-b text-center text-sm">
                   <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === "Success"
+                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      order.status === "Success"
                         ? "bg-green-100 text-green-800"
                         : order.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
                   >
                     {translateStatus(order.status)}
                   </span>
                 </td>
-
                 <td className="py-2 px-4 border-b text-center text-sm">{formatDate(order.createdAt)}</td>
-                <td>
+                <td className="py-2 px-4 border-b text-center">
                   <button
                     onClick={() => navigate(`/order/detail-seller/${order.id}`)}
-                    className="text-primary/70 hover:text-secondary/80"
+                    className="text-primary/70 hover:text-secondary/80 transition-colors duration-200"
                   >
-                    <Eye className="h-5 w-5 items-center" />
+                    <Eye className="h-5 w-5 inline-block" />
                   </button>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={4} className="py-2 text-center">
+              <td colSpan={6} className="py-4 text-center text-gray-500">
                 Không có đơn hàng nào.
               </td>
             </tr>
@@ -165,3 +194,4 @@ const OrderTableSeller = ({
 };
 
 export default OrderTableSeller;
+

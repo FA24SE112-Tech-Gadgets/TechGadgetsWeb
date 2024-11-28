@@ -1,19 +1,19 @@
 // orderId = sellerorderId 
 import { HomeOutlined, PhoneOutlined } from "@ant-design/icons";
-import { Eye, Store } from "lucide-react";
+import { Check, Copy, Eye, Store, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 import slugify from "~/ultis/config";
 
-const OrderTable = ({ 
-  orders, 
-  onOrderCancelled, 
-  currentPage, 
-  setCurrentPage, 
-  totalItems, 
-  pageSize 
+const OrderTable = ({
+  orders,
+  onOrderCancelled,
+  currentPage,
+  setCurrentPage,
+  totalItems,
+  pageSize
 }) => {
   // Remove local pagination states and logic
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -21,6 +21,13 @@ const OrderTable = ({
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const navigate = useNavigate();
   const [copiedStates, setCopiedStates] = useState({});
+  const [expandedOrders, setExpandedOrders] = useState({});
+  const toggleOrderDetails = (orderId) => {
+    setExpandedOrders(prev => ({
+      ...prev,
+      [orderId]: !prev[orderId]
+    }));
+  };
 
   // Function to open the cancel modal and set the selected order ID
   const openCancelModal = (orderId) => {
@@ -109,15 +116,30 @@ const OrderTable = ({
             {/* Order Header */}
             <div className="p-4 border-b border-gray-200">
               <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 font-semibold">
                   <p>Mã đơn hàng:</p>
                   <span className="font-medium text-gray-800">{order.id}</span>
                   <button
+                    onClick={(e) => handleCopy(order.id, e)}
+                    className={`p-1 mb-1 rounded-md transition-colors duration-200 ${copiedStates[order.id]
+                      ? 'bg-green-500 text-white'
+                      : 'bg-primary/75 text-white hover:bg-secondary/85'
+                      }`}
+                    aria-label={copiedStates[order.id] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
+                  >
+                    {copiedStates[order.id] ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                  {/* <button
                       onClick={(e) => handleCopy(order.id, e)}
                       className="ml-2 px-2 py-1 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
                     >
                       {copiedStates[order.id] ? 'Đã sao chép' : 'Sao chép'}
-                    </button>
+                    </button> */}
+
                 </div>
                 <span
                   className={`px-3 py-1 text-xs font-semibold rounded-full 
@@ -169,9 +191,9 @@ const OrderTable = ({
                       <div className="text-right">
                         {gadget.discountPercentage > 0 ? (
                           <div className="flex flex-col items-end gap-1">
-                            
+
                             <div className="flex items-center gap-2">
-                           
+
                               <span className="text-red-500 font-medium">
                                 {gadget.discountPrice.toLocaleString()}₫
                               </span>
@@ -179,8 +201,8 @@ const OrderTable = ({
                                 {gadget.price.toLocaleString()}₫
                               </span>
                               <span className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded">
-                              -{gadget.discountPercentage}%
-                            </span>
+                                -{gadget.discountPercentage}%
+                              </span>
                             </div>
                           </div>
                         ) : (
@@ -200,9 +222,31 @@ const OrderTable = ({
             {/* Order Footer */}
             <div className="p-4 border-t border-gray-200">
               <div className="flex flex-col items-end gap-2">
-                <div className="text-gray-700">
-                  Tổng tiền: <span className="font-semibold text-lg">{order.amount.toLocaleString()}₫</span>
+                {expandedOrders[order.id] && order.discountAmount > 0 && (
+                  <div className="w-full border border-gray-200 rounded-lg p-4 mb-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-600">Tổng tiền hàng:</span>
+                      <span className="font-medium">{order.beforeAppliedDiscountAmount.toLocaleString()}₫</span>
+                    </div>
+                    <div className="flex justify-between items-center text-red-400">
+                      <span>Phí giảm giá:</span>
+                      <span className="font-medium">-{order.discountAmount.toLocaleString()}₫</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="text-gray-700 flex items-center">
+                  Thành tiền: <span className="font-semibold text-lg ml-2">{order.amount.toLocaleString()}₫</span>
+                  {order.discountAmount > 0 && (
+                    <button
+                      onClick={() => toggleOrderDetails(order.id)}
+                      className="ml-2 focus:outline-none"
+                    >
+                      {expandedOrders[order.id] ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                    </button>
+                  )}
                 </div>
+
                 <button
                   onClick={() => handleOrderClick(order.id)}
                   className="flex items-center gap-2 text-primary hover:text-secondary transition-colors duration-200"
@@ -236,11 +280,10 @@ const OrderTable = ({
                   <button
                     key={number}
                     onClick={() => setCurrentPage(number)}
-                    className={`px-4 py-2 rounded-md ${
-                      number === currentPage 
-                        ? "bg-primary/70 text-white" 
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                    className={`px-4 py-2 rounded-md ${number === currentPage
+                      ? "bg-primary/70 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
                   >
                     {number}
                   </button>

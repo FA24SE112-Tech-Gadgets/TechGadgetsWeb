@@ -1,4 +1,5 @@
 import { CreditCardOutlined, HomeOutlined } from "@ant-design/icons";
+import { Copy, Check } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
@@ -170,15 +171,23 @@ const OrderDetailSeller = () => {
           </h2>
           <button
             onClick={() => setShowFullId(!showFullId)}
-            className="ml-2 px-2 py-1 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
+            className="ml-2 px-2 py-1 text-sm text-primary/95 hover:text-secondary/90 hover:underline focus:outline-none"
           >
             ({showFullId ? 'Thu gọn' : 'Xem đầy đủ'})
           </button>
           <button
             onClick={(e) => handleCopy(orderId, e)}
-            className="px-4 py-2 text-sm text-primary/50 hover:text-secondary/80 hover:underline focus:outline-none"
+            className={`p-1 mb-1 rounded-md transition-colors duration-200 ${copiedStates[orderId]
+                ? 'bg-green-500 text-white'
+                : 'bg-primary/75 text-white hover:bg-secondary/85'
+              }`}
+            aria-label={copiedStates[orderId] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
           >
-            {copiedStates[orderId] ? 'Đã sao chép' : 'Sao chép'}
+            {copiedStates[orderId] ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </button>
         </div>
       </div>
