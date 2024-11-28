@@ -122,7 +122,7 @@ const ManageGadget = ({ categoryId }) => {
   // Update useEffect to include currentPage in dependencies
   useEffect(() => {
     fetchGadgets();
-  }, [categoryId, statusFilter, selectedBrand, currentPage, searchTerm]); // Add currentPage and searchTerm
+  }, [categoryId, statusFilter, selectedBrand, currentPage]); // Add currentPage and searchTerm
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-screen">

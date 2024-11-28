@@ -18,7 +18,7 @@ const ReviewPage = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/reviews/gadget/${productId}`, {
+        const response = await axios.get(`${apiBaseUrl}/api/reviews/gadget/${productId}?Page=1&PageSize=100`, {
           params: {
             SortByDate: sortByDate,
             SortByRating: sortByRating,
