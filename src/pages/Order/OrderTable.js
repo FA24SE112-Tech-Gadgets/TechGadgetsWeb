@@ -7,44 +7,20 @@ import { toast } from "react-toastify";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 import slugify from "~/ultis/config";
 
-const OrderTable = ({ orders, onOrderCancelled }) => {
+const OrderTable = ({ 
+  orders, 
+  onOrderCancelled, 
+  currentPage, 
+  setCurrentPage, 
+  totalItems, 
+  pageSize 
+}) => {
+  // Remove local pagination states and logic
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const navigate = useNavigate();
   const [copiedStates, setCopiedStates] = useState({});
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
-  const handleChangePage = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    // Add scroll to top
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-  const getPaginationRange = () => {
-    const maxVisible = 5; // Số lượng nút hiển thị
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(start + maxVisible - 1, totalPages);
-
-    // Điều chỉnh start nếu end đã chạm giới hạn
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-  };
-  // Add this useEffect to reset pagination when orders change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [orders]);
 
   // Function to open the cancel modal and set the selected order ID
   const openCancelModal = (orderId) => {
@@ -124,8 +100,8 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
 
   return (
     <div className="container mx-auto">
-      <div className="grid grid-cols-1 gap-6  mx-auto">
-        {currentOrders.map((order) => (
+      <div className="grid grid-cols-1 gap-6 mx-auto">
+        {orders.map((order) => (
           <div
             key={order.id}
             className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
@@ -240,20 +216,38 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
         ))}
       </div>
 
-      {/* Pagination Controls - Keep existing pagination code */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {getPaginationRange().map((pageNumber) => (
-          <button
-            key={pageNumber}
-            onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${pageNumber === currentPage
-              ? 'bg-primary/80 text-white'
-              : 'bg-gray-200 text-gray-700'
-              }`}
-          >
-            {pageNumber}
-          </button>
-        ))}
+      {/* Updated Pagination Controls */}
+      <div className="mt-4">
+        <div className="flex justify-center mt-4">
+          <nav className="flex items-center space-x-2">
+            {(() => {
+              const maxVisiblePages = 5;
+              const totalPages = Math.ceil(totalItems / pageSize);
+              let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+              let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+              if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+              }
+
+              return Array.from({ length: totalPages }, (_, index) => index + 1)
+                .filter(number => number >= startPage && number <= endPage)
+                .map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => setCurrentPage(number)}
+                    className={`px-4 py-2 rounded-md ${
+                      number === currentPage 
+                        ? "bg-primary/70 text-white" 
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                ));
+            })()}
+          </nav>
+        </div>
       </div>
     </div>
   );

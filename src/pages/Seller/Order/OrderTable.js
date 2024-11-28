@@ -1,34 +1,18 @@
 import { Eye } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 
-const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) => {
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [cancelReason, setCancelReason] = useState("");
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
+const OrderTableSeller = ({ 
+  orders = [], 
+  currentPage,
+  totalItems,
+  pageSize,
+  onPageChange
+}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [orders, setOrders] = useState(initialOrders);
-  const navigate = useNavigate();
   const [error, setError] = useState(null);
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [ordersPerPage, setOrdersPerPage] = useState(10);
-  const [totalOrders, setTotalOrders] = useState(0);
   const [copiedStates, setCopiedStates] = useState({});
-  useEffect(() => {
-    setOrders(initialOrders);
-    setTotalOrders(initialOrders.length);
-    // Reset to first page when orders change
-    setCurrentPage(1);
-  }, [initialOrders]);
-
-  // Calculate pagination values
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
-  const totalPages = Math.ceil(orders.length / ordersPerPage);
+  const navigate = useNavigate();
 
   const translateStatus = (status) => {
     const statusMap = {
@@ -39,26 +23,25 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
     return statusMap[status] || status;
   };
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
   const handleCopy = (id, e) => {
     e.stopPropagation();
     navigator.clipboard.writeText(id).then(() => {
       setCopiedStates((prev) => ({
         ...prev,
-        [id]: true, // Đánh dấu giao dịch cụ thể là đã sao chép
+        [id]: true,
       }));
       setTimeout(() => {
         setCopiedStates((prev) => ({
           ...prev,
-          [id]: false, // Reset trạng thái sau 2 giây
+          [id]: false,
         }));
       }, 2000);
     });
   };
+
   // Pagination component
   const Pagination = () => {
+    const totalPages = Math.ceil(totalItems / pageSize);
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -68,25 +51,24 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
     }
 
     return (
-      <div className="mt-4">
-        {/* Pagination Controls */}
-        <div className="flex justify-center mt-4">
-          <nav className="flex items-center space-x-2">
-            {/* Page Numbers */}
-            {Array.from({ length: Math.ceil(totalPages) }, (_, index) => index + 1)
-              .filter((number) => number >= startPage && number <= endPage) // Ensure the buttons are displayed within the calculated range
-              .map((number) => (
-                <button
-                  key={number}
-                  onClick={() => handlePageChange(number)}
-                  className={`px-4 py-2 rounded-md ${number === currentPage ? "bg-primary/70 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                >
-                  {number}
-                </button>
-              ))}
-          </nav>
-        </div>
+      <div className="flex justify-center mt-4">
+        <nav className="flex items-center space-x-2">
+          {Array.from({ length: totalPages }, (_, index) => index + 1)
+            .filter(number => number >= startPage && number <= endPage)
+            .map((number) => (
+              <button
+                key={number}
+                onClick={() => onPageChange(number)}
+                className={`px-4 py-2 rounded-md ${
+                  number === currentPage 
+                    ? "bg-primary/70 text-white" 
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                {number}
+              </button>
+            ))}
+        </nav>
       </div>
     );
   };
@@ -114,7 +96,7 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
   };
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full bg-white border-2 border-gray-200  table-fixed">
+      <table className="min-w-full bg-white border-2 border-gray-200 table-fixed">
         <thead>
           <tr>
             <th className="py-2 px-4 border-b text-sm">Mã đơn hàng</th>
@@ -125,8 +107,8 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
           </tr>
         </thead>
         <tbody>
-          {currentOrders.length > 0 ? (
-            currentOrders.map((order) => (
+          {orders.length > 0 ? (
+            orders.map((order) => (
               <tr key={order.id}
 
                 className="hover:bg-gray-50 cursor-pointer">
@@ -177,9 +159,7 @@ const OrderTableSeller = ({ orders: initialOrders = [], onOrderStatusChanged }) 
         </tbody>
       </table>
 
-      {/* Show pagination only if there are more orders than ordersPerPage */}
-      {orders.length > ordersPerPage && <Pagination />}
-
+      {totalItems > pageSize && <Pagination />}
     </div>
   );
 };

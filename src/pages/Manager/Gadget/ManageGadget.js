@@ -31,6 +31,7 @@ const ManageGadget = ({ categoryId }) => {
   const [brandPage, setBrandPage] = useState(1);
   const [brandPageSize, setBrandPageSize] = useState(100);
   const [totalBrandPages, setTotalBrandPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0); // Add this state variable
 
   const fetchBrands = async (page = brandPage, pageSize = brandPageSize) => {
     try {
@@ -48,7 +49,7 @@ const ManageGadget = ({ categoryId }) => {
   const fetchGadgets = async () => {
     try {
       setIsLoading(true);
-      let url = `/api/gadgets/category/${categoryId}/managers?Page=1&PageSize=200`;
+      let url = `/api/gadgets/category/${categoryId}/managers?Page=${currentPage}&PageSize=${itemsPerPage}`;
       if (statusFilter !== 'all') {
         url += `&GadgetStatus=${statusFilter}`;
       }
@@ -60,6 +61,8 @@ const ManageGadget = ({ categoryId }) => {
       }
       const response = await AxiosInterceptor.get(url);
       setGadgets(response.data.items);
+      // Update to use the correct pagination data format
+      setTotalItems(response.data.totalItems);
     } catch (error) {
       console.error("Error fetching gadgets:", error);
       toast.error("Failed to fetch gadgets");
@@ -98,31 +101,6 @@ const ManageGadget = ({ categoryId }) => {
     }
   };
 
-  // Add these calculations for pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentGadgets = gadgets.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(gadgets.length / itemsPerPage);
-
-  // Add handleChangePage function
-  const handleChangePage = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  // Thêm hàm này trước return statement
-  const getPaginationRange = () => {
-    const maxVisible = 5; // Số lượng nút hiển thị
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(start + maxVisible - 1, totalPages);
-
-    // Điều chỉnh start nếu end đã chạm giới hạn
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-  };
-
   // Add handleSearch function
   const handleSearch = () => {
     setCurrentPage(1);
@@ -140,6 +118,11 @@ const ManageGadget = ({ categoryId }) => {
     fetchBrands(brandPage, brandPageSize);
     setSelectedBrand(''); // Reset selected brand when category changes
   }, [categoryId, brandPage, brandPageSize]);
+
+  // Update useEffect to include currentPage in dependencies
+  useEffect(() => {
+    fetchGadgets();
+  }, [categoryId, statusFilter, selectedBrand, currentPage, searchTerm]); // Add currentPage and searchTerm
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-screen">
@@ -218,7 +201,7 @@ const ManageGadget = ({ categoryId }) => {
           </tr>
         </thead>
         <tbody>
-          {currentGadgets.map((gadget) => (
+          {gadgets.map((gadget) => (
             <tr key={gadget.id} className="border-b hover:bg-gray-50">
               <td className="p-4">
                 <img
@@ -307,21 +290,47 @@ const ManageGadget = ({ categoryId }) => {
       )}
 
       {/* Thay thế phần pagination controls cũ bằng đoạn này */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {getPaginationRange().map((pageNumber) => (
-          <button
-            key={pageNumber}
-            onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${pageNumber === currentPage
-                ? 'bg-primary/80 text-white'
-                : 'bg-gray-200 text-gray-700'
-              }`}
-            disabled={isLoading}
-          >
-            {pageNumber}
-          </button>
-        ))}
-      </div>
+      {gadgets.length > 0 && (
+        <div className="mt-4">
+          <div className="flex justify-center mt-4">
+            <nav className="flex items-center space-x-2">
+              {(() => {
+                const maxVisiblePages = 5;
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                
+                if (totalPages <= 1) return null;
+  
+                let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  
+                if (endPage - startPage + 1 < maxVisiblePages) {
+                  startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                }
+  
+                const pages = [];
+                // Add page numbers
+                Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
+                  .forEach(number => {
+                    pages.push(
+                      <button
+                        key={number}
+                        onClick={() => setCurrentPage(number)}
+                        className={`px-4 py-2 rounded-md ${
+                          number === currentPage 
+                            ? "bg-primary/70 text-white" 
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                      >
+                        {number}
+                      </button>
+                    );
+                  });
+                return pages;
+              })()}
+            </nav>
+          </div>
+        </div>
+      )}
 
       {showConfirmModal && gadgetToToggle && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">

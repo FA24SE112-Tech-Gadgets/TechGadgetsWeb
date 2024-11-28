@@ -7,10 +7,10 @@ import { PendingOutlined } from "@mui/icons-material";
 
 const OrderHistorySeller = () => {
   const [orders, setOrders] = useState([]);
-  const [filteredOrders, setFilteredOrders] = useState([]);
   const [status, setStatus] = useState("");
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [pageSize] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const [sortByDate, setSortByDate] = useState('DESC');
 
@@ -18,12 +18,16 @@ const OrderHistorySeller = () => {
     setIsLoading(true);
     try {
       const response = await AxiosInterceptor.get(`/api/seller-orders?SortByDate=${sortByDate}`, {
-        params: { Page: pageNumber, PageSize: 100, Status: statusFilter },
+        params: { 
+          Page: pageNumber, 
+          PageSize: pageSize, 
+          Status: statusFilter 
+        },
       });
 
-      const { items, totalCount } = response.data;
+      const { items, totalItems } = response.data;
       setOrders(items);
-      setTotalPages(Math.ceil(totalCount / 10));
+      setTotalItems(totalItems);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.reasons) {
         const reasons = error.response.data.reasons;
@@ -40,22 +44,17 @@ const OrderHistorySeller = () => {
   };
 
   useEffect(() => {
-    fetchOrders(page, status);
-  }, [page, status, sortByDate]);
-
-  useEffect(() => {
-    setFilteredOrders(orders);
-  }, [orders]);
+    fetchOrders(currentPage, status);
+  }, [currentPage, status, sortByDate]);
 
   const handleStatusChange = (newStatus) => {
     setStatus(newStatus);
-    setPage(1);
+    setCurrentPage(1);
     fetchOrders(1, newStatus);
   };
 
   const handleOrderStatus = (orderId) => {
     setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
-    setFilteredOrders((prevFilteredOrders) => prevFilteredOrders.filter((order) => order.id !== orderId));
   };
 
   return (
@@ -71,7 +70,7 @@ const OrderHistorySeller = () => {
             value={sortByDate}
             onChange={(e) => {
               setSortByDate(e.target.value);
-              setPage(1);
+              setCurrentPage(1);
             }}
             className="w-full sm:w-[180px] px-1 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60"
           >
@@ -121,10 +120,17 @@ const OrderHistorySeller = () => {
         </div>
       )}
 
-      {filteredOrders.length === 0 && !isLoading ? (
+      {orders.length === 0 && !isLoading ? (
         <p className="text-center text-gray-500">Không có đơn hàng nào.</p>
       ) : (
-        <OrderTableSeller orders={filteredOrders} onOrderStatusChanged={handleOrderStatus} />
+        <OrderTableSeller 
+          orders={orders} 
+          onOrderStatusChanged={handleOrderStatus}
+          currentPage={currentPage}
+          totalItems={totalItems}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+        />
       )}
     </div>
   );
