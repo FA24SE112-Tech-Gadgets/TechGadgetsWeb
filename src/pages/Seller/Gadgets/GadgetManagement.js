@@ -469,7 +469,7 @@ const GadgetManagement = ({ categoryId }) => {
             <ToastContainer position="top-right" autoClose={3000} />
 
             {/* Statistics Section with improved layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
@@ -523,7 +523,7 @@ const GadgetManagement = ({ categoryId }) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Add search and sort controls */}
             <div className="mb-4 flex gap-4">
