@@ -111,9 +111,11 @@ export default function SellerTransfer() {
       ) : (
         <div className="space-y-4">
           {deposits.map((deposit) => (
-            <div key={deposit.id}
+            <div
+              key={deposit.id}
               onClick={() => navigate(`/order/detail-seller/${deposit.sellerOrderId}`)}
-              className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex items-center justify-between cursor-pointer">
+              className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex items-center justify-between cursor-pointer"
+            >
               <div className="flex-1">
                 <div className="flex items-center">
                   <p className="text-sm font-semibold text-gray-700">
@@ -122,8 +124,8 @@ export default function SellerTransfer() {
                   <button
                     onClick={(e) => handleCopy(deposit.sellerOrderId, e)}
                     className={`p-1 mb-1 ml-2 rounded-md transition-colors duration-200 ${copiedStates[deposit.sellerOrderId]
-                      ? 'bg-green-500 text-white'
-                      : 'bg-primary/75 text-white hover:bg-secondary/85'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-primary/75 text-white hover:bg-secondary/85'
                       }`}
                     aria-label={copiedStates[deposit.sellerOrderId] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
                   >
@@ -139,9 +141,9 @@ export default function SellerTransfer() {
                   <p className="text-sm font-semibold text-gray-700">Trạng thái:</p>
                   <span
                     className={`ml-2 px-3 py-1 rounded-full text-xs font-semibold ${deposit.status === 'Success' ? 'bg-green-200 text-green-700' :
-                      deposit.status === 'Pending' ? 'bg-yellow-200 text-yellow-700' :
-                        deposit.status === 'Expired' ? 'bg-red-200 text-red-700' :
-                          'bg-gray-200 text-gray-700'
+                        deposit.status === 'Pending' ? 'bg-yellow-200 text-yellow-700' :
+                          deposit.status === 'Expired' ? 'bg-red-200 text-red-700' :
+                            'bg-gray-200 text-gray-700'
                       }`}
                   >
                     {deposit.status === 'Success' ? 'Hoàn thành' :
@@ -151,17 +153,26 @@ export default function SellerTransfer() {
                             deposit.status}
                   </span>
                 </div>
+                {deposit.balanceBeforeChange !== null && deposit.status === 'Success' && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    <span>Số dư trước: {formatCurrency(deposit.balanceBeforeChange)}</span>
+                    <span className="mx-2">→</span>
+                    <span>Số dư sau: {formatCurrency(deposit.balanceBeforeChange + deposit.amount)}</span>
+                  </div>
+                )}
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col items-end">
                 <p className="text-sm font-semibold text-gray-700">
-                  Số tiền: <span className="text-green-600">+ {formatCurrency(deposit.amount)}</span>
+                  Số tiền: {' '}
+                  <span className={`${deposit.status === 'Success' ? 'text-green-600' : 'text-gray-600'}`}>
+                    {deposit.status === 'Success' ? '+ ' : ''}{formatCurrency(deposit.amount)}
+                  </span>
                 </p>
                 <p className="text-xs text-gray-500 mt-5">
                   Ngày tạo: {formatDate(deposit.createdAt)}
                 </p>
               </div>
             </div>
-
           ))}
         </div>
       )}

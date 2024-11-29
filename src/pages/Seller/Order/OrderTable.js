@@ -2,8 +2,8 @@ import { Eye, Copy, Check } from 'lucide-react';
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const OrderTableSeller = ({ 
-  orders = [], 
+const OrderTableSeller = ({
+  orders = [],
   currentPage,
   totalItems,
   pageSize,
@@ -59,11 +59,10 @@ const OrderTableSeller = ({
               <button
                 key={number}
                 onClick={() => onPageChange(number)}
-                className={`px-4 py-2 rounded-md ${
-                  number === currentPage 
-                    ? "bg-primary/70 text-white" 
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+                className={`px-4 py-2 rounded-md ${number === currentPage
+                  ? "bg-primary/70 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
               >
                 {number}
               </button>
@@ -85,7 +84,7 @@ const OrderTableSeller = ({
       </div>
     );
   if (error) return <div className="text-center mt-8 text-red-600">{error}</div>;
-  
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString("vi-VN", {
       year: "numeric",
@@ -117,16 +116,15 @@ const OrderTableSeller = ({
           {orders.length > 0 ? (
             orders.map((order) => (
               <tr key={order.id} className="hover:bg-gray-50 cursor-pointer">
-                <td className="py-2 px-4 border-b text-sm text-center">
-                  <div className="flex items-center justify-center bg-gray-50 rounded-md p-2 w-fit mx-auto">
+                <td className="py-2 px-4 border-b text-sm">
+                  <div className="flex items-center justify-between w-96 bg-gray-50 rounded-md p-2 mx-auto">
                     <span className="font-medium text-sm mr-2">{order.id}</span>
                     <button
                       onClick={(e) => handleCopy(order.id, e)}
-                      className={`p-1 rounded-md transition-colors duration-200 ${
-                        copiedStates[order.id]
-                          ? 'bg-green-500 text-white'
-                          : 'bg-primary/75 text-white hover:bg-secondary/85'
-                      }`}
+                      className={`p-1 rounded-md transition-colors duration-200 ${copiedStates[order.id]
+                        ? 'bg-green-500 text-white'
+                        : 'bg-primary/75 text-white hover:bg-secondary/85'
+                        }`}
                       aria-label={copiedStates[order.id] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
                     >
                       {copiedStates[order.id] ? (
@@ -145,24 +143,24 @@ const OrderTableSeller = ({
                         <span className="line-through text-gray-500 text-xs">
                           {formatCurrency(order.beforeAppliedDiscountAmount)}
                         </span>
-                        <span className="font-semibold text-green-600">
+                        <span className="font-semibold text-black">
                           {formatCurrency(order.amount)}
                         </span>
                       </>
                     ) : (
-                      <span>{formatCurrency(order.amount)}</span>
+                      <span className="font-semibold text-black">
+                        {formatCurrency(order.amount)}</span>
                     )}
                   </div>
                 </td>
                 <td className="py-2 px-4 border-b text-center text-sm">
                   <span
-                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      order.status === "Success"
-                        ? "bg-green-100 text-green-800"
-                        : order.status === "Pending"
+                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === "Success"
+                      ? "bg-green-100 text-green-800"
+                      : order.status === "Pending"
                         ? "bg-yellow-100 text-yellow-800"
                         : "bg-red-100 text-red-800"
-                    }`}
+                      }`}
                   >
                     {translateStatus(order.status)}
                   </span>

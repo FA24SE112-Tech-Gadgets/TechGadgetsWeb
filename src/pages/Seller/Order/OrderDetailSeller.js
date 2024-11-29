@@ -1,5 +1,5 @@
-import { CreditCardOutlined, HomeOutlined } from "@ant-design/icons";
-import { Copy, Check } from 'lucide-react';
+import { CreditCardOutlined, HomeOutlined, ShopOutlined } from "@ant-design/icons";
+import { Copy, Check, ChevronUp, ChevronDown } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
@@ -16,6 +16,7 @@ const OrderDetailSeller = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [copiedStates, setCopiedStates] = useState({});
   const [showFullId, setShowFullId] = useState(false);
+  const [showTotalBreakdown, setShowTotalBreakdown] = useState(false);
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
@@ -178,8 +179,8 @@ const OrderDetailSeller = () => {
           <button
             onClick={(e) => handleCopy(orderId, e)}
             className={`p-1 mb-1 rounded-md transition-colors duration-200 ${copiedStates[orderId]
-                ? 'bg-green-500 text-white'
-                : 'bg-primary/75 text-white hover:bg-secondary/85'
+              ? 'bg-green-500 text-white'
+              : 'bg-primary/75 text-white hover:bg-secondary/85'
               }`}
             aria-label={copiedStates[orderId] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
           >
@@ -244,6 +245,15 @@ const OrderDetailSeller = () => {
           <p className=" p-2">Địa chỉ: {orderDetails.customerInfo.address}</p>
           <p className=" p-2">Điện thoại: {orderDetails.customerInfo.phoneNumber}</p>
         </div>
+        {/* Địa chỉ cửa hàng */}
+        <div className="p-4 border rounded-lg">
+          <h3 className="font-semibold text-primary/80 mb-2 flex items-center">
+            <ShopOutlined className="mr-2" /> Địa chỉ cửa hàng
+          </h3>
+          <p className="font-semibold p-2">{orderDetails.sellerInfo.shopName}</p>
+          <p className=" p-2">Địa chỉ: {orderDetails.sellerInfo.shopAddress}</p>
+          <p className=" p-2">Điện thoại: {orderDetails.sellerInfo.phoneNumber}</p>
+        </div>
         {/* Hình thức thanh toán */}
         <div className="p-4 border rounded-lg">
           <h3 className="font-semibold text-primary/80 mb-2 flex items-center">
@@ -299,6 +309,39 @@ const OrderDetailSeller = () => {
         <p className="font-semibold text-red-500 text-lg">
           Tổng cộng: {orderDetails.totalAmount.toLocaleString()}₫
         </p>
+      </div>
+
+      <div className="text-right mt-6">
+        {showTotalBreakdown && orderDetails.discountAmount > 0 && (
+          <div className="w-full border border-gray-200 rounded-lg p-4 mb-2">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-gray-600">Tổng tiền hàng:</span>
+              <span className="font-medium">{orderDetails.beforeAppliedDiscountAmount.toLocaleString()}₫</span>
+            </div>
+            <div className="flex justify-between items-center text-red-400">
+              <span>Phí giảm giá:</span>
+              <span className="font-medium">-{orderDetails.discountAmount.toLocaleString()}₫</span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-end items-center">
+          <p className="font-semibold text-red-500 text-lg mr-2">
+            Tổng cộng: {orderDetails.totalAmount.toLocaleString()}₫
+          </p>
+          {orderDetails.discountAmount > 0 && (
+            <button
+              onClick={() => setShowTotalBreakdown(!showTotalBreakdown)}
+              className="focus:outline-none"
+            >
+              {showTotalBreakdown ? (
+                <ChevronUp className="h-5 w-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="h-5 w-5 text-gray-500" />
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Action Buttons */}

@@ -176,7 +176,7 @@ const OrderTable = ({
                       <div>
                         <p className="font-medium text-gray-800">{gadget.name}</p>
                         <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                          <span>Được cung cấp bởi: </span>
+                          <span>Người bán: </span>
                           <Store className="h-4 w-4" />
                           <span>{order.sellerInfo.shopName}</span>
                         </div>
