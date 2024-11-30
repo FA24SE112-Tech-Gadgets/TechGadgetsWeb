@@ -136,6 +136,7 @@ const ProfilePage = () => {
       formData.append('DateOfBirth', formattedDate);
 
       if (profile.phoneNumber) formData.append('PhoneNumber', profile.phoneNumber);
+      if (profile.email !== originalProfile.email) formData.append('Email', profile.email);
 
       if (profile.avatar instanceof File) {
         formData.append('Avatar', profile.avatar);
@@ -184,7 +185,7 @@ const ProfilePage = () => {
         <div>
           <button
             onClick={() => navigate('/')}
-            className="text-black  cursor-pointer"
+            className="text-black cursor-pointer"
           >
             <ArrowBack />
           </button>
@@ -205,7 +206,7 @@ const ProfilePage = () => {
         </div>
         <div className="flex">
           <div className="w-1/3 flex flex-col items-center">
-          <img
+            <img
               src={previewImage || profile.avatar || DefaultAvatar}
               alt="User Avatar"
               className="rounded-full w-40 h-40 mb-4 bg-gray-100 object-cover"
@@ -245,45 +246,54 @@ const ProfilePage = () => {
             <div className="grid grid-cols-2 gap-4">
               {Object.keys(profile).map((key) =>
                 key !== 'avatar' && key !== 'name' ? (
-                  <div key={key} className="mb-4">
-                    <label className="block text-gray-700">{labels[key]}</label>
-                    {isEditing ? (
-                      key === 'gender' ? (
-                        <select
-                          name="gender"
-                          value={profile.gender}
-                          onChange={handleChange}
-                          className="mt-2 p-2 border rounded w-full h-10"
-                        >
-                          <option value="Nam">Nam</option>
-                          <option value="Nữ">Nữ</option>
-                        </select>
-                      ) : key === 'dateOfBirth' ? (
-                        <input
-                          type="text"
-                          name="dateOfBirth"
-                          value={profile.dateOfBirth}
-                          onChange={handleChange}
-                          placeholder="DD/MM/YYYY"
-                          className="mt-2 p-2 border rounded w-full h-10"
-                        />
-                      ) : (
-                        <input
-                          type="text"
-                          name={key}
-                          value={profile[key]}
-                          onChange={handleChange}
-                          className="mt-2 p-2 border rounded w-full h-10"
-                        />
-                      )
-                    ) : (
+                  key === 'email' ? (
+                    <div key={key} className="mb-4">
+                      <label className="block text-gray-700">{labels[key]}</label>
                       <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10 truncate">
-                        {key === 'dateOfBirth'
-                          ? profile[key]
-                          : profile[key]}
+                        {profile[key]}
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <div key={key} className="mb-4">
+                      <label className="block text-gray-700">{labels[key]}</label>
+                      {isEditing ? (
+                        key === 'gender' ? (
+                          <select
+                            name="gender"
+                            value={profile.gender}
+                            onChange={handleChange}
+                            className="mt-2 p-2 border rounded w-full h-10"
+                          >
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                          </select>
+                        ) : key === 'dateOfBirth' ? (
+                          <input
+                            type="text"
+                            name="dateOfBirth"
+                            value={profile.dateOfBirth}
+                            onChange={handleChange}
+                            placeholder="DD/MM/YYYY"
+                            className="mt-2 p-2 border rounded w-full h-10"
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            name={key}
+                            value={profile[key]}
+                            onChange={handleChange}
+                            className="mt-2 p-2 border rounded w-full h-10"
+                          />
+                        )
+                      ) : (
+                        <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10 truncate">
+                          {key === 'dateOfBirth'
+                            ? profile[key]
+                            : profile[key]}
+                        </p>
+                      )}
+                    </div>
+                  )
                 ) : null
               )}
             </div>

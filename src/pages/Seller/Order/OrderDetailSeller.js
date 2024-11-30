@@ -305,12 +305,6 @@ const OrderDetailSeller = () => {
       </div>
 
       {/* Tổng cộng */}
-      <div className="text-right">
-        <p className="font-semibold text-red-500 text-lg">
-          Tổng cộng: {orderDetails.totalAmount.toLocaleString()}₫
-        </p>
-      </div>
-
       <div className="text-right mt-6">
         {showTotalBreakdown && orderDetails.discountAmount > 0 && (
           <div className="w-full border border-gray-200 rounded-lg p-4 mb-2">
