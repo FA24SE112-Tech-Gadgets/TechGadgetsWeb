@@ -36,7 +36,7 @@ const GadgetManagementPage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <div className="flex flex-col space-y-4 mb-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Quản lý sản phẩm</h1>
