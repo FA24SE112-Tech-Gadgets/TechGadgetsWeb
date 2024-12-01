@@ -56,6 +56,8 @@ import SellerDashboard from "./pages/Seller/Dashboard/SellerDashboard";
 import ManagerDashboard from "./pages/Manager/Dashboard/ManagerDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import GadgetDetailManager from "./pages/Manager/Gadget/GadgetDetailManager";
+import ErrorPage from "./pages/404";
+import ErrorPageSeller from "./pages/404Seller";
 
 
 
@@ -140,11 +142,14 @@ function App() {
           </AuthRoute>
 
         } />
-
+        {/* error Page */}
+        <Route path='/404' element={<ErrorPage />} />
       </Route>
       {/* Search by AI */}
       <Route path="/search-by-natural-language" element={<NaturalLanguageSearch />} />
-      
+
+
+
       {/* Seller Route */}
       <Route element={<SellerLayout />}>
         <Route path='/seller/Order-management' element={<OrderHistorySeller />} />
@@ -176,7 +181,6 @@ function App() {
       <Route element={<SellerLayout />}>
         <Route path='/seller/dashboard' element={<SellerDashboard />} />
       </Route>
-
       <Route path="/sellerProfile" element={
         <AuthRoute>
           <RoleBaseRoute accessibleRoles={["Seller"]}>
@@ -227,8 +231,8 @@ function App() {
         <Route path='/manage-gadget' element={
           <ManageGadgetPage />
         } />
-          <Route path='/gadget/detail-manager/:name' element={
-          <GadgetDetailManager/>
+        <Route path='/gadget/detail-manager/:name' element={
+          <GadgetDetailManager />
         } />
         <Route path='/manage-dashboard' element={
           <ManagerDashboard />
@@ -237,11 +241,11 @@ function App() {
 
       {/* Admin Route */}
       <Route element={<AdminLayout />}>
-          <Route path='/admin/manage-users' element={
-         <AdminPage/>
+        <Route path='/admin/manage-users' element={
+          <AdminPage />
         } />
         <Route path='/admin/dashboard' element={
-         <AdminDashboard/>
+          <AdminDashboard />
         } />
       </Route>
     </Routes>

@@ -75,6 +75,7 @@ const ProfilePage = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [loginMethod, setLoginMethod] = useState(null);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -82,6 +83,8 @@ const ProfilePage = () => {
         const response = await AxiosInterceptor.get('/api/users/current');
         const userData = response.data.customer;
 
+        // Set login method
+        setLoginMethod(response.data.loginMethod);
         const newProfile = {
           name: userData.fullName,
           address: userData.address || '',
@@ -197,12 +200,14 @@ const ProfilePage = () => {
               <FaPencilAlt />
             </button>
           </div>
-          <button
-            onClick={openModal}
-            className="text-gray-500 hover:text-gray-700 text-xl"
-          >
-            <FaKey />
-          </button>
+          {loginMethod !== 'Google' && (
+            <button
+              onClick={openModal}
+              className="text-gray-500 hover:text-gray-700 text-xl"
+            >
+              <FaKey />
+            </button>
+          )}
         </div>
         <div className="flex">
           <div className="w-1/3 flex flex-col items-center">
@@ -319,7 +324,7 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {isModalOpen && (
+      {isModalOpen && loginMethod !== 'Google' && (
         <div
           className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
         >

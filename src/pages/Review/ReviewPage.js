@@ -12,19 +12,33 @@ const ReviewPage = () => {
   const [loading, setLoading] = useState(true);
   const [sortByDate, setSortByDate] = useState('');
   const [sortByRating, setSortByRating] = useState('');
+  const [reviewSummary, setReviewSummary] = useState({
+    avgReview: 0,
+    numOfReview: 0,
+    numOfFiveStar: 0,
+    numOfFourStar: 0,
+    numOfThreeStar: 0,
+    numOfTwoStar: 0,
+    numOfOneStar: 0
+  });
   const apiBaseUrl = process.env.NODE_ENV === "development"
     ? process.env.REACT_APP_DEV_API
     : process.env.REACT_APP_PRO_API;
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/reviews/gadget/${productId}?Page=1&PageSize=100`, {
-          params: {
-            SortByDate: sortByDate,
-            SortByRating: sortByRating,
-          },
-        });
-        setReviews(response.data.items);
+        const [reviewsResponse, summaryResponse] = await Promise.all([
+          axios.get(`${apiBaseUrl}/api/reviews/gadget/${productId}?Page=1&PageSize=100`, {
+            params: {
+              SortByDate: sortByDate,
+              SortByRating: sortByRating,
+            },
+          }),
+          axios.get(`${apiBaseUrl}/api/reviews/summary/gadgets/${productId}`)
+        ]);
+        
+        setReviews(reviewsResponse.data.items);
+        setReviewSummary(summaryResponse.data);
       } catch (error) {
         if (error.response && error.response.data && error.response.data.reasons) {
           const reasons = error.response.data.reasons;
@@ -42,7 +56,7 @@ const ReviewPage = () => {
       }
     };
 
-    fetchReviews();
+    fetchData();
   }, [productId, sortByDate, sortByRating]);
 
   if (loading) return (
@@ -55,16 +69,6 @@ const ReviewPage = () => {
       </span>
     </div>
   );
-  const totalReviews = reviews.length;
-  const starCounts = [0, 0, 0, 0, 0];
-
-  reviews.forEach((review) => {
-    starCounts[review.rating - 1]++;
-  });
-
-  const starPercentages = starCounts.map((count) => ((count / totalReviews) * 100).toFixed(2));
-
-  const averageRating = (reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews).toFixed(1);
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('vi-VN', {
       year: 'numeric',
@@ -83,10 +87,10 @@ const ReviewPage = () => {
         <div className="w-full max-w-md">
           {/* Average rating with stars */}
           <div className="flex items-center mb-4 justify-center">
-            <span className="text-3xl font-bold text-primary/80">{averageRating}</span>
+            <span className="text-3xl font-bold text-primary/80">{reviewSummary.avgReview.toFixed(1)}</span>
             <div className="ml-2 flex">
               <StarRatings
-                rating={parseFloat(averageRating)}
+                rating={reviewSummary.avgReview}
                 starRatedColor="orange"
                 numberOfStars={5}
                 starDimension="24px"
@@ -97,17 +101,25 @@ const ReviewPage = () => {
 
           {/* Star rating breakdown */}
           <div className="space-y-2">
-            {starCounts.map((count, index) => (
+            {[
+              reviewSummary.numOfFiveStar,
+              reviewSummary.numOfFourStar,
+              reviewSummary.numOfThreeStar,
+              reviewSummary.numOfTwoStar,
+              reviewSummary.numOfOneStar
+            ].map((count, index) => (
               <div key={index} className="flex items-center">
                 <span className="w-8 text-right">{5 - index}</span>
                 <Star size={16} className="text-gray-400 ml-2" />
                 <div className="flex-1 mx-2 h-3 bg-gray-200 rounded">
                   <div
                     className="h-3 bg-primary/80 rounded"
-                    style={{ width: `${Math.floor(starPercentages[5 - index - 1])}%` }}
+                    style={{ width: `${reviewSummary.numOfReview > 0 ? (count / reviewSummary.numOfReview * 100) : 0}%` }}
                   ></div>
                 </div>
-                <span className="w-12 text-right">{Math.floor(starPercentages[5 - index - 1])}%</span>
+                <span className="w-12 text-right">
+                  {reviewSummary.numOfReview > 0 ? Math.floor(count / reviewSummary.numOfReview * 100) : 0}%
+                </span>
               </div>
             ))}
           </div>

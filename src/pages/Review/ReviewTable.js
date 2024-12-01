@@ -266,7 +266,7 @@ const ReviewTable = ({ orders, onOrderStatusChanged, onOrderUpdateStatusChanged 
             {/* Seller Reply Section */}
             {order.review && order.review.sellerReply && order.review.sellerReply.status === 'Active' && (
               <div className=" bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ người bán</h4>
+                <h4 className="text-md font-semibold text-primary mb-2">Phản hồi từ {order.review.sellerReply.seller.shopName}</h4>
                 <p className="text-gray-500 text-sm">{formatDate(order.review.sellerReply.createdAt)}</p>
 
                 <div className="mt-2 flex items-center text-gray-700">

@@ -105,6 +105,7 @@ const GadgetManagement = ({ categoryId }) => {
                     gadget.id === gadgetToToggleSale.id ? { ...gadget, isForSale: !gadgetToToggleSale.isForSale } : gadget
                 )
             );
+            await fetchGadgets();
             toast.success("Cập nhật trạng thái thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {

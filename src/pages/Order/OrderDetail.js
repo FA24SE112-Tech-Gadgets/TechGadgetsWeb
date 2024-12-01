@@ -20,22 +20,22 @@ const OrderDetail = () => {
     const [showFullId, setShowFullId] = useState(false);
     const [showTotalBreakdown, setShowTotalBreakdown] = useState(false);
 
+    const fetchOrderDetails = async () => {
+        try {
+            const [orderDetailsResponse, orderItemsResponse] = await Promise.all([
+                AxiosInterceptor.get(`/api/seller-orders/${orderId}`),
+                AxiosInterceptor.get(`/api/seller-order/${orderId}/items`),
+            ]);
+
+            setOrderDetails(orderDetailsResponse.data);
+            setOrderItems(orderItemsResponse.data.items);
+        } catch (error) {
+            console.error("Error fetching order details:", error);
+            navigate('/404');
+        }
+    };
+
     useEffect(() => {
-        const fetchOrderDetails = async () => {
-            try {
-                const [orderDetailsResponse, orderItemsResponse] = await Promise.all([
-                    AxiosInterceptor.get(`/api/seller-orders/${orderId}`),
-                    AxiosInterceptor.get(`/api/seller-order/${orderId}/items`),
-                ]);
-
-                setOrderDetails(orderDetailsResponse.data);
-                setOrderItems(orderItemsResponse.data.items);
-            } catch (error) {
-                console.error("Error fetching order details:", error);
-                toast.error("Failed to fetch order details");
-            }
-        };
-
         fetchOrderDetails();
     }, []);
 
@@ -74,12 +74,7 @@ const OrderDetail = () => {
                 reason: cancelReason.trim() || "",
             });
 
-            setOrderDetails((prevDetails) => ({
-                ...prevDetails,
-                status: "Cancelled",
-                cancelledReason: cancelReason.trim(),
-                sellerOrderUpdatedAt: new Date().toISOString(),
-            }));
+            await fetchOrderDetails(); // Re-fetch data after successful cancellation
 
             setShowCancelModal(false);
             setCancelReason("");

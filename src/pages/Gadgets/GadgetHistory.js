@@ -73,8 +73,8 @@ const GadgetHistory = () => {
           className="mySwiper"
         >
           {gadgets.length > 0 ? (
-            gadgets.map((gadget) => (
-              <SwiperSlide key={gadget.id}>
+            gadgets.map((gadget, index) => (
+              <SwiperSlide key={`${gadget.id}-${index}`}>
                 <div
                   onClick={() =>
                     navigate(`/gadget/detail/${slugify(gadget.name)}`, {

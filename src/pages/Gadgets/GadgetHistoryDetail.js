@@ -68,8 +68,8 @@ const GadgetHistoryDetail = () => {
           className="w-full" // Thêm w-full
         >
           {gadgets.length > 0 ? (
-            gadgets.map((gadget) => (
-              <SwiperSlide key={gadget.id} className="flex justify-center"> {/* Thêm flex và justify-center */}
+            gadgets.map((gadget,index) => (
+              <SwiperSlide key={`${gadget.id}-${index}`} className="flex justify-center"> {/* Thêm flex và justify-center */}
                 <div
                   onClick={() =>
                     navigate(`/gadget/detail/${slugify(gadget.name)}`, {

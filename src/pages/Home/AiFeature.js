@@ -27,7 +27,10 @@ const AiFeature = () => {
                                 khả năng hiểu ý định tìm kiếm, phân tích từ khóa và gợi ý những sản phẩm, cửa hàng phù hợp nhất với nhu cầu của bạn.
                             </p>
                             <button
-                                onClick={() => navigate("/search-by-natural-language")}
+                                onClick={() => {
+                                    localStorage.removeItem('searchState');
+                                    navigate("/search-by-natural-language");
+                                }}
                                 className="group inline-flex items-center px-6 py-3 text-lg font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-300 ease-in-out hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
                                 Hãy thử ngay
