@@ -76,7 +76,7 @@ const ProfilePage = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loginMethod, setLoginMethod] = useState(null);
-
+  const [status, setStatus] = useState(false);
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
@@ -95,7 +95,7 @@ const ProfilePage = () => {
           email: response.data.email,
           avatar: userData.avatarUrl || ''
         };
-
+        setStatus(response.data.status);
         setProfile(newProfile);
         setOriginalProfile(newProfile);
       } catch (error) {
@@ -157,7 +157,7 @@ const ProfilePage = () => {
         if (response.data && response.data.avatarUrl) {
           updatedProfile.avatar = response.data.avatarUrl;
         }
-        
+
         setProfile(updatedProfile);
         setOriginalProfile(updatedProfile);
         setIsEditing(false);
@@ -199,6 +199,9 @@ const ProfilePage = () => {
             <button onClick={() => setIsEditing(!isEditing)} className="text-gray-500 hover:text-gray-700 text-xl">
               <FaPencilAlt />
             </button>
+            {status === "Inactive" && (
+              <span className="ml-2 text-red-500">Tài khoản của bạn đã bị khóa</span>
+            )}
           </div>
           {loginMethod !== 'Google' && (
             <button
@@ -307,9 +310,8 @@ const ProfilePage = () => {
                 <button
                   onClick={handleSave}
                   disabled={!hasChanges || isSaving}
-                  className={`mt-4 bg-black text-white p-2 rounded flex items-center ${
-                    !hasChanges || isSaving ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  className={`mt-4 bg-black text-white p-2 rounded flex items-center ${!hasChanges || isSaving ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                 >
                   {isSaving ? (
                     <CgSpinner className="animate-spin mr-2" />

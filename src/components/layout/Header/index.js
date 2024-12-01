@@ -25,7 +25,7 @@ const Header = () => {
   const [showWalletAmount, setShowWalletAmount] = useState(false);
   const { deleteDeviceToken } = useDeviceToken();
   const [cartItemCount, setCartItemCount] = useState(0);
-
+  const [status, setStatus] = useState(false);
   const formatWalletAmount = (amount) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
@@ -73,6 +73,7 @@ const Header = () => {
     try {
       const response = await AxiosInterceptor.get('/api/users/current');
       setWalletAmount(response.data.wallet.amount);
+      setStatus(response.data.status);
     } catch (error) {
       console.error('Error fetching wallet amount:', error);
     }
@@ -217,7 +218,10 @@ const Header = () => {
                         onClick={() => navigate("/profile")}
                         className="flex justify-start cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg text-gray-800 dark:text-gray-200 font-semibold w-full transition-colors duration-300"
                       >
-                        <p>Hồ sơ</p>
+                        <p>Hồ sơ</p> 
+                        {status === "Inactive" && (
+                          <span className="ml-2 text-red-500">(Bị khóa)</span>
+                        )}
                       </button>
                       <button
                         onClick={() => navigate("/orderHistory")}
