@@ -44,6 +44,9 @@ jobs:
             # Copy folder to Nginx
             sudo cp -r ./build/* /usr/share/nginx/html/
 
+            # Delete folder after copy success
+            sudo rm -rf ./build
+
             # Clean up dangling images
             sudo docker image prune -af
           EOF
