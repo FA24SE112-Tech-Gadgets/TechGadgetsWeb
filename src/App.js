@@ -58,6 +58,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import GadgetDetailManager from "./pages/Manager/Gadget/GadgetDetailManager";
 import ErrorPage from "./pages/404";
 import ErrorPageSeller from "./pages/404Seller";
+import AdminKeyWord from "./pages/Admin/AdminKeyWord";
 
 
 
@@ -246,6 +247,9 @@ function App() {
         } />
         <Route path='/admin/dashboard' element={
           <AdminDashboard />
+        } />
+        <Route path='/admin/keyword' element={
+          <AdminKeyWord />
         } />
       </Route>
     </Routes>

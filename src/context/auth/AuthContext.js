@@ -142,7 +142,7 @@ const AuthProvider = ({ children }) => {
 					return;
 				}
 				if (resData.status === 200) {
-					if (resData.data.status === "Active") {
+					// if (resData.data.status === "Active") {
 						setUser(resData.data);
 						setAuthenticated(true);
 						setError(null);
@@ -160,13 +160,13 @@ const AuthProvider = ({ children }) => {
 							navigate("/");
 						}
 
-					} else {
-						await logout();
-						setError({
-							title: "Account Banned",
-							message: "Tài khoản của bạn đã bị khóa, hãy thử lại."
-						});
-					}
+					// } else {
+					// 	await logout();
+					// 	setError({
+					// 		title: "Account Banned",
+					// 		message: "Tài khoản của bạn đã bị khóa, hãy thử lại."
+					// 	});
+					// }
 
 				}
 			} else {
