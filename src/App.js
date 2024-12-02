@@ -58,8 +58,9 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import GadgetDetailManager from "./pages/Manager/Gadget/GadgetDetailManager";
 import ErrorPage from "./pages/404";
 import ErrorPageSeller from "./pages/404Seller";
-import AdminKeyWord from "./pages/Admin/AdminKeyWord";
-import CreateKeyWordGroup from "./pages/Admin/CreateKeyWordGroup/CreateKeyWordGroup";
+import AdminKeyWord from "./pages/Manager/KeyWord/ManagerKeyWord";
+import CreateKeyWordGroup from "./pages/Manager/KeyWord/CreateKeyWordGroup";
+
 
 
 
@@ -239,6 +240,12 @@ function App() {
         <Route path='/manage-dashboard' element={
           <ManagerDashboard />
         } />
+         <Route path='/manage-keyword' element={
+          <AdminKeyWord />
+        } />
+        <Route path='/manage-create-keyword-group' element={
+          <CreateKeyWordGroup />
+        } />
       </Route>
 
       {/* Admin Route */}
@@ -248,12 +255,6 @@ function App() {
         } />
         <Route path='/admin/dashboard' element={
           <AdminDashboard />
-        } />
-        <Route path='/admin/keyword' element={
-          <AdminKeyWord />
-        } />
-        <Route path='/admin/create-keyword-group' element={
-          <CreateKeyWordGroup />
         } />
       </Route>
     </Routes>

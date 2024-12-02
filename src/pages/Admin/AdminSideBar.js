@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaUsersCog, FaSignOutAlt, FaChartBar, FaKey } from "react-icons/fa";
+import { FaUsersCog, FaSignOutAlt, FaChartBar } from "react-icons/fa";
 import useAuth from '~/context/auth/useAuth';
 import { useDeviceToken } from '~/context/auth/Noti';
 import icon from "~/assets/icon.ico";
@@ -19,7 +19,6 @@ const AdminSideBar = ({ minHeight = 'min-h-screen' }) => {
   const menuItems = [
     { path: '/admin/dashboard', label: 'Trang quản lý', icon: FaChartBar },
     { path: '/admin/manage-users', label: 'Quản lý người dùng', icon: FaUsersCog },
-    { path: '/admin/keyword', label: 'Quản lý từ khóa', icon: FaKey },
 
   ];
 
