@@ -1,0 +1,52 @@
+name: Deploy Web Prod
+
+on:
+  push:
+    branches: ["prod"]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image and push
+        run: docker buildx build . --file Dockerfile --tag techgadget/techgadget-web-prod --build-arg REACT_APP_DEV_API=${{ secrets.REACT_APP_DEV_API }} --build-arg REACT_APP_PRO_API=${{ secrets.REACT_APP_PRO_API }} --push
+
+      - name: Setup SSH Keys
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to EC2 (Deploy Server)
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_IP_PROD_WEB }} << EOF
+
+             # Pull the latest image
+            sudo docker pull techgadget/techgadget-web-prod
+
+            # Copy build folder from the Docker container to EC2
+            sudo docker create --name temp-container techgadget/techgadget-web-prod
+            sudo docker cp temp-container:/app/build ./build
+            sudo docker rm temp-container
+
+            # Copy folder to Nginx
+            sudo cp -r ./build/* /usr/share/nginx/html/
+
+            # Delete folder after copy success
+            sudo rm -rf ./build
+
+            # Clean up dangling images
+            sudo docker image prune -af
+          EOF
