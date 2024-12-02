@@ -1,7 +1,8 @@
-'use client'
+
 
 import React, { useState } from 'react'
 import { FaChevronDown, FaChevronUp, FaPencilAlt, FaTrash, FaToggleOn, FaToggleOff, FaPlus, FaTimes } from 'react-icons/fa'
+import { Link } from 'react-router-dom';
 
 // Initial mock data (unchanged)
 const initialGroups = [
@@ -46,10 +47,12 @@ export default function AdminKeyWord() {
     maxPrice: '',
     selectedCategories: []
   })
+  const [editingGroupId, setEditingGroupId] = useState(null);
+  const [editingGroupName, setEditingGroupName] = useState('');
 
   // Toggle group expansion
   const toggleGroup = (groupId) => {
-    setGroups(groups.map(group => 
+    setGroups(groups.map(group =>
       group.id === groupId ? { ...group, isExpanded: !group.isExpanded } : group
     ))
   }
@@ -154,6 +157,22 @@ export default function AdminKeyWord() {
     })
   }
 
+  const handleGroupNameEdit = (groupId) => {
+    const group = groups.find(g => g.id === groupId);
+    if (group) {
+      setEditingGroupId(groupId);
+      setEditingGroupName(group.name);
+    }
+  };
+
+  const saveGroupName = () => {
+    setGroups(groups.map(group =>
+      group.id === editingGroupId ? { ...group, name: editingGroupName } : group
+    ));
+    setEditingGroupId(null);
+    setEditingGroupName('');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
@@ -163,9 +182,11 @@ export default function AdminKeyWord() {
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-800">Danh sách nhóm</h2>
-            <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+            <Link to="/admin/create-keyword-group"
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+            >
               Tạo nhóm mới
-            </button>
+            </Link>
           </div>
 
           {/* Groups List */}
@@ -174,7 +195,19 @@ export default function AdminKeyWord() {
               <div key={group.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="flex items-center justify-between p-4 bg-gray-50 border-b">
                   <div className="flex items-center space-x-4">
-                    <span className="font-medium text-lg text-gray-700">{group.name}</span>
+                    {editingGroupId === group.id ? (
+                      <input
+                        type="text"
+                        value={editingGroupName}
+                        onChange={(e) => setEditingGroupName(e.target.value)}
+                        className="border rounded px-2 py-1 text-lg text-gray-700"
+                        onBlur={saveGroupName}
+                        onKeyPress={(e) => e.key === 'Enter' && saveGroupName()}
+                        autoFocus
+                      />
+                    ) : (
+                      <span className="font-medium text-lg text-gray-700">{group.name}</span>
+                    )}
                     <button 
                       onClick={() => toggleActive(group.id)}
                       className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ease-in-out focus:outline-none ${group.isActive ? 'bg-green-500' : 'bg-gray-300'}`}
@@ -183,6 +216,12 @@ export default function AdminKeyWord() {
                     </button>
                   </div>
                   <div className="flex items-center space-x-2">
+                    <button 
+                      onClick={() => handleGroupNameEdit(group.id)}
+                      className="text-yellow-500 hover:text-yellow-600 transition duration-300 ease-in-out"
+                    >
+                      <FaPencilAlt />
+                    </button>
                     <button className="text-red-500 hover:text-red-600 transition duration-300 ease-in-out">
                       <FaTrash />
                     </button>
