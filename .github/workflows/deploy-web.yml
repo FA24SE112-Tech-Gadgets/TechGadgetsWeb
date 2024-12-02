@@ -41,9 +41,9 @@ jobs:
             sudo docker cp temp-container:/app/build ./build
             sudo docker rm temp-container
 
+            # Copy folder to Nginx
+            sudo cp -r ./build/* /usr/share/nginx/html/
+
             # Clean up dangling images
             sudo docker image prune -af
           EOF
-
-      - name: Copy folder to Nginx
-        run: sudo cp -r ./build/* /usr/share/nginx/html/
