@@ -160,17 +160,35 @@ export default function ManagerKeyWord() {
       toast.success('Tiêu chí mới đã được thêm thành công');
       fetchGroups()
       setShowCriteriaModal(false)
-      setCriteriaForm({
-        type: 'Name',
-        contains: '',
-        minPrice: '',
-        maxPrice: '',
-        specificationKeyId: '',
-        categories: []
-      })
+      // setCriteriaForm({
+      //   type: 'Name',
+      //   contains: '',
+      //   minPrice: '',
+      //   maxPrice: '',
+      //   specificationKeyId: '',
+      //   categories: []
+      // })
+      resetCriteriaForm()
     } catch (error) {
-      console.error('Error adding criteria:', error)
+      console.error('Error create criteria:', error);
+      if (error.response && error.response.data && error.response.data.reasons) {
+        toast.error(`Lỗi: ${error.response.data.reasons[0].message}`);
+      } else {
+        toast.error('Đã xảy ra lỗi khi thêm tiêu chí');
+      }
     }
+  }
+
+  const resetCriteriaForm = () => {
+    setCriteriaForm({
+      type: 'Name',
+      contains: '',
+      minPrice: '',
+      maxPrice: '',
+      specificationKeyId: '',
+      categories: []
+    })
+    setSelectedCategoryId('')
   }
 
   const handleAddKeyword = async (groupId) => {
@@ -314,14 +332,14 @@ export default function ManagerKeyWord() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600">
-          <h1 className="text-3xl font-bold text-white">Quản lý từ khóa</h1>
+        <div className="p-6 ">
+          <h1 className="text-3xl font-bold text-black">Quản lý từ khóa</h1>
         </div>
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-800">Danh sách nhóm</h2>
             <Link to="/manage-create-keyword-group"
-              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+              className="px-4 py-2 bg-primary/75 text-white rounded-lg hover:bg-secondary/85 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
             >
               Tạo nhóm mới
             </Link>
@@ -396,7 +414,7 @@ export default function ManagerKeyWord() {
                       </button>
                       <button
                         onClick={() => toggleGroup(group.id)}
-                        className="text-blue-500 hover:text-blue-600 transition duration-300 ease-in-out p-2"
+                        className="text-primary/75 hover:text-secondary/85 transition duration-300 ease-in-out p-2"
                       >
                         {group.isExpanded ? <FaChevronUp /> : <FaChevronDown />}
                       </button>
@@ -455,11 +473,14 @@ export default function ManagerKeyWord() {
                             value={newKeyword}
                             onChange={(e) => setNewKeyword(e.target.value)}
                             placeholder="Nhập từ khóa muốn thêm"
-                            className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                           />
                           <button
                             onClick={() => handleAddKeyword(group.id)}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                            className={`px-4 py-2 bg-primary/75 text-white rounded-lg hover:bg-secondary/85 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50 ${(!newKeyword.trim() || (editingKeyword && newKeyword === group.naturalLanguageKeywords.find(k => k.id === editingKeyword)?.keyword))
+                                ? 'opacity-50 cursor-not-allowed'
+                                : ''
+                              }`}
                             disabled={!newKeyword.trim() || (editingKeyword && newKeyword === group.naturalLanguageKeywords.find(k => k.id === editingKeyword)?.keyword)}
                           >
                             {editingKeyword ? 'Cập Nhật' : 'Tạo'}
@@ -470,7 +491,7 @@ export default function ManagerKeyWord() {
                               setNewKeyword('');
                               setEditingKeyword(null);
                             }}
-                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+                            className="px-4 py-2 bg-gray-200 text-gray-500 rounded-lg hover:bg-gray-300 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
                           >
                             Hủy
                           </button>
@@ -483,10 +504,9 @@ export default function ManagerKeyWord() {
                             setNewKeyword('');
                             setEditingKeyword(null);
                           }}
-                          className="flex items-center space-x-2 text-blue-500 hover:text-blue-600 transition duration-300 ease-in-out"
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary/80 hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
                         >
-                          <FaPlus />
-                          <span>Thêm từ khóa</span>
+                          <FaPlus className="w-3 h-3 mr-1" /> Thêm từ khóa
                         </button>
                       )}
                     </div>
@@ -500,10 +520,10 @@ export default function ManagerKeyWord() {
                             <div>
                               <span className="text-gray-700">
                                 {criteria.type === 'Price'
-                                  ? `Giá: ${criteria.minPrice.toLocaleString()}đ đến ${criteria.maxPrice.toLocaleString()}đ`
+                                  ? `Giá từ ${criteria.minPrice.toLocaleString()}đ đến ${criteria.maxPrice.toLocaleString()}đ`
                                   : criteria.type === 'Specification'
-                                    ? `${criteria.specificationKey.name}: ${criteria.contains}`
-                                    : `${criteria.type}: ${criteria.contains}`
+                                    ? `Bao gồm thông số: ${criteria.specificationKey.name} - ${criteria.contains}`
+                                    : `Phải chứa: ${criteria.contains}`
                                 }
                               </span>
                               <div className="text-sm text-gray-500">
@@ -527,10 +547,9 @@ export default function ManagerKeyWord() {
                           setSelectedGroup(group.id)
                           setShowCriteriaModal(true)
                         }}
-                        className="flex items-center space-x-2 text-blue-500 hover:text-blue-600 transition duration-300 ease-in-out"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary/80 hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
                       >
-                        <FaPlus />
-                        <span>Thêm tiêu chí</span>
+                        <FaPlus className="w-3 h-3 mr-1" /> Thêm tiêu chí
                       </button>
                     </div>
                   </div>
@@ -566,7 +585,7 @@ export default function ManagerKeyWord() {
                       setSpecifications([])
                     }
                   }}
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                 >
                   {criteriaTypes.map(type => (
                     <option key={type} value={type}>{type}</option>
@@ -583,7 +602,7 @@ export default function ManagerKeyWord() {
                       setSelectedCategoryId(e.target.value)
                       fetchSpecifications(e.target.value)
                     }}
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                   >
                     <option value="">Chọn danh mục</option>
                     {categories.map(category => (
@@ -599,7 +618,7 @@ export default function ManagerKeyWord() {
                   <select
                     value={criteriaForm.specificationKeyId}
                     onChange={(e) => setCriteriaForm({ ...criteriaForm, specificationKeyId: e.target.value })}
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                   >
                     <option value="">Chọn thông số</option>
                     {specifications.map(spec => (
@@ -617,7 +636,7 @@ export default function ManagerKeyWord() {
                     value={criteriaForm.contains}
                     onChange={(e) => setCriteriaForm({ ...criteriaForm, contains: e.target.value })}
                     placeholder="Nhập giá trị"
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                   />
                 </div>
               )}
@@ -631,7 +650,7 @@ export default function ManagerKeyWord() {
                       value={criteriaForm.minPrice}
                       onChange={(e) => setCriteriaForm({ ...criteriaForm, minPrice: parseInt(e.target.value) })}
                       placeholder="Giá tối thiểu"
-                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                       min="0"
                       max="150000000"
                     />
@@ -646,7 +665,7 @@ export default function ManagerKeyWord() {
                       value={criteriaForm.maxPrice}
                       onChange={(e) => setCriteriaForm({ ...criteriaForm, maxPrice: parseInt(e.target.value) })}
                       placeholder="Giá tối đa"
-                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                       min="0"
                       max="150000000"
                     />
@@ -662,7 +681,7 @@ export default function ManagerKeyWord() {
                   <label className="block mb-2 text-sm font-medium text-gray-700">Danh sách thể loại áp dụng:</label>
                   <div className="flex items-center space-x-2">
                     <select
-                      className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                       value={selectedCategoryId}
                       onChange={(e) => setSelectedCategoryId(e.target.value)}
                     >
@@ -684,7 +703,7 @@ export default function ManagerKeyWord() {
                           setSelectedCategoryId('');
                         }
                       }}
-                      className="text-blue-500 hover:text-blue-600 transition duration-300 ease-in-out p-2"
+                      className="text-primary/85 hover:text-secondary/95 transition duration-300 ease-in-out p-2"
                     >
                       <FaPlus />
                     </button>
@@ -714,14 +733,14 @@ export default function ManagerKeyWord() {
 
               <div className="flex justify-end space-x-2 mt-6">
                 <button
-                  onClick={() => setShowCriteriaModal(false)}
+                  onClick={() => {setShowCriteriaModal(false); resetCriteriaForm();}}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition duration-300 ease-in-out"
                 >
                   Hủy
                 </button>
                 <button
                   onClick={handleAddCriteria}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  className="px-4 py-2 bg-primary/75 text-white rounded-lg hover:bg-secondary/85 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50"
                 >
                   Tạo
                 </button>

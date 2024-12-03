@@ -71,17 +71,17 @@ export default function CreateKeyWordGroup() {
     if (criteriaForm.type === 'Price') {
       const minPrice = criteriaForm.minPrice === '' ? 0 : parseFloat(criteriaForm.minPrice);
       const maxPrice = criteriaForm.maxPrice === '' ? 150000000 : parseFloat(criteriaForm.maxPrice);
-    
+
       if (minPrice < 0 || minPrice > 150000000) {
         toast.error('Giá tối thiểu phải từ 0 đến nhỏ hơn hoặc bằng 150,000,000đ.');
         return;
       }
-    
+
       if (maxPrice < 0 || maxPrice > 150000000) {
         toast.error('Giá tối đa phải từ 0 đến nhỏ hơn hoặc bằng 150,000,000đ.');
         return;
       }
-    
+
       if (minPrice > maxPrice) {
         toast.error('Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.');
         return;
@@ -225,8 +225,8 @@ export default function CreateKeyWordGroup() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600">
-          <h1 className="text-3xl font-bold text-white">Tạo nhóm từ khóa mới</h1>
+        <div className="p-6">
+          <h1 className="text-2xl font-bold text-black">Tạo nhóm từ khóa mới</h1>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
@@ -236,7 +236,7 @@ export default function CreateKeyWordGroup() {
               id="groupName"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary/75"
               required
             />
           </div>
@@ -258,13 +258,13 @@ export default function CreateKeyWordGroup() {
                 type="text"
                 value={newKeyword}
                 onChange={(e) => setNewKeyword(e.target.value)}
-                className="flex-grow border border-gray-300 rounded-l-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="flex-grow border border-gray-300 rounded-l-md shadow-sm py-2 px-3 focus:outline-none  focus:ring-2 focus:ring-primary/75"
                 placeholder="Nhập từ khóa mới"
               />
               <button
                 type="button"
                 onClick={addKeyword}
-                className="bg-blue-500 text-white px-4 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                className="bg-primary/75 text-white px-4 rounded-r-md hover:bg-secondary/85 focus:outline-none  focus:ring-2 focus:ring-primary/75 focus:ring-opacity-50"
               >
                 Thêm
               </button>
@@ -277,32 +277,41 @@ export default function CreateKeyWordGroup() {
               {criteria.map(c => (
                 <div key={c.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                   <div>
-                    {c.type === 'Price' ? (
-                      <span>Giá: {c.minPrice.toLocaleString()}đ đến {c.maxPrice.toLocaleString()}đ</span>
-                    ) : c.type === 'Specification' ? (
-                      <span>{c.type}: {specifications.find(spec => spec.id === c.specificationKeyId)?.name} - {c.contains}</span>
-                    ) : (
-                      <span>{c.type}: {c.contains}</span>
-                    )}
+                    <span className="text-gray-700">
+                      {c.type === 'Price'
+                        ? `Giá từ ${c.minPrice.toLocaleString()}đ đến ${c.maxPrice.toLocaleString()}đ`
+                        : c.type === 'Specification'
+                          ? `Bao gồm thông số: ${specifications.find(spec => spec.id === c.specificationKeyId)?.name} - ${c.contains}`
+                          : `Phải chứa: ${c.contains}`
+                      }
+                    </span>
                     <div className="text-sm text-gray-500">
-                      Áp dụng: {c.type === 'Specification'
-                        ? categories.find(cat => cat.id === selectedCategoryId)?.name
-                        : c.categories.map(catId => categories.find(cat => cat.id === catId)?.name).join(', ')}
+                      {c.type === 'Specification'
+                        ? `Áp dụng: ${categories.find(cat => cat.id === selectedCategoryId)?.name || ''}`
+                        : `Áp dụng: ${c.categories
+                          .map(catId => categories.find(cat => cat.id === catId)?.name)
+                          .filter(Boolean)
+                          .join(', ') || ''}`
+                      }
                     </div>
                   </div>
-                  <button type="button" onClick={() => removeCriteria(c.id)} className="text-red-500 hover:text-red-700">
+                  <button
+                    type="button"
+                    onClick={() => removeCriteria(c.id)}
+                    className="text-red-500 hover:text-red-700 transition duration-300 ease-in-out p-2"
+                  >
                     <FaTrash />
                   </button>
                 </div>
               ))}
+
             </div>
             <button
               type="button"
               onClick={() => setShowCriteriaModal(true)}
-              className="mt-2 flex items-center text-blue-500 hover:text-blue-700"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary/80 hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
             >
-              <FaPlus className="mr-2" />
-              Thêm tiêu chí
+              <FaPlus className="w-3 h-3 mr-1" /> Thêm tiêu chí
             </button>
           </div>
 
@@ -310,13 +319,13 @@ export default function CreateKeyWordGroup() {
             <button
               type="button"
               onClick={() => navigate('/manage-keyword')}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none  focus:ring-2 focus:ring-primary/75 focus:ring-opacity-50"
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              className="px-4 py-2 bg-primary/75 text-white rounded-md hover:bg-secondary/85 focus:outline-none  focus:ring-2 focus:ring-primary/75 focus:ring-opacity-50"
             >
               Tạo nhóm
             </button>
@@ -349,7 +358,7 @@ export default function CreateKeyWordGroup() {
                       setSpecifications([])
                     }
                   }}
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border rounded-lg px-3 py-2 focus:outline-none  focus:ring-2 focus:ring-primary/75"
                 >
                   {criteriaTypes.map(type => (
                     <option key={type} value={type}>{type}</option>
@@ -366,7 +375,7 @@ export default function CreateKeyWordGroup() {
                       setSelectedCategoryId(e.target.value)
                       fetchSpecifications(e.target.value)
                     }}
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                   >
                     <option value="">Chọn danh mục</option>
                     {categories.map(category => (
@@ -382,7 +391,7 @@ export default function CreateKeyWordGroup() {
                   <select
                     value={criteriaForm.specificationKeyId}
                     onChange={(e) => setCriteriaForm({ ...criteriaForm, specificationKeyId: e.target.value })}
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                   >
                     <option value="">Chọn thông số</option>
                     {specifications.map(spec => (
@@ -400,7 +409,7 @@ export default function CreateKeyWordGroup() {
                     value={criteriaForm.contains}
                     onChange={(e) => setCriteriaForm({ ...criteriaForm, contains: e.target.value })}
                     placeholder="Nhập giá trị"
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none  focus:ring-2 focus:ring-primary/75"
                   />
                 </div>
               )}
@@ -414,10 +423,10 @@ export default function CreateKeyWordGroup() {
                       value={criteriaForm.minPrice}
                       onChange={(e) => setCriteriaForm({ ...criteriaForm, minPrice: e.target.value ? parseFloat(e.target.value) : '' })}
                       placeholder="Giá tối thiểu"
-                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                       min="0"
                     />
-                     {criteriaForm.minPrice >= criteriaForm.maxPrice && (
+                    {criteriaForm.minPrice >= criteriaForm.maxPrice && (
                       <p className="text-red-500 text-sm mt-1">Giá tối thiểu phải nhỏ hơn giá tối đa.</p>
                     )}
                   </div>
@@ -428,10 +437,10 @@ export default function CreateKeyWordGroup() {
                       value={criteriaForm.maxPrice}
                       onChange={(e) => setCriteriaForm({ ...criteriaForm, maxPrice: e.target.value ? parseFloat(e.target.value) : '' })}
                       placeholder="Giá tối đa"
-                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                       min="0"
                     />
-                   {criteriaForm.minPrice >= criteriaForm.maxPrice && (
+                    {criteriaForm.minPrice >= criteriaForm.maxPrice && (
                       <p className="text-red-500 text-sm mt-1">Giá tối đa phải lớn hơn giá tối thiểu.</p>
                     )}
                   </div>
@@ -443,7 +452,7 @@ export default function CreateKeyWordGroup() {
                   <label className="block mb-2 text-sm font-medium text-gray-700">Danh sách thể loại áp dụng:</label>
                   <div className="flex items-center space-x-2">
                     <select
-                      className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 border rounded-lg px-3 py-2 focus:outline-none  focus:ring-2 focus:ring-primary/75"
                       value={selectedCategoryId}
                       onChange={(e) => setSelectedCategoryId(e.target.value)}
                     >
@@ -465,7 +474,7 @@ export default function CreateKeyWordGroup() {
                           setSelectedCategoryId('');
                         }
                       }}
-                      className="text-blue-500 hover:text-blue-600 transition duration-300 ease-in-out"
+                      className="text-primary/75 hover:text-secondary/85 transition duration-300 ease-in-out"
                       disabled={!selectedCategoryId}
                     >
                       <FaPlus />
@@ -517,7 +526,7 @@ export default function CreateKeyWordGroup() {
                   type="button"
                   onClick={handleAddCriteria}
                   disabled={!isFormValid()}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-primary/75 text-white rounded-lg hover:bg-secondary/85 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none  focus:ring-2 focus:ring-primary/75 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Tạo
                 </button>
@@ -525,7 +534,7 @@ export default function CreateKeyWordGroup() {
               {!isFormValid() && (
                 <div className="text-red-500 text-sm mt-2">
                   {criteriaForm.type === 'Specification' && (!selectedCategoryId || !criteriaForm.specificationKeyId || criteriaForm.contains.trim() === '')}
-                  {criteriaForm.type === 'Price' && (criteriaForm.minPrice < 0 || criteriaForm.maxPrice <= criteriaForm.minPrice || criteriaForm.categories.length === 0) }
+                  {criteriaForm.type === 'Price' && (criteriaForm.minPrice < 0 || criteriaForm.maxPrice <= criteriaForm.minPrice || criteriaForm.categories.length === 0)}
                   {['Name', 'Description', 'Condition'].includes(criteriaForm.type) && (criteriaForm.contains.trim() === '' || criteriaForm.categories.length === 0)}
                 </div>
               )}
