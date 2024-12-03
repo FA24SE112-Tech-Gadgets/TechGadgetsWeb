@@ -1,10 +1,11 @@
-
-
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FaPlus, FaTrash, FaTimes } from 'react-icons/fa'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import AxiosInterceptor from '~/components/api/AxiosInterceptor'
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const categories = ['Điện thoại', 'Laptop', 'Tai nghe', 'Loa']
+const criteriaTypes = ['Name', 'Description', 'Condition', 'Price', 'Specification']
 
 export default function CreateKeyWordGroup() {
   const navigate = useNavigate();
@@ -14,16 +15,45 @@ export default function CreateKeyWordGroup() {
   const [criteria, setCriteria] = useState([])
   const [showCriteriaModal, setShowCriteriaModal] = useState(false)
   const [criteriaForm, setCriteriaForm] = useState({
-    type: 'name',
-    value: '',
+    type: 'Name',
+    contains: '',
     minPrice: '',
     maxPrice: '',
-    selectedCategories: []
+    specificationKeyId: '',
+    categories: []
   })
+  const [categories, setCategories] = useState([])
+  const [specifications, setSpecifications] = useState([])
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await AxiosInterceptor.get('/api/categories')
+      setCategories(response.data.items)
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      toast.error('Failed to load categories. Please try again.')
+    }
+  }
+
+  const fetchSpecifications = async (categoryId) => {
+    try {
+      const response = await AxiosInterceptor.get(`/api/specification-keys/categories/${categoryId}?Page=1&PageSize=100`)
+      setSpecifications(response.data.items)
+    } catch (error) {
+      console.error('Error fetching specifications:', error)
+      toast.error('Failed to load specifications. Please try again.')
+    }
+  }
 
   const addKeyword = () => {
     if (newKeyword.trim()) {
-      setKeywords([...keywords, { id: Date.now(), text: newKeyword, isActive: true }])
+      setKeywords([...keywords, { id: Date.now(), text: newKeyword }])
       setNewKeyword('')
     }
   }
@@ -33,40 +63,163 @@ export default function CreateKeyWordGroup() {
   }
 
   const handleAddCriteria = () => {
+    if (!isFormValid()) {
+      toast.error('Bảng tiêu chí không được để trống.');
+      return;
+    }
+
+    if (criteriaForm.type === 'Price') {
+      const minPrice = criteriaForm.minPrice === '' ? 0 : parseFloat(criteriaForm.minPrice);
+      const maxPrice = criteriaForm.maxPrice === '' ? 150000000 : parseFloat(criteriaForm.maxPrice);
+    
+      if (minPrice < 0 || minPrice > 150000000) {
+        toast.error('Giá tối thiểu phải từ 0 đến nhỏ hơn hoặc bằng 150,000,000đ.');
+        return;
+      }
+    
+      if (maxPrice < 0 || maxPrice > 150000000) {
+        toast.error('Giá tối đa phải từ 0 đến nhỏ hơn hoặc bằng 150,000,000đ.');
+        return;
+      }
+    
+      if (minPrice > maxPrice) {
+        toast.error('Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu.');
+        return;
+      }
+    }
+
     const newCriteria = {
       id: Date.now(),
       type: criteriaForm.type,
-      categories: criteriaForm.selectedCategories
+      categories: criteriaForm.categories,
+    };
+
+    switch (criteriaForm.type) {
+      case 'Name':
+      case 'Description':
+      case 'Condition':
+        newCriteria.contains = criteriaForm.contains;
+        break;
+      case 'Price':
+        newCriteria.minPrice = criteriaForm.minPrice === '' ? 0 : parseFloat(criteriaForm.minPrice);
+        newCriteria.maxPrice = criteriaForm.maxPrice === '' ? 150000000 : parseFloat(criteriaForm.maxPrice);
+        break;
+      case 'Specification':
+        newCriteria.specificationKeyId = criteriaForm.specificationKeyId;
+        newCriteria.contains = criteriaForm.contains;
+        break;
     }
 
-    if (criteriaForm.type === 'name') {
-      newCriteria.value = criteriaForm.value
-    } else {
-      newCriteria.minPrice = parseFloat(criteriaForm.minPrice)
-      newCriteria.maxPrice = parseFloat(criteriaForm.maxPrice)
-    }
-
-    setCriteria([...criteria, newCriteria])
-    setShowCriteriaModal(false)
+    setCriteria([...criteria, newCriteria]);
+    setShowCriteriaModal(false);
     setCriteriaForm({
-      type: 'name',
-      value: '',
+      type: 'Name',
+      contains: '',
       minPrice: '',
       maxPrice: '',
-      selectedCategories: []
-    })
-  }
+      specificationKeyId: '',
+      categories: [],
+    });
+  };
 
   const removeCriteria = (id) => {
     setCriteria(criteria.filter(c => c.id !== id))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Here you would typically send the data to your backend
-    console.log({ groupName, keywords, criteria })
-    // After saving, redirect back to the main page
-   navigate('/admin/keyword')
+    if (!groupName.trim()) {
+      toast.error('Tên nhóm không được để trống.');
+      return;
+    }
+    if (keywords.length === 0) {
+      toast.error('Từ khóa không được để trống.');
+      return;
+    }
+    if (criteria.length === 0) {
+      toast.error('Tiêu chí không được để trống.');
+      return;
+    }
+    setIsLoading(true)
+
+    try {
+      const requestBody = {
+        name: groupName,
+        keywords: keywords.map(k => k.text),
+        criteria: criteria.map(c => {
+          const criteriaData = {
+            type: c.type,
+            categories: c.categories
+          }
+
+          switch (c.type) {
+            case 'Name':
+            case 'Description':
+            case 'Condition':
+              criteriaData.contains = c.contains
+              break
+            case 'Price':
+              criteriaData.minPrice = c.minPrice
+              criteriaData.maxPrice = c.maxPrice
+              break
+            case 'Specification':
+              criteriaData.specificationKeyId = c.specificationKeyId
+              criteriaData.contains = c.contains
+              break
+          }
+
+          return criteriaData
+        })
+      }
+
+      console.log('Request body:', JSON.stringify(requestBody, null, 2))
+
+      const response = await AxiosInterceptor.post('/api/natural-language-keyword-groups', requestBody)
+
+      console.log('Group created:', response.data)
+      setIsLoading(false)
+      toast.success('Tạo tên nhóm thành công')
+      setTimeout(() => {
+        navigate('/manage-keyword')
+      }, 2000)
+    } catch (error) {
+      console.error('Error creating group:', error)
+      setIsLoading(false)
+      if (error.response && error.response.data && error.response.data.reasons) {
+        toast.error(`Lỗi: ${error.response.data.reasons[0].message}`)
+      } else {
+        toast.error('Failed to create group. Please try again.')
+      }
+    }
+  }
+
+  const isFormValid = () => {
+    if (criteriaForm.type === 'Specification') {
+      return (
+        selectedCategoryId &&
+        criteriaForm.specificationKeyId &&
+        criteriaForm.contains.trim() !== ''
+      );
+    } else if (criteriaForm.type === 'Price') {
+      return (
+        (criteriaForm.minPrice === '' || criteriaForm.minPrice >= 0) &&
+        (criteriaForm.maxPrice === '' || criteriaForm.maxPrice > criteriaForm.minPrice) &&
+        criteriaForm.categories.length > 0
+      );
+    } else {
+      return (
+        criteriaForm.contains.trim() !== '' &&
+        criteriaForm.categories.length > 0
+      );
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-primary/85"></div>
+      </div>
+    );
   }
 
   return (
@@ -124,13 +277,17 @@ export default function CreateKeyWordGroup() {
               {criteria.map(c => (
                 <div key={c.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                   <div>
-                    {c.type === 'name' ? (
-                      <span>Phải chứa: {c.value}</span>
+                    {c.type === 'Price' ? (
+                      <span>Giá: {c.minPrice.toLocaleString()}đ đến {c.maxPrice.toLocaleString()}đ</span>
+                    ) : c.type === 'Specification' ? (
+                      <span>{c.type}: {specifications.find(spec => spec.id === c.specificationKeyId)?.name} - {c.contains}</span>
                     ) : (
-                      <span>Giá: {c.minPrice.toLocaleString()} đến {c.maxPrice.toLocaleString()}</span>
+                      <span>{c.type}: {c.contains}</span>
                     )}
                     <div className="text-sm text-gray-500">
-                      Áp dụng: {c.categories.join(', ')}
+                      Áp dụng: {c.type === 'Specification'
+                        ? categories.find(cat => cat.id === selectedCategoryId)?.name
+                        : c.categories.map(catId => categories.find(cat => cat.id === catId)?.name).join(', ')}
                     </div>
                   </div>
                   <button type="button" onClick={() => removeCriteria(c.id)} className="text-red-500 hover:text-red-700">
@@ -152,7 +309,7 @@ export default function CreateKeyWordGroup() {
           <div className="flex justify-end space-x-2">
             <button
               type="button"
-              onClick={() => navigate('/admin/keyword')}
+              onClick={() => navigate('/manage-keyword')}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             >
               Hủy
@@ -173,7 +330,7 @@ export default function CreateKeyWordGroup() {
           <div className="bg-white rounded-lg p-6 w-96 max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-800">Tạo tiêu chí</h2>
-              <button 
+              <button
                 onClick={() => setShowCriteriaModal(false)}
                 className="text-gray-500 hover:text-gray-700 transition duration-300 ease-in-out"
               >
@@ -185,112 +342,173 @@ export default function CreateKeyWordGroup() {
                 <label className="block mb-2 text-sm font-medium text-gray-700">Loại tiêu chí:</label>
                 <select
                   value={criteriaForm.type}
-                  onChange={(e) => setCriteriaForm({ ...criteriaForm, type: e.target.value })}
+                  onChange={(e) => {
+                    setCriteriaForm({ ...criteriaForm, type: e.target.value })
+                    if (e.target.value === 'Specification') {
+                      setSelectedCategoryId('')
+                      setSpecifications([])
+                    }
+                  }}
                   className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="name">Tên</option>
-                  <option value="price">Giá</option>
+                  {criteriaTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
                 </select>
               </div>
 
-              {criteriaForm.type === 'name' ? (
+              {criteriaForm.type === 'Specification' && (
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Chọn danh mục:</label>
+                  <select
+                    value={selectedCategoryId}
+                    onChange={(e) => {
+                      setSelectedCategoryId(e.target.value)
+                      fetchSpecifications(e.target.value)
+                    }}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Chọn danh mục</option>
+                    {categories.map(category => (
+                      <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {criteriaForm.type === 'Specification' && selectedCategoryId && (
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Chọn thông số kỹ thuật:</label>
+                  <select
+                    value={criteriaForm.specificationKeyId}
+                    onChange={(e) => setCriteriaForm({ ...criteriaForm, specificationKeyId: e.target.value })}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Chọn thông số</option>
+                    {specifications.map(spec => (
+                      <option key={spec.id} value={spec.id}>{spec.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {['Name', 'Description', 'Condition', 'Specification'].includes(criteriaForm.type) && (
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Phải chứa:</label>
                   <input
                     type="text"
-                    value={criteriaForm.value}
-                    onChange={(e) => setCriteriaForm({ ...criteriaForm, value: e.target.value })}
+                    value={criteriaForm.contains}
+                    onChange={(e) => setCriteriaForm({ ...criteriaForm, contains: e.target.value })}
                     placeholder="Nhập giá trị"
                     className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-              ) : (
+              )}
+
+              {criteriaForm.type === 'Price' && (
                 <div className="space-y-4">
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">Giá từ:</label>
                     <input
                       type="number"
                       value={criteriaForm.minPrice}
-                      onChange={(e) => setCriteriaForm({ ...criteriaForm, minPrice: e.target.value })}
+                      onChange={(e) => setCriteriaForm({ ...criteriaForm, minPrice: e.target.value ? parseFloat(e.target.value) : '' })}
                       placeholder="Giá tối thiểu"
                       className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="0"
                     />
+                     {criteriaForm.minPrice >= criteriaForm.maxPrice && (
+                      <p className="text-red-500 text-sm mt-1">Giá tối thiểu phải nhỏ hơn giá tối đa.</p>
+                    )}
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">đến:</label>
                     <input
                       type="number"
                       value={criteriaForm.maxPrice}
-                      onChange={(e) => setCriteriaForm({ ...criteriaForm, maxPrice: e.target.value })}
+                      onChange={(e) => setCriteriaForm({ ...criteriaForm, maxPrice: e.target.value ? parseFloat(e.target.value) : '' })}
                       placeholder="Giá tối đa"
                       className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="0"
                     />
+                   {criteriaForm.minPrice >= criteriaForm.maxPrice && (
+                      <p className="text-red-500 text-sm mt-1">Giá tối đa phải lớn hơn giá tối thiểu.</p>
+                    )}
                   </div>
                 </div>
               )}
 
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">Danh sách thể loại áp dụng:</label>
-                <div className="flex items-center space-x-2">
-                  <select
-                    className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value=""
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setCriteriaForm({
-                          ...criteriaForm,
-                          selectedCategories: [...criteriaForm.selectedCategories, e.target.value]
-                        })
-                      }
-                    }}
-                  >
-                    <option value="">Chọn thể loại</option>
-                    {categories.filter(cat => !criteriaForm.selectedCategories.includes(cat)).map(category => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (criteriaForm.selectedCategories.length < categories.length) {
-                        const availableCategories = categories.filter(cat => !criteriaForm.selectedCategories.includes(cat));
-                        const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
-                        setCriteriaForm({
-                          ...criteriaForm,
-                          selectedCategories: [...criteriaForm.selectedCategories, randomCategory]
-                        });
-                      }
-                    }}
-                    className="text-blue-500 hover:text-blue-600 transition duration-300 ease-in-out"
-                  >
-                    <FaPlus />
-                  </button>
+              {criteriaForm.type !== 'Specification' && (
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Danh sách thể loại áp dụng:</label>
+                  <div className="flex items-center space-x-2">
+                    <select
+                      className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={selectedCategoryId}
+                      onChange={(e) => setSelectedCategoryId(e.target.value)}
+                    >
+                      <option value="">Chọn thể loại</option>
+                      {categories.filter(cat => !criteriaForm.categories.includes(cat.id)).map(category => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedCategoryId && !criteriaForm.categories.includes(selectedCategoryId)) {
+                          setCriteriaForm({
+                            ...criteriaForm,
+                            categories: [...criteriaForm.categories, selectedCategoryId]
+                          });
+                          setSelectedCategoryId('');
+                        }
+                      }}
+                      className="text-blue-500 hover:text-blue-600 transition duration-300 ease-in-out"
+                      disabled={!selectedCategoryId}
+                    >
+                      <FaPlus />
+                    </button>
+                  </div>
+                  <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
+                    {criteriaForm.categories.map((categoryId) => {
+                      const category = categories.find(c => c.id === categoryId);
+                      return (
+                        <div key={categoryId} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                          <span className="text-sm text-gray-700">{category ? category.name : 'Unknown Category'}</span>
+                          <button
+                            type="button"
+                            onClick={() => setCriteriaForm({
+                              ...criteriaForm,
+                              categories: criteriaForm.categories.filter(c => c !== categoryId)
+                            })}
+                            className="text-red-500 hover:text-red-600 transition duration-300 ease-in-out"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                  {criteriaForm.selectedCategories.map((category, index) => (
-                    <div key={category} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                      <span className="text-sm text-gray-700">{index + 1}. {category}</span>
-                      <button
-                        type="button"
-                        onClick={() => setCriteriaForm({
-                          ...criteriaForm,
-                          selectedCategories: criteriaForm.selectedCategories.filter(c => c !== category)
-                        })}
-                        className="text-red-500 hover:text-red-600 transition duration-300 ease-in-out"
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
 
               <div className="flex justify-end space-x-2 mt-6">
                 <button
                   type="button"
-                  onClick={() => setShowCriteriaModal(false)}
+                  onClick={() => {
+                    setShowCriteriaModal(false);
+                    setCriteriaForm({
+                      type: 'Name',
+                      contains: '',
+                      minPrice: '',
+                      maxPrice: '',
+                      specificationKeyId: '',
+                      categories: []
+                    });
+                    setSelectedCategoryId('');
+                  }}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition duration-300 ease-in-out"
                 >
                   Hủy
@@ -298,16 +516,24 @@ export default function CreateKeyWordGroup() {
                 <button
                   type="button"
                   onClick={handleAddCriteria}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  disabled={!isFormValid()}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Tạo
                 </button>
               </div>
+              {!isFormValid() && (
+                <div className="text-red-500 text-sm mt-2">
+                  {criteriaForm.type === 'Specification' && (!selectedCategoryId || !criteriaForm.specificationKeyId || criteriaForm.contains.trim() === '')}
+                  {criteriaForm.type === 'Price' && (criteriaForm.minPrice < 0 || criteriaForm.maxPrice <= criteriaForm.minPrice || criteriaForm.categories.length === 0) }
+                  {['Name', 'Description', 'Condition'].includes(criteriaForm.type) && (criteriaForm.contains.trim() === '' || criteriaForm.categories.length === 0)}
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   )
 }
-
