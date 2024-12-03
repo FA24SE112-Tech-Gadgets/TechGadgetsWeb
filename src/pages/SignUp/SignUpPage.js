@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import signupp from '~/assets/signupp.jpg';
 import google from '~/assets/google.svg';
 import useAuth from '~/context/auth/useAuth';
@@ -20,7 +20,7 @@ function SignUp() {
     deviceToken: ""
   });
   const [showPassword, setShowPassword] = useState(false);
-
+  const navigate = useNavigate();
 
   useEffect(() => {
     requestForToken()
@@ -31,7 +31,6 @@ function SignUp() {
       }
     });
   }, []);
-
 
   const handleChangeValue = (fieldName, value) => {
     setUser((prev) => ({
@@ -71,6 +70,7 @@ function SignUp() {
     setLoading(true);
     try {
       await signup(user);
+      navigate('/verify', { state: { email: user.email } });
     } catch (err) {
       console.error('Signup error:', err);
     }

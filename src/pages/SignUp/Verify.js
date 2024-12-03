@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import useAuth from '~/context/auth/useAuth';
 import signupp from '~/assets/signupp.jpg';
 import { ToastContainer, toast } from "react-toastify";
+
 function Verify() {
+  const location = useLocation();
+  const email = location.state?.email || '';
+
   const { verify, resend, error } = useAuth();
   const [verificationData, setVerificationData] = useState({
     code: "",
-    email: "",
+    email: email, // Initialize with email from navigation state
   });
   const [resendLoading, setResendLoading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -66,19 +70,8 @@ function Verify() {
         <div className="flex flex-col justify-center p-8 md:p-14">
           <span className="mb-3 text-4xl font-bold">Nhập mã xác nhận</span>
           <span className="font-light text-gray-400 mb-8">
-            Nhập mã xác nhận đã được gửi tới mail của bạn
+            Nhập mã xác nhận đã được gửi tới {email}
           </span>
-          <div className="py-1">
-            <span className="text-base font-semibold text-gray-600">Email</span>
-            <input
-              type="email"
-              className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
-              name="email"
-              value={verificationData.email}
-              onChange={(e) => handleChangeValue("email", e.target.value)}
-              required
-            />
-          </div>
           <div className="py-1 pb-5">
             <span className="text-base font-semibold text-gray-600">Mã xác nhận</span>
             <input
