@@ -18,8 +18,9 @@ const SellerHeader = () => {
   const [walletAmount, setWalletAmount] = useState(0);
   const [showWalletAmount, setShowWalletAmount] = useState(false);
   const { deleteDeviceToken } = useDeviceToken();
+  const [status, setStatus] = useState(false);
   const handleLogout = async () => {
-    await deleteDeviceToken(); 
+    await deleteDeviceToken();
     logout();
   };
   const formatWalletAmount = (amount) => {
@@ -30,7 +31,7 @@ const SellerHeader = () => {
     try {
       const response = await AxiosInterceptor.get('/api/users/current');
       setWalletAmount(response.data.wallet.amount);
-
+      setStatus(response.data.status);
     } catch (error) {
       console.error('Error fetching wallet amount:', error);
     }
@@ -55,6 +56,9 @@ const SellerHeader = () => {
     <Menu>
       <Menu.Item key="profile" icon={<UserOutlined />} onClick={() => navigate('/sellerProfile')}>
         Thông tin cá nhân
+        {status === "Inactive" && (
+          <span className="ml-2 text-red-500">(Bị khóa)</span>
+        )}
       </Menu.Item>
       <Menu.Item key="wallet" icon={<Wallet />}>
         <div className=" rounded-lg w-full">
@@ -83,7 +87,7 @@ const SellerHeader = () => {
   return (
     <Header style={{ background: '#fff', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e8e8e8' }}>
       {/* Logo Section */}
-      <div 
+      <div
         onClick={() => navigate('/seller/Order-management')}
         style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
         <div style={{ marginRight: '10px' }}>
@@ -95,7 +99,7 @@ const SellerHeader = () => {
       </div>
 
       {/* Right-side icons */}
-      <div  className="flex justify-center">
+      <div className="flex justify-center">
         {/* Notification Bell */}
         <div className="mt-4 mr-5 ">
           <SellerNotification />

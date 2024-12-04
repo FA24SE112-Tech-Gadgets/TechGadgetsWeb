@@ -14,6 +14,7 @@ import AiFeature from "./AiFeature";
 import useAuth from "~/context/auth/useAuth";
 import PosterBanner1 from "./Poster";
 import SuggestGadgetCurrent from "./GadgetSuggestCurrent";
+import { ToastContainer } from "react-toastify";
 
 function Home() {
   const [orderPopup, setOrderPopup] = React.useState(false);
@@ -42,6 +43,7 @@ const{isAuthenticated}=useAuth();
 
   return (
     <div className="bg-white dark:bg-gray-900 dark:text-white duration-200">
+      <ToastContainer />
       <HeroSection handleOrderPopup={handleOrderPopup} />
      
       {isAuthenticated && <AiFeature />}

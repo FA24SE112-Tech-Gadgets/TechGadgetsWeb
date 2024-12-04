@@ -365,7 +365,7 @@ export default function ProductPage() {
   );
   return (
     <div className="container p-10">
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       {renderCategory("laptop", "Laptop")}
       {renderCategory("headphones", "Tai nghe")}
       {renderCategory("speakers", "Loa")}

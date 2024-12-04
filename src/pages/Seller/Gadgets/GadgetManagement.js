@@ -43,6 +43,7 @@ const GadgetManagement = ({ categoryId }) => {
     const itemsPerPage = 5;
     const navigate = useNavigate();
     const formRef = React.useRef(null);
+    const [totalItems, setTotalItems] = useState(0);
 
     const resetForm = () => {
         if (formRef.current) {
@@ -54,7 +55,7 @@ const GadgetManagement = ({ categoryId }) => {
     const fetchGadgets = async () => {
         try {
             setIsLoading(true);
-            let url = `/api/gadgets/category/${categoryId}/current-seller?Page=1&PageSize=100`;
+            let url = `/api/gadgets/category/${categoryId}/current-seller?Page=${currentPage}&PageSize=${itemsPerPage}`;
 
             // Add search parameter if exists
             if (searchTerm) {
@@ -65,6 +66,7 @@ const GadgetManagement = ({ categoryId }) => {
 
             const response = await AxiosInterceptor.get(url);
             setGadgets(response.data.items);
+            setTotalItems(response.data.totalItems);
         } catch (error) {
             console.error("Error fetching products:", error);
             toast.error("Failed to fetch products");
@@ -75,29 +77,13 @@ const GadgetManagement = ({ categoryId }) => {
 
     useEffect(() => {
         fetchGadgets();
-    }, [categoryId, searchTerm]); // Remove sortOrder from dependencies
+    }, [categoryId, searchTerm, currentPage]); // Remove sortOrder from dependencies
 
     useEffect(() => {
         setCurrentPage(1); // Reset to page 1 when category changes
         fetchGadgets();
     }, [categoryId]);
 
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentGadgets = gadgets.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(gadgets.length / itemsPerPage);
-    const getPaginationRange = () => {
-        const maxVisible = 5; // Số lượng nút hiển thị
-        let start = Math.max(1, currentPage - 2);
-        let end = Math.min(start + maxVisible - 1, totalPages);
-
-        // Điều chỉnh start nếu end đã chạm giới hạn
-        if (end - start + 1 < maxVisible) {
-            start = Math.max(1, end - maxVisible + 1);
-        }
-
-        return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-    };
     const handleSaleToggle = (id, isForSale) => {
         setGadgetToToggleSale({ id, isForSale });
         setShowSaleConfirmModal(true);
@@ -119,6 +105,7 @@ const GadgetManagement = ({ categoryId }) => {
                     gadget.id === gadgetToToggleSale.id ? { ...gadget, isForSale: !gadgetToToggleSale.isForSale } : gadget
                 )
             );
+            await fetchGadgets();
             toast.success("Cập nhật trạng thái thành công");
         } catch (error) {
             if (error.response && error.response.data && error.response.data.reasons) {
@@ -483,7 +470,7 @@ const GadgetManagement = ({ categoryId }) => {
             <ToastContainer position="top-right" autoClose={3000} />
 
             {/* Statistics Section with improved layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
@@ -537,7 +524,7 @@ const GadgetManagement = ({ categoryId }) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Add search and sort controls */}
             <div className="mb-4 flex gap-4">
@@ -573,7 +560,7 @@ const GadgetManagement = ({ categoryId }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {currentGadgets.map((gadget) => (
+                    {gadgets.map((gadget) => (
                         <tr key={gadget.id} className="border-b hover:bg-gray-50">
                             <td className="p-4">
                                 <div className="relative">
@@ -745,22 +732,47 @@ const GadgetManagement = ({ categoryId }) => {
             {gadgets.length === 0 && !isLoading && (
                 <div className="text-center p-4 text-gray-500">Không có sản phẩm</div>
             )}
-            {/* Pagination */}
-            <div className="flex justify-center mt-6 space-x-2">
-                {getPaginationRange().map((pageNumber) => (
-                    <button
-                        key={pageNumber}
-                        onClick={() => handleChangePage(pageNumber)}
-                        className={`px-4 py-2 rounded-md ${pageNumber === currentPage
-                                ? 'bg-primary/80 text-white'
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                        disabled={isLoading}
-                    >
-                        {pageNumber}
-                    </button>
-                ))}
-            </div>
+            {gadgets.length > 0 && (
+                <div className="mt-4">
+                    <div className="flex justify-center mt-4">
+                        <nav className="flex items-center space-x-2">
+                            {(() => {
+                                const maxVisiblePages = 5;
+                                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                                
+                                if (totalPages <= 1) return null;
+
+                                let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+                                if (endPage - startPage + 1 < maxVisiblePages) {
+                                    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                                }
+
+                                const pages = [];
+                                // Add page numbers
+                                Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
+                                    .forEach(number => {
+                                        pages.push(
+                                            <button
+                                                key={number}
+                                                onClick={() => handleChangePage(number)}
+                                                className={`px-4 py-2 rounded-md ${
+                                                    number === currentPage 
+                                                        ? "bg-primary/70 text-white" 
+                                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                                }`}
+                                            >
+                                                {number}
+                                            </button>
+                                        );
+                                    });
+                                return pages;
+                            })()}
+                        </nav>
+                    </div>
+                </div>
+            )}
 
             {/* Discount Modal */}
             {isModalVisible && (

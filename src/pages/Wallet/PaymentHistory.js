@@ -71,7 +71,12 @@ const PaymentHistory = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {['Số tiền', 'Trạng thái', 'Ngày thanh toán'].map((header) => (
+                {[
+                  'Số dư trước',
+                  'Biến động',
+                  'Trạng thái',
+                  'Ngày thanh toán'
+                ].map((header) => (
                   <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {header}
                   </th>
@@ -81,11 +86,29 @@ const PaymentHistory = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {payments.map((payment) => (
                 <tr key={payment.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(payment.amount)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {payment.balanceBeforeChange !== null ? (
+                      formatCurrency(payment.balanceBeforeChange)
+                    ) : (
+                      <span className="text-gray-400">--</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center space-x-1">
+                      <span className={`text-sm ${payment.status === 'Success' ? 'text-red-600' : 'text-gray-600'}`}>
+                        {payment.status === 'Success' ? '-' : ''}{formatCurrency(payment.amount)}
+                      </span>
+                      {payment.balanceBeforeChange !== null && payment.status === 'Success' && (
+                        <span className="text-xs text-gray-400">
+                          → {formatCurrency(payment.balanceBeforeChange - payment.amount)}
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${payment.status === 'Success' ? 'bg-green-100 text-green-800' :
-                      payment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                        payment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
                       }`}>
                       {payment.status === 'Success' ? 'Thành công' :
                         payment.status === 'Pending' ? 'Đang chờ' :
@@ -93,14 +116,15 @@ const PaymentHistory = () => {
                             payment.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(payment.createdAt)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {formatDate(payment.createdAt)}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
-
       {/* Pagination Controls */}
       <div className="mt-4">
         <div className="flex justify-center mt-4">
@@ -121,11 +145,10 @@ const PaymentHistory = () => {
                   <button
                     key={number}
                     onClick={() => setCurrentPage(number)}
-                    className={`px-4 py-2 rounded-md ${
-                      number === currentPage 
-                        ? "bg-primary/70 text-white" 
+                    className={`px-4 py-2 rounded-md ${number === currentPage
+                        ? "bg-primary/70 text-white"
                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                      }`}
                   >
                     {number}
                   </button>

@@ -12,7 +12,7 @@ import { CART_ACTIONS } from '~/constants/cartEvents';
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
     if (!isOpen) return null;
-    
+
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
             <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
@@ -48,9 +48,9 @@ const OrderConfirmation = ({ selectedItems, cartItemsBySeller, totalPrice, onCan
             const listGadgetItems = Object.values(selectedItems).flat();
             await AxiosInterceptor.post('/api/order', { listGadgetItems });
             setOrderSuccess(true);
-            
+
             // Dispatch event to reset cart count after successful order
-            window.dispatchEvent(new CustomEvent('cartUpdate', { 
+            window.dispatchEvent(new CustomEvent('cartUpdate', {
                 detail: { type: CART_ACTIONS.REMOVE_ITEMS, items: listGadgetItems }
             }));
         } catch (error) {
@@ -233,13 +233,24 @@ const CartPage = () => {
             const totalItems = Object.values(cartItemsBySeller).reduce((sum, items) => {
                 return sum + items.length;
             }, 0);
-            
-            window.dispatchEvent(new CustomEvent('cartUpdate', { 
-                detail: { count: totalItems } 
+
+            window.dispatchEvent(new CustomEvent('cartUpdate', {
+                detail: { count: totalItems }
             }));
         } catch (error) {
             console.error("Error updating quantity:", error);
-            toast.error("Failed to update item quantity. Please try again.");
+
+            if (error.response && error.response.data && error.response.data.reasons) {
+                const reasons = error.response.data.reasons;
+                if (reasons.length > 0) {
+                    const reasonMessage = reasons[0].message;
+                    toast.error(reasonMessage);
+                } else {
+                    toast.error("Thay đổi trạng thái thất bại, vui lòng thử lại");
+                }
+            }
+
+
 
 
             setCartItemsBySeller(prev => {
@@ -278,7 +289,7 @@ const CartPage = () => {
                         }, 0);
 
                         // Dispatch event with new count
-                        window.dispatchEvent(new CustomEvent('cartUpdate', { 
+                        window.dispatchEvent(new CustomEvent('cartUpdate', {
                             detail: { type: CART_ACTIONS.REMOVE }
                         }));
 
@@ -304,8 +315,8 @@ const CartPage = () => {
                     await AxiosInterceptor.delete('/api/cart', {
                         data: { gadgetId, quantity }
                     });
-                    
-                    window.dispatchEvent(new CustomEvent('cartUpdate', { 
+
+                    window.dispatchEvent(new CustomEvent('cartUpdate', {
                         detail: { type: CART_ACTIONS.REMOVE }
                     }));
 
@@ -321,8 +332,8 @@ const CartPage = () => {
                             return sum + items.length;
                         }, 0);
 
-                        window.dispatchEvent(new CustomEvent('cartUpdate', { 
-                            detail: { count: newTotal } 
+                        window.dispatchEvent(new CustomEvent('cartUpdate', {
+                            detail: { count: newTotal }
                         }));
 
                         return updatedCart;
@@ -352,6 +363,13 @@ const CartPage = () => {
     };
 
     const handleSelectItem = (sellerId, productId) => {
+        const seller = sellers.find(s => s.id === sellerId);
+        // Prevent selection if seller is inactive
+        if (seller.user.status === "Inactive") {
+            toast.error("Không thể chọn sản phẩm từ người bán đã bị khóa");
+            return;
+        }
+
         setSelectedItems(prev => {
             const newSelectedItems = { ...prev };
             if (newSelectedItems[sellerId]?.includes(productId)) {
@@ -382,6 +400,9 @@ const CartPage = () => {
     const handleSelectAll = () => {
         const validItemsBySeller = {};
         sellers.forEach(seller => {
+            // Skip inactive sellers
+            if (seller.user.status === "Inactive") return;
+
             const validItems = (cartItemsBySeller[seller.id] || [])
                 .filter(item => item.gadget.status !== "Inactive" && item.gadget.isForSale !== false)
                 .map(item => item.gadget.id);
@@ -391,7 +412,7 @@ const CartPage = () => {
         });
 
         const allSelected = Object.keys(selectedItems).length === Object.keys(validItemsBySeller).length &&
-            Object.keys(validItemsBySeller).every(sellerId => 
+            Object.keys(validItemsBySeller).every(sellerId =>
                 selectedItems[sellerId]?.length === validItemsBySeller[sellerId].length);
 
         if (allSelected) {
@@ -517,8 +538,14 @@ const CartPage = () => {
                                                     type="checkbox"
                                                     onChange={() => handleSelectAllForSeller(seller.id)}
                                                     checked={selectedItems[seller.id]?.length === cartItemsBySeller[seller.id]?.length}
+                                                    disabled={seller.user.status === "Inactive"}
                                                 />
-                                                <h2 className="text-lg font-semibold ml-2">{seller.shopName}</h2>
+                                                <h2 className="text-lg font-semibold ml-2">
+                                                    {seller.shopName}
+                                                    {seller.user.status === "Inactive" && (
+                                                        <span className="text-red-500 ml-2">(Đã bị khóa)</span>
+                                                    )}
+                                                </h2>
                                             </div>
                                             <div className="flex items-center mt-2">
                                                 <HomeOutlined />
@@ -553,12 +580,23 @@ const CartPage = () => {
                                                     />
 
                                                     <div className="flex-grow flex flex-col space-y-2">
-                                                        <h4 className="font-bold cursor-pointer"
-                                                            onClick={() => navigate(`/gadget/detail/${slugify(item.gadget.name)}`, {
-                                                                state: {
-                                                                    productId: item.gadget.id,
+                                                        <h4
+                                                            // onClick={() => navigate(`/gadget/detail/${slugify(item.gadget.name)}`, {
+                                                            //     state: {
+                                                            //         productId: item.gadget.id,
+                                                            //     }
+                                                            // })}
+                                                            onClick={() => {
+                                                                if (item.gadget.status !== "Inactive") {
+                                                                    navigate(`/gadget/detail/${slugify(item.gadget.name)}`, {
+                                                                        state: {
+                                                                            productId: item.gadget.id,
+                                                                        }
+                                                                    });
                                                                 }
-                                                            })}
+                                                            }}
+                                                            className={` flex-none  flex flex-col justify-between relative  ${item.gadget.status === "Inactive" ? "cursor-not-allowed opacity-75" : "cursor-pointer"
+                                                                }`}
                                                         >{item.gadget.name}</h4>
                                                         <p>Hãng: {item.gadget.brand.name}</p>
                                                         <p>Loại sản phẩm: {item.gadget.category.name}</p>
@@ -649,8 +687,8 @@ const CartPage = () => {
                                         onClick={handleCheckout}
                                         disabled={isAnySelectedItemInactiveOrNotForSale()}
                                         className={`px-6 py-2 rounded-lg font-semibold transition duration-200 ${isAnySelectedItemInactiveOrNotForSale()
-                                                ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-primary/80 hover:bg-secondary/90 text-white'
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-primary/80 hover:bg-secondary/90 text-white'
                                             }`}
                                     >
                                         Mua ngay

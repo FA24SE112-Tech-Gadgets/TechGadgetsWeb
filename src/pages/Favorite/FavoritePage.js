@@ -277,12 +277,18 @@ function FavoritePage() {
                                             {shop.products.map((product) => (
                                                 <div
                                                     key={product.id}
-                                                    onClick={() => navigate(`/gadget/detail/${slugify(product.name)}`, {
-                                                        state: {
-                                                            productId: product.id,
+                                                    onClick={() => {
+                                                        if (product.status !== "Inactive") {
+                                                            navigate(`/gadget/detail/${slugify(product.name)}`, {
+                                                                state: {
+                                                                    productId: product.id,
+                                                                }
+                                                            });
                                                         }
-                                                    })}
-                                                    className="border rounded-lg shadow-sm flex-none w-[200px] flex flex-col justify-between relative bg-40 cursor-pointer"
+                                                    }}
+                                                    className={`border rounded-lg shadow-sm flex-none w-[200px] flex flex-col justify-between relative bg-40 ${
+                                                        product.status === "Inactive" ? "cursor-not-allowed opacity-75" : "cursor-pointer"
+                                                    }`}
                                                 >
                                                     {product.discountPercentage > 0 && (
                                                         <div className="absolute top-0 left-0 bg-red-600 text-white text-sm font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md">

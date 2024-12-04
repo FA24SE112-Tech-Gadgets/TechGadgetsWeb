@@ -16,13 +16,11 @@ const NaturalLanguageSearch = () => {
     const [searchText, setSearchText] = useState('');
     const [gadgets, setGadgets] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedGadget, setSelectedGadget] = useState(null);
     const itemsPerPage = 8;
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false); // Change initial state to false
     const [sellers, setSellers] = useState([]);
     const [resultType, setResultType] = useState('gadget');
-    const [selectedSeller, setSelectedSeller] = useState(null);
     const [isListening, setIsListening] = useState(false);
     const [searchTimeout, setSearchTimeout] = useState(null);
     const [reviewData, setReviewData] = useState({});
@@ -151,6 +149,28 @@ const NaturalLanguageSearch = () => {
     };
 // hêt khoảng cách
 
+    // Add effect to load saved state on component mount
+    useEffect(() => {
+        const savedState = localStorage.getItem('searchState');
+        if (savedState) {
+            const { 
+                searchText: savedSearchText, 
+                gadgets: savedGadgets, 
+                sellers: savedSellers,
+                resultType: savedResultType,
+                reviewData: savedReviewData,
+                currentPage: savedCurrentPage 
+            } = JSON.parse(savedState);
+            
+            setSearchText(savedSearchText || '');
+            setGadgets(savedGadgets || []);
+            setSellers(savedSellers || []);
+            setResultType(savedResultType || 'gadget');
+            setReviewData(savedReviewData || {});
+            setCurrentPage(savedCurrentPage || 1);
+        }
+    }, []);
+
     const fetchGadgets = async () => {
         setLoading(true);
         try {
@@ -172,6 +192,16 @@ const NaturalLanguageSearch = () => {
                 setReviewData(reviewMap);
                 setGadgets(response.data.gadgets);
                 setSellers([]);
+                
+                // Save state after setting data
+                localStorage.setItem('searchState', JSON.stringify({
+                    searchText,
+                    gadgets: response.data.gadgets,
+                    sellers: [],
+                    resultType: 'gadget',
+                    reviewData: reviewMap,
+                    currentPage: 1
+                }));
             } else {
                 // Add distance calculation for sellers
                 const sellersWithDistance = await Promise.all(response.data.sellers.map(async (seller) => {
@@ -189,6 +219,16 @@ const NaturalLanguageSearch = () => {
                 }));
                 setSellers(sellersWithDistance);
                 setGadgets([]);
+                
+                // Save state after setting data
+                localStorage.setItem('searchState', JSON.stringify({
+                    searchText,
+                    gadgets: [],
+                    sellers: sellersWithDistance,
+                    resultType: 'seller',
+                    reviewData: {},
+                    currentPage: 1
+                }));
             }
         } catch (error) {
             console.error('Failed to fetch results:', error);
@@ -196,6 +236,16 @@ const NaturalLanguageSearch = () => {
             setLoading(false);
         }
     };
+
+    // Add cleanup effect to clear saved state when component unmounts
+    useEffect(() => {
+        return () => {
+            // Only clear if navigating away from search (not on page refresh)
+            if (!window.performance.getEntriesByType('navigation')[0].type === 'reload') {
+                localStorage.removeItem('searchState');
+            }
+        };
+    }, []);
 
     const handleSearch = async () => {
         // Stop speech recognition if it's active
@@ -226,35 +276,19 @@ const NaturalLanguageSearch = () => {
         }
     };
     const handleProductClick = (gadget) => {
-        setSelectedGadget(gadget);
-    };
-
-    const handleConfirmNavigation = () => {
-        if (selectedGadget) {
-            navigate(`/gadget/detail/${slugify(selectedGadget.name)}`, {
-                state: {
-                    productId: selectedGadget.id,
-                }
-            });
-        }
-    };
-
-    const handleCloseModal = () => {
-        setSelectedGadget(null);
+        navigate(`/gadget/detail/${slugify(gadget.name)}`, {
+            state: {
+                productId: gadget.id,
+            }
+        });
     };
 
     const handleSellerClick = (seller) => {
-        setSelectedSeller(seller);
-    };
-
-    const handleConfirmSellerNavigation = () => {
-        if (selectedSeller) {
-            navigate(`/seller-page/${slugify(selectedSeller.shopName)}`, {
-                state: {
-                    sellerId: selectedSeller.id,
-                }
-            });
-        }
+        navigate(`/seller-page/${slugify(seller.shopName)}`, {
+            state: {
+                sellerId: seller.id,
+            }
+        });
     };
 
     const totalPages = Math.ceil(gadgets.length / itemsPerPage);
@@ -520,52 +554,6 @@ const NaturalLanguageSearch = () => {
 
                 </div>
             </div>
-            {selectedGadget && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" style={{ zIndex: 1000 }} onClick={handleCloseModal}>
-                    <div className="bg-white p-6 rounded-md shadow-md" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-lg font-bold mb-4">Xác nhận</h2>
-                        <p>Bạn có muốn đến trang chi tiết sản phẩm không?</p>
-                        <div className="mt-4 flex justify-end space-x-2">
-                            <button
-                                onClick={handleCloseModal}
-                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                onClick={handleConfirmNavigation}
-                                className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary-600"
-                            >
-                                Đồng ý
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {selectedSeller && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-                    style={{ zIndex: 1000 }}
-                    onClick={() => setSelectedSeller(null)}>
-                    <div className="bg-white p-6 rounded-md shadow-md" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-lg font-bold mb-4">Xác nhận</h2>
-                        <p>Bạn có muốn đến trang chi tiết người bán không?</p>
-                        <div className="mt-4 flex justify-end space-x-2">
-                            <button
-                                onClick={() => setSelectedSeller(null)}
-                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                onClick={handleConfirmSellerNavigation}
-                                className="px-4 py-2 bg-primary/80 text-white rounded hover:bg-primary-600"
-                            >
-                                Đồng ý
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

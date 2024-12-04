@@ -173,12 +173,22 @@ const OrderConfirmation = ({ product, quantity, onCancel }) => {
 
 const DetailGadgetPage = () => {
     const { isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { productId } = location.state || {};
+
+    // Add this check at the beginning of the component
+    useEffect(() => {
+        if (!productId) {
+            navigate('/404');
+            return;
+        }
+    }, [productId, navigate]);
+
     const apiBase = process.env.NODE_ENV === "development"
         ? process.env.REACT_APP_DEV_API + "/"
         : process.env.REACT_APP_PRO_API + "/";
     // const { id } = useParams();
-    const location = useLocation();
-    const { productId } = location.state || {};
     const [product, setProduct] = useState(null);
     const [activeTab, setActiveTab] = useState('specifications');
     const [error, setError] = useState(null);
@@ -187,7 +197,15 @@ const DetailGadgetPage = () => {
     const [price, setPrice] = useState(0);
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [showProfileWarning, setShowProfileWarning] = useState(false);
-    const navigate = useNavigate();
+    const [reviewSummary, setReviewSummary] = useState({
+        avgReview: 0,
+        numOfReview: 0,
+        numOfFiveStar: 0,
+        numOfFourStar: 0,
+        numOfThreeStar: 0,
+        numOfTwoStar: 0,
+        numOfOneStar: 0
+    });
     // const {user} = useAuth()
     const [isOpen, setIsOpen] = useState(false);
     const [user, setUser] = useState(null);
@@ -195,7 +213,7 @@ const DetailGadgetPage = () => {
         const fetchUserData = async () => {
             if (!isAuthenticated) {
                 return;
-              }
+            }
             try {
                 const response = await AxiosInterceptor.get('/api/users/current');
                 setUser(response.data.customer);
@@ -212,21 +230,31 @@ const DetailGadgetPage = () => {
         const fetchProduct = async () => {
             try {
                 const response = await apiClient(`${apiBase}api/gadgets/${productId}`);
+                if (response.data.status === "Inactive") {
+                    navigate('/404');
+                    return;
+                }
+                if (response.data.sellerStatus === "Inactive") {
+                    navigate('/404');
+                    return;
+                }
                 setProduct(response.data);
                 setPrice(response.price);
             } catch (error) {
                 console.error("Error fetching product details:", error);
-                setError("Failed to fetch product details.");
+                navigate('/404'); 
             }
         };
 
         const fetchReviews = async () => {
             if (!isAuthenticated) {
                 return;
-              }
+            }
             try {
                 const response = await AxiosInterceptor.get(`/api/reviews/gadget/${productId}`);
-                setReviews(response.data.items.slice(0, 2)); // Show only the first 2 reviews             
+              const summaryResponse = await AxiosInterceptor.get(`/api/reviews/summary/gadgets/${productId}`)
+                setReviews(response.data.items.slice(0, 2)); // Show only the first 2 reviews    
+                setReviewSummary(summaryResponse.data);
             } catch (error) {
                 toast.error('Failed to fetch reviews');
             }
@@ -234,7 +262,7 @@ const DetailGadgetPage = () => {
 
         fetchProduct();
         fetchReviews();
-    }, [productId, isAuthenticated, apiBase]);
+    }, [productId, isAuthenticated, apiBase, navigate]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -536,35 +564,47 @@ const DetailGadgetPage = () => {
                         ) : (
                             <div className="mb-6 w-full flex ">
                                 <div className="w-full max-w-md">
-                                    {/* Average rating with stars */}
-                                    <div className="flex items-center mb-4 justify-center">
-                                        <span className="text-xl font-bold text-orange-500">{averageRating}</span>
-                                        <div className="ml-2 flex">
-                                            <StarRatings
-                                                rating={parseFloat(averageRating)}
-                                                starRatedColor="orange"
-                                                numberOfStars={5}
-                                                starDimension="24px"
-                                                starSpacing="2px"
-                                            />
-                                        </div>
-                                    </div>
 
                                     {/* Star rating breakdown */}
-                                    <div className="space-y-2">
-                                        {starCounts.map((count, index) => (
-                                            <div key={index} className="flex items-center">
-                                                <span className="w-8 text-right">{5 - index}</span>
-                                                <Star size={16} className="text-gray-400 ml-2" />
-                                                <div className="flex-1 mx-2 h-3 bg-gray-200 rounded">
-                                                    <div
-                                                        className="h-3 bg-orange-500 rounded"
-                                                        style={{ width: `${Math.floor(starPercentages[5 - index - 1])}%` }}
-                                                    ></div>
-                                                </div>
-                                                <span className="w-12 text-right">{Math.floor(starPercentages[5 - index - 1])}%</span>
+                                    <div className="w-full max-w-md">
+                                        {/* Average rating with stars */}
+                                        <div className="flex items-center mb-4 justify-center">
+                                            <span className="text-3xl font-bold text-primary/80">{reviewSummary.avgReview.toFixed(1)}</span>
+                                            <div className="ml-2 flex">
+                                                <StarRatings
+                                                    rating={reviewSummary.avgReview}
+                                                    starRatedColor="orange"
+                                                    numberOfStars={5}
+                                                    starDimension="24px"
+                                                    starSpacing="2px"
+                                                />
                                             </div>
-                                        ))}
+                                        </div>
+
+                                        {/* Star rating breakdown */}
+                                        <div className="space-y-2">
+                                            {[
+                                                reviewSummary.numOfFiveStar,
+                                                reviewSummary.numOfFourStar,
+                                                reviewSummary.numOfThreeStar,
+                                                reviewSummary.numOfTwoStar,
+                                                reviewSummary.numOfOneStar
+                                            ].map((count, index) => (
+                                                <div key={index} className="flex items-center">
+                                                    <span className="w-8 text-right">{5 - index}</span>
+                                                    <Star size={16} className="text-gray-400 ml-2" />
+                                                    <div className="flex-1 mx-2 h-3 bg-gray-200 rounded">
+                                                        <div
+                                                            className="h-3 bg-primary/80 rounded"
+                                                            style={{ width: `${reviewSummary.numOfReview > 0 ? (count / reviewSummary.numOfReview * 100) : 0}%` }}
+                                                        ></div>
+                                                    </div>
+                                                    <span className="w-12 text-right">
+                                                        {reviewSummary.numOfReview > 0 ? Math.floor(count / reviewSummary.numOfReview * 100) : 0}%
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -652,13 +692,7 @@ const DetailGadgetPage = () => {
                                 </div>
                             )}
                         </div>
-                        {product.status === "Inactive" ? (
-                            <div className="relative">
-                                <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-sm font-bold py-1 px-2 rounded-full shadow-lg">
-                                    Sản phẩm đã bị khóa
-                                </div>
-                            </div>
-                        ) : product.isForSale === false && (
+                        {product.isForSale === false && (
                             <div className="relative">
                                 <div className="absolute top-0 right-0 mt-2  bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-full shadow-lg">
                                     Ngừng bán

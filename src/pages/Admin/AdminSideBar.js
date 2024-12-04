@@ -19,6 +19,7 @@ const AdminSideBar = ({ minHeight = 'min-h-screen' }) => {
   const menuItems = [
     { path: '/admin/dashboard', label: 'Trang quản lý', icon: FaChartBar },
     { path: '/admin/manage-users', label: 'Quản lý người dùng', icon: FaUsersCog },
+
   ];
 
   const isActive = (path) => location.pathname === path;

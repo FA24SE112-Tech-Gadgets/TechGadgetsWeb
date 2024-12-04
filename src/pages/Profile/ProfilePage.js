@@ -75,13 +75,16 @@ const ProfilePage = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
+  const [loginMethod, setLoginMethod] = useState(null);
+  const [status, setStatus] = useState(false);
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
         const response = await AxiosInterceptor.get('/api/users/current');
         const userData = response.data.customer;
 
+        // Set login method
+        setLoginMethod(response.data.loginMethod);
         const newProfile = {
           name: userData.fullName,
           address: userData.address || '',
@@ -92,7 +95,7 @@ const ProfilePage = () => {
           email: response.data.email,
           avatar: userData.avatarUrl || ''
         };
-
+        setStatus(response.data.status);
         setProfile(newProfile);
         setOriginalProfile(newProfile);
       } catch (error) {
@@ -136,6 +139,7 @@ const ProfilePage = () => {
       formData.append('DateOfBirth', formattedDate);
 
       if (profile.phoneNumber) formData.append('PhoneNumber', profile.phoneNumber);
+      if (profile.email !== originalProfile.email) formData.append('Email', profile.email);
 
       if (profile.avatar instanceof File) {
         formData.append('Avatar', profile.avatar);
@@ -153,7 +157,7 @@ const ProfilePage = () => {
         if (response.data && response.data.avatarUrl) {
           updatedProfile.avatar = response.data.avatarUrl;
         }
-        
+
         setProfile(updatedProfile);
         setOriginalProfile(updatedProfile);
         setIsEditing(false);
@@ -184,7 +188,7 @@ const ProfilePage = () => {
         <div>
           <button
             onClick={() => navigate('/')}
-            className="text-black  cursor-pointer"
+            className="text-black cursor-pointer"
           >
             <ArrowBack />
           </button>
@@ -195,17 +199,22 @@ const ProfilePage = () => {
             <button onClick={() => setIsEditing(!isEditing)} className="text-gray-500 hover:text-gray-700 text-xl">
               <FaPencilAlt />
             </button>
+            {status === "Inactive" && (
+              <span className="ml-2 text-red-500">Tài khoản của bạn đã bị khóa</span>
+            )}
           </div>
-          <button
-            onClick={openModal}
-            className="text-gray-500 hover:text-gray-700 text-xl"
-          >
-            <FaKey />
-          </button>
+          {loginMethod !== 'Google' && (
+            <button
+              onClick={openModal}
+              className="text-gray-500 hover:text-gray-700 text-xl"
+            >
+              <FaKey />
+            </button>
+          )}
         </div>
         <div className="flex">
           <div className="w-1/3 flex flex-col items-center">
-          <img
+            <img
               src={previewImage || profile.avatar || DefaultAvatar}
               alt="User Avatar"
               className="rounded-full w-40 h-40 mb-4 bg-gray-100 object-cover"
@@ -245,45 +254,54 @@ const ProfilePage = () => {
             <div className="grid grid-cols-2 gap-4">
               {Object.keys(profile).map((key) =>
                 key !== 'avatar' && key !== 'name' ? (
-                  <div key={key} className="mb-4">
-                    <label className="block text-gray-700">{labels[key]}</label>
-                    {isEditing ? (
-                      key === 'gender' ? (
-                        <select
-                          name="gender"
-                          value={profile.gender}
-                          onChange={handleChange}
-                          className="mt-2 p-2 border rounded w-full h-10"
-                        >
-                          <option value="Nam">Nam</option>
-                          <option value="Nữ">Nữ</option>
-                        </select>
-                      ) : key === 'dateOfBirth' ? (
-                        <input
-                          type="text"
-                          name="dateOfBirth"
-                          value={profile.dateOfBirth}
-                          onChange={handleChange}
-                          placeholder="DD/MM/YYYY"
-                          className="mt-2 p-2 border rounded w-full h-10"
-                        />
-                      ) : (
-                        <input
-                          type="text"
-                          name={key}
-                          value={profile[key]}
-                          onChange={handleChange}
-                          className="mt-2 p-2 border rounded w-full h-10"
-                        />
-                      )
-                    ) : (
+                  key === 'email' ? (
+                    <div key={key} className="mb-4">
+                      <label className="block text-gray-700">{labels[key]}</label>
                       <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10 truncate">
-                        {key === 'dateOfBirth'
-                          ? profile[key]
-                          : profile[key]}
+                        {profile[key]}
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <div key={key} className="mb-4">
+                      <label className="block text-gray-700">{labels[key]}</label>
+                      {isEditing ? (
+                        key === 'gender' ? (
+                          <select
+                            name="gender"
+                            value={profile.gender}
+                            onChange={handleChange}
+                            className="mt-2 p-2 border rounded w-full h-10"
+                          >
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                          </select>
+                        ) : key === 'dateOfBirth' ? (
+                          <input
+                            type="text"
+                            name="dateOfBirth"
+                            value={profile.dateOfBirth}
+                            onChange={handleChange}
+                            placeholder="DD/MM/YYYY"
+                            className="mt-2 p-2 border rounded w-full h-10"
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            name={key}
+                            value={profile[key]}
+                            onChange={handleChange}
+                            className="mt-2 p-2 border rounded w-full h-10"
+                          />
+                        )
+                      ) : (
+                        <p className="mt-2 p-2 border rounded w-full bg-gray-100 h-10 truncate">
+                          {key === 'dateOfBirth'
+                            ? profile[key]
+                            : profile[key]}
+                        </p>
+                      )}
+                    </div>
+                  )
                 ) : null
               )}
             </div>
@@ -292,9 +310,8 @@ const ProfilePage = () => {
                 <button
                   onClick={handleSave}
                   disabled={!hasChanges || isSaving}
-                  className={`mt-4 bg-black text-white p-2 rounded flex items-center ${
-                    !hasChanges || isSaving ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  className={`mt-4 bg-black text-white p-2 rounded flex items-center ${!hasChanges || isSaving ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                 >
                   {isSaving ? (
                     <CgSpinner className="animate-spin mr-2" />
@@ -309,7 +326,7 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {isModalOpen && (
+      {isModalOpen && loginMethod !== 'Google' && (
         <div
           className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
         >
