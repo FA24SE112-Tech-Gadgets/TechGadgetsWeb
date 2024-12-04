@@ -180,11 +180,8 @@ export default function CreateKeyWordGroup() {
         })
       }
 
-      console.log('Request body:', JSON.stringify(requestBody, null, 2))
-
       const response = await AxiosInterceptor.post('/api/natural-language-keyword-groups', requestBody)
 
-      console.log('Group created:', response.data)
       setIsLoading(false)
       toast.success('Tạo tên nhóm thành công')
       setTimeout(() => {
