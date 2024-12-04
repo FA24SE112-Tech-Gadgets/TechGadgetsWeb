@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { FaChevronDown, FaChevronUp, FaPencilAlt, FaTrash, FaPlus, FaTimes, FaCheck } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 
@@ -26,7 +26,15 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor'
   }
 `}</style>
 
-const criteriaTypes = ['Specification', 'Name', 'Description', 'Condition', 'Price']
+const criteriaTypesMap = {
+  'Thông số kỹ thuật': 'Specification',
+  'Tên': 'Name',
+  'Mô tả': 'Description',
+  'Tình trạng': 'Condition',
+  'Giá': 'Price'
+};
+
+const criteriaTypes = Object.keys(criteriaTypesMap);
 
 export default function ManagerKeyWord() {
   const [groups, setGroups] = useState([])
@@ -49,20 +57,30 @@ export default function ManagerKeyWord() {
   const [showAddKeyword, setShowAddKeyword] = useState({})
   const [editingKeyword, setEditingKeyword] = useState(null)
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: () => { } })
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+
+
+  const fetchGroups = useCallback(async () => {
+    try {
+      const response = await AxiosInterceptor.get(`/api/natual-language-keyword-groups?Page=${page}&PageSize=${pageSize}`)
+      setGroups(response.data.items.map(group => ({
+        ...group,
+        isExpanded: expandedGroups[group.id] || false
+      })))
+      setTotalPages(Math.ceil(response.data.totalItems / pageSize))
+    } catch (error) {
+      console.error('Error fetching groups:', error)
+      toast.error('Không thể lấy danh sách nhóm từ khóa')
+    }
+  }, [page, pageSize, expandedGroups])
 
   useEffect(() => {
     fetchGroups()
     fetchCategories()
-  }, [])
-
-  const fetchGroups = async () => {
-    try {
-      const response = await AxiosInterceptor.get('/api/natual-language-keyword-groups')
-      setGroups(response.data.items)
-    } catch (error) {
-      console.error('Error fetching groups:', error)
-    }
-  }
+  }, [fetchGroups])
 
   const fetchCategories = async () => {
     try {
@@ -83,9 +101,10 @@ export default function ManagerKeyWord() {
   }
 
   const toggleGroup = (groupId) => {
-    setGroups(groups.map(group =>
-      group.id === groupId ? { ...group, isExpanded: !group.isExpanded } : group
-    ))
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
   }
 
   const handleGroupNameEdit = (groupId, name) => {
@@ -134,22 +153,22 @@ export default function ManagerKeyWord() {
     if (!selectedGroup) return
 
     let criteriaData = {
-      type: criteriaForm.type,
+      type: criteriaTypesMap[criteriaForm.type],
       categories: criteriaForm.categories
     }
 
     switch (criteriaForm.type) {
-      case 'Specification':
+      case 'Thông số kỹ thuật':
         criteriaData.specificationKeyId = criteriaForm.specificationKeyId
         criteriaData.contains = criteriaForm.contains
         criteriaData.categories = []
         break
-      case 'Name':
-      case 'Description':
-      case 'Condition':
+      case 'Tên':
+      case 'Mô tả':
+      case 'Tình trạng':
         criteriaData.contains = criteriaForm.contains
         break
-      case 'Price':
+      case 'Giá':
         criteriaData.minPrice = criteriaForm.minPrice
         criteriaData.maxPrice = criteriaForm.maxPrice
         break
@@ -160,14 +179,6 @@ export default function ManagerKeyWord() {
       toast.success('Tiêu chí mới đã được thêm thành công');
       fetchGroups()
       setShowCriteriaModal(false)
-      // setCriteriaForm({
-      //   type: 'Name',
-      //   contains: '',
-      //   minPrice: '',
-      //   maxPrice: '',
-      //   specificationKeyId: '',
-      //   categories: []
-      // })
       resetCriteriaForm()
     } catch (error) {
       console.error('Error create criteria:', error);
@@ -181,7 +192,7 @@ export default function ManagerKeyWord() {
 
   const resetCriteriaForm = () => {
     setCriteriaForm({
-      type: 'Name',
+      type: 'Tên',
       contains: '',
       minPrice: '',
       maxPrice: '',
@@ -416,12 +427,12 @@ export default function ManagerKeyWord() {
                         onClick={() => toggleGroup(group.id)}
                         className="text-primary/75 hover:text-secondary/85 transition duration-300 ease-in-out p-2"
                       >
-                        {group.isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                        {expandedGroups[group.id] ? <FaChevronUp /> : <FaChevronDown />}
                       </button>
                     </div>
                   </div>
                 </div>
-                {group.isExpanded && (
+                {expandedGroups[group.id] && (
                   <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Keywords Section */}
                     <div className="bg-white rounded-lg shadow p-4">
@@ -478,8 +489,8 @@ export default function ManagerKeyWord() {
                           <button
                             onClick={() => handleAddKeyword(group.id)}
                             className={`px-4 py-2 bg-primary/75 text-white rounded-lg hover:bg-secondary/85 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50 ${(!newKeyword.trim() || (editingKeyword && newKeyword === group.naturalLanguageKeywords.find(k => k.id === editingKeyword)?.keyword))
-                                ? 'opacity-50 cursor-not-allowed'
-                                : ''
+                              ? 'opacity-50 cursor-not-allowed'
+                              : ''
                               }`}
                             disabled={!newKeyword.trim() || (editingKeyword && newKeyword === group.naturalLanguageKeywords.find(k => k.id === editingKeyword)?.keyword)}
                           >
@@ -520,16 +531,16 @@ export default function ManagerKeyWord() {
                             <div>
                               <span className="text-gray-700">
                                 {criteria.type === 'Price'
-                                  ? `Giá từ ${criteria.minPrice.toLocaleString()}đ đến ${criteria.maxPrice.toLocaleString()}đ`
+                                  ? `Giá từ ${criteria.minPrice?.toLocaleString()}đ đến ${criteria.maxPrice?.toLocaleString()}đ`
                                   : criteria.type === 'Specification'
-                                    ? `Bao gồm thông số: ${criteria.specificationKey.name} - ${criteria.contains}`
+                                    ? `Bao gồm thông số: ${criteria.specificationKey?.name} - ${criteria.contains}`
                                     : `Phải chứa: ${criteria.contains}`
                                 }
                               </span>
                               <div className="text-sm text-gray-500">
                                 {criteria.type === 'Specification'
-                                  ? `Áp dụng: ${criteria.specificationKey.category.name}`
-                                  : `Áp dụng: ${criteria.categories.map(cat => cat.name).join(', ')}`
+                                  ? `Áp dụng: ${criteria.specificationKey?.category?.name}`
+                                  : `Áp dụng: ${criteria.categories?.map(cat => cat.name).join(', ')}`
                                 }
                               </div>
                             </div>
@@ -560,6 +571,24 @@ export default function ManagerKeyWord() {
         </div>
       </div>
 
+      {/* Pagination */}
+      <div className="flex justify-center mt-4">
+        <nav className="flex items-center space-x-2">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+            <button
+              key={pageNumber}
+              onClick={() => setPage(pageNumber)}
+              className={`px-4 py-2 rounded-md transition-colors duration-200 ${pageNumber === page
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+            >
+              {pageNumber}
+            </button>
+          ))}
+        </nav>
+      </div>
+
       {/* Create Criteria Modal */}
       {showCriteriaModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -579,8 +608,8 @@ export default function ManagerKeyWord() {
                 <select
                   value={criteriaForm.type}
                   onChange={(e) => {
-                    setCriteriaForm({ ...criteriaForm, type: e.target.value })
-                    if (e.target.value === 'Specification') {
+                    setCriteriaForm({ ...criteriaForm, type: e.target.value, minPrice: '', maxPrice: '' })
+                    if (e.target.value === 'Thông số kỹ thuật') {
                       setSelectedCategoryId('')
                       setSpecifications([])
                     }
@@ -593,7 +622,7 @@ export default function ManagerKeyWord() {
                 </select>
               </div>
 
-              {criteriaForm.type === 'Specification' && (
+              {criteriaForm.type === 'Thông số kỹ thuật' && (
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Chọn danh mục:</label>
                   <select
@@ -612,7 +641,7 @@ export default function ManagerKeyWord() {
                 </div>
               )}
 
-              {criteriaForm.type === 'Specification' && selectedCategoryId && (
+              {criteriaForm.type === 'Thông số kỹ thuật' && selectedCategoryId && (
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Chọn thông số kỹ thuật:</label>
                   <select
@@ -628,7 +657,7 @@ export default function ManagerKeyWord() {
                 </div>
               )}
 
-              {['Name', 'Description', 'Condition', 'Specification'].includes(criteriaForm.type) && (
+              {['Tên', 'Mô tả', 'Tình trạng', 'Thông số kỹ thuật'].includes(criteriaForm.type) && (
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Phải chứa:</label>
                   <input
@@ -641,42 +670,39 @@ export default function ManagerKeyWord() {
                 </div>
               )}
 
-              {criteriaForm.type === 'Price' && (
+              {criteriaForm.type === 'Giá' && (
                 <div className="space-y-4">
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">Giá từ:</label>
                     <input
                       type="number"
                       value={criteriaForm.minPrice}
-                      onChange={(e) => setCriteriaForm({ ...criteriaForm, minPrice: parseInt(e.target.value) })}
+                      onChange={(e) => setCriteriaForm({ ...criteriaForm, minPrice: e.target.value })}
                       placeholder="Giá tối thiểu"
                       className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                       min="0"
                       max="150000000"
                     />
-                    {criteriaForm.minPrice >= criteriaForm.maxPrice && (
-                      <p className="text-red-500 text-sm mt-1">Giá tối thiểu phải nhỏ hơn giá tối đa.</p>
-                    )}
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">đến:</label>
                     <input
                       type="number"
                       value={criteriaForm.maxPrice}
-                      onChange={(e) => setCriteriaForm({ ...criteriaForm, maxPrice: parseInt(e.target.value) })}
+                      onChange={(e) => setCriteriaForm({ ...criteriaForm, maxPrice: e.target.value })}
                       placeholder="Giá tối đa"
                       className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                       min="0"
                       max="150000000"
                     />
-                    {criteriaForm.minPrice >= criteriaForm.maxPrice && (
-                      <p className="text-red-500 text-sm mt-1">Giá tối đa phải lớn hơn giá tối thiểu.</p>
-                    )}
                   </div>
+                  {criteriaForm.minPrice && criteriaForm.maxPrice && parseInt(criteriaForm.minPrice) >= parseInt(criteriaForm.maxPrice) && (
+                    <p className="text-red-500 text-sm">Giá tối thiểu phải nhỏ hơn giá tối đa.</p>
+                  )}
                 </div>
               )}
 
-              {criteriaForm.type !== 'Specification' && (
+              {criteriaForm.type !== 'Thông số kỹ thuật' && (
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Danh sách thể loại áp dụng:</label>
                   <div className="flex items-center space-x-2">
@@ -733,7 +759,7 @@ export default function ManagerKeyWord() {
 
               <div className="flex justify-end space-x-2 mt-6">
                 <button
-                  onClick={() => {setShowCriteriaModal(false); resetCriteriaForm();}}
+                  onClick={() => { setShowCriteriaModal(false); resetCriteriaForm(); }}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition duration-300 ease-in-out"
                 >
                   Hủy

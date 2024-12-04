@@ -5,7 +5,15 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor'
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const criteriaTypes = ['Name', 'Description', 'Condition', 'Price', 'Specification']
+const criteriaTypesMap = {
+  'Thông số kỹ thuật': 'Specification',
+  'Tên': 'Name',
+  'Mô tả': 'Description',
+  'Tình trạng': 'Condition',
+  'Giá': 'Price'
+};
+
+const criteriaTypes = Object.keys(criteriaTypesMap);
 
 export default function CreateKeyWordGroup() {
   const navigate = useNavigate();
@@ -15,7 +23,7 @@ export default function CreateKeyWordGroup() {
   const [criteria, setCriteria] = useState([])
   const [showCriteriaModal, setShowCriteriaModal] = useState(false)
   const [criteriaForm, setCriteriaForm] = useState({
-    type: 'Name',
+    type: 'Tên',
     contains: '',
     minPrice: '',
     maxPrice: '',
@@ -68,7 +76,7 @@ export default function CreateKeyWordGroup() {
       return;
     }
 
-    if (criteriaForm.type === 'Price') {
+    if (criteriaForm.type === 'Giá') {
       const minPrice = criteriaForm.minPrice === '' ? 0 : parseFloat(criteriaForm.minPrice);
       const maxPrice = criteriaForm.maxPrice === '' ? 150000000 : parseFloat(criteriaForm.maxPrice);
 
@@ -90,21 +98,21 @@ export default function CreateKeyWordGroup() {
 
     const newCriteria = {
       id: Date.now(),
-      type: criteriaForm.type,
+      type: criteriaTypesMap[criteriaForm.type],
       categories: criteriaForm.categories,
     };
 
     switch (criteriaForm.type) {
-      case 'Name':
-      case 'Description':
-      case 'Condition':
+      case 'Tên':
+      case 'Mô tả':
+      case 'Tình trạng':
         newCriteria.contains = criteriaForm.contains;
         break;
-      case 'Price':
+      case 'Giá':
         newCriteria.minPrice = criteriaForm.minPrice === '' ? 0 : parseFloat(criteriaForm.minPrice);
         newCriteria.maxPrice = criteriaForm.maxPrice === '' ? 150000000 : parseFloat(criteriaForm.maxPrice);
         break;
-      case 'Specification':
+      case 'Thông số kỹ thuật':
         newCriteria.specificationKeyId = criteriaForm.specificationKeyId;
         newCriteria.contains = criteriaForm.contains;
         break;
@@ -113,7 +121,7 @@ export default function CreateKeyWordGroup() {
     setCriteria([...criteria, newCriteria]);
     setShowCriteriaModal(false);
     setCriteriaForm({
-      type: 'Name',
+      type: 'Tên',
       contains: '',
       minPrice: '',
       maxPrice: '',
@@ -194,17 +202,17 @@ export default function CreateKeyWordGroup() {
   }
 
   const isFormValid = () => {
-    if (criteriaForm.type === 'Specification') {
+    if (criteriaForm.type === 'Thông số kỹ thuật') {
       return (
         selectedCategoryId &&
         criteriaForm.specificationKeyId &&
         criteriaForm.contains.trim() !== ''
       );
-    } else if (criteriaForm.type === 'Price') {
+    } else if (criteriaForm.type === 'Giá') {
       return (
-        (criteriaForm.minPrice === '' || criteriaForm.minPrice >= 0) &&
-        (criteriaForm.maxPrice === '' || criteriaForm.maxPrice > criteriaForm.minPrice) &&
-        criteriaForm.categories.length > 0
+        criteriaForm.categories.length > 0 &&
+        (criteriaForm.minPrice === '' || criteriaForm.maxPrice === '' || 
+         (parseFloat(criteriaForm.minPrice) >= 0 && parseFloat(criteriaForm.maxPrice) > parseFloat(criteriaForm.minPrice)))
       );
     } else {
       return (
@@ -353,7 +361,7 @@ export default function CreateKeyWordGroup() {
                   value={criteriaForm.type}
                   onChange={(e) => {
                     setCriteriaForm({ ...criteriaForm, type: e.target.value })
-                    if (e.target.value === 'Specification') {
+                    if (e.target.value === 'Thông số kỹ thuật') {
                       setSelectedCategoryId('')
                       setSpecifications([])
                     }
@@ -366,7 +374,7 @@ export default function CreateKeyWordGroup() {
                 </select>
               </div>
 
-              {criteriaForm.type === 'Specification' && (
+              {criteriaForm.type === 'Thông số kỹ thuật' && (
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Chọn danh mục:</label>
                   <select
@@ -385,7 +393,7 @@ export default function CreateKeyWordGroup() {
                 </div>
               )}
 
-              {criteriaForm.type === 'Specification' && selectedCategoryId && (
+              {criteriaForm.type === 'Thông số kỹ thuật' && selectedCategoryId && (
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Chọn thông số kỹ thuật:</label>
                   <select
@@ -401,7 +409,7 @@ export default function CreateKeyWordGroup() {
                 </div>
               )}
 
-              {['Name', 'Description', 'Condition', 'Specification'].includes(criteriaForm.type) && (
+              {['Tên', 'Mô tả', 'Tình trạng', 'Thông số kỹ thuật'].includes(criteriaForm.type) && (
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Phải chứa:</label>
                   <input
@@ -414,7 +422,7 @@ export default function CreateKeyWordGroup() {
                 </div>
               )}
 
-              {criteriaForm.type === 'Price' && (
+              {criteriaForm.type === 'Giá' && (
                 <div className="space-y-4">
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">Giá từ:</label>
@@ -426,9 +434,6 @@ export default function CreateKeyWordGroup() {
                       className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                       min="0"
                     />
-                    {criteriaForm.minPrice >= criteriaForm.maxPrice && (
-                      <p className="text-red-500 text-sm mt-1">Giá tối thiểu phải nhỏ hơn giá tối đa.</p>
-                    )}
                   </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">đến:</label>
@@ -440,14 +445,14 @@ export default function CreateKeyWordGroup() {
                       className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/75"
                       min="0"
                     />
-                    {criteriaForm.minPrice >= criteriaForm.maxPrice && (
-                      <p className="text-red-500 text-sm mt-1">Giá tối đa phải lớn hơn giá tối thiểu.</p>
-                    )}
                   </div>
+                  {criteriaForm.minPrice !== '' && criteriaForm.maxPrice !== '' && parseFloat(criteriaForm.minPrice) >= parseFloat(criteriaForm.maxPrice) && (
+                    <p className="text-red-500 text-sm mt-1">Giá tối đa phải lớn hơn giá tối thiểu.</p>
+                  )}
                 </div>
               )}
 
-              {criteriaForm.type !== 'Specification' && (
+              {criteriaForm.type !== 'Thông số kỹ thuật' && (
                 <div>
                   <label className="block mb-2 text-sm font-medium text-gray-700">Danh sách thể loại áp dụng:</label>
                   <div className="flex items-center space-x-2">
@@ -509,7 +514,7 @@ export default function CreateKeyWordGroup() {
                   onClick={() => {
                     setShowCriteriaModal(false);
                     setCriteriaForm({
-                      type: 'Name',
+                      type: 'Tên',
                       contains: '',
                       minPrice: '',
                       maxPrice: '',
@@ -531,13 +536,6 @@ export default function CreateKeyWordGroup() {
                   Tạo
                 </button>
               </div>
-              {!isFormValid() && (
-                <div className="text-red-500 text-sm mt-2">
-                  {criteriaForm.type === 'Specification' && (!selectedCategoryId || !criteriaForm.specificationKeyId || criteriaForm.contains.trim() === '')}
-                  {criteriaForm.type === 'Price' && (criteriaForm.minPrice < 0 || criteriaForm.maxPrice <= criteriaForm.minPrice || criteriaForm.categories.length === 0)}
-                  {['Name', 'Description', 'Condition'].includes(criteriaForm.type) && (criteriaForm.contains.trim() === '' || criteriaForm.categories.length === 0)}
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -546,3 +544,4 @@ export default function CreateKeyWordGroup() {
     </div>
   )
 }
+
