@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaTachometerAlt, FaRegSun, FaWrench, FaStickyNote, FaRegChartBar, FaRegCalendarAlt, FaWpforms, FaSignOutAlt, FaProductHunt } from "react-icons/fa"
+import { FaTachometerAlt, FaRegSun, FaWrench, FaStickyNote, FaRegChartBar, FaRegCalendarAlt, FaWpforms, FaSignOutAlt, FaProductHunt, FaKey } from "react-icons/fa"
 import { useNavigate, useLocation } from 'react-router-dom';
 import icon from "~/assets/icon.ico"
 import { useDeviceToken } from '~/context/auth/Noti';
@@ -23,6 +23,7 @@ const Sidebar = ({ minHeight = 'min-h-screen' }) => {
         { path: '/manage-seller-application', icon: FaWpforms, text: 'Quản lý đơn người bán' },
         { path: '/specification-key', icon: FaRegSun, text: 'Quản lý thông số' },
         { path: '/brand', icon: FaWrench, text: 'Quản lý thương hiệu' },
+        { path: '/manage-keyword', icon: FaKey , text: 'Quản lý từ khóa' },
     ];
 
     const MenuItem = ({ path, icon: Icon, text }) => {

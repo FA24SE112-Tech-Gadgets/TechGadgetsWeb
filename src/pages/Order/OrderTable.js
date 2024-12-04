@@ -1,44 +1,33 @@
 // orderId = sellerorderId 
 import { HomeOutlined, PhoneOutlined } from "@ant-design/icons";
-import { Eye } from "lucide-react";
+import { Check, Copy, Eye, Store, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AxiosInterceptor from "~/components/api/AxiosInterceptor";
 import slugify from "~/ultis/config";
 
-const OrderTable = ({ orders, onOrderCancelled }) => {
+const OrderTable = ({
+  orders,
+  onOrderCancelled,
+  currentPage,
+  setCurrentPage,
+  totalItems,
+  pageSize
+}) => {
+  // Remove local pagination states and logic
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const navigate = useNavigate();
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
-  const handleChangePage = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  const [copiedStates, setCopiedStates] = useState({});
+  const [expandedOrders, setExpandedOrders] = useState({});
+  const toggleOrderDetails = (orderId) => {
+    setExpandedOrders(prev => ({
+      ...prev,
+      [orderId]: !prev[orderId]
+    }));
   };
-  const getPaginationRange = () => {
-    const maxVisible = 5; // Số lượng nút hiển thị
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(start + maxVisible - 1, totalPages);
-
-    // Điều chỉnh start nếu end đã chạm giới hạn
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-  };
-  // Add this useEffect to reset pagination when orders change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [orders]);
 
   // Function to open the cancel modal and set the selected order ID
   const openCancelModal = (orderId) => {
@@ -100,162 +89,202 @@ const OrderTable = ({ orders, onOrderCancelled }) => {
     });
   };
 
+  const handleCopy = (id, e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(id).then(() => {
+      setCopiedStates((prev) => ({
+        ...prev,
+        [id]: true, // Đánh dấu giao dịch cụ thể là đã sao chép
+      }));
+      setTimeout(() => {
+        setCopiedStates((prev) => ({
+          ...prev,
+          [id]: false, // Reset trạng thái sau 2 giây
+        }));
+      }, 2000);
+    });
+  };
+
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full bg-white border border-gray-200 table-fixed">
-        <thead>
-          <tr>
-            <th className="py-2 px-4 border-b w-1/4">Sản phẩm</th>
-            <th className="py-2 px-4 border-b w-1/4">Tổng giá tiền</th>
-            <th className="py-2 px-4 border-b w-1/4">Trạng thái</th>
-            <th className="py-2 px-4 border-b w-1/4">Ngày đặt</th>
-            <th className="py-2 px-4 border-b w-1/4"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentOrders.map((order) => (
-            <tr
-              key={order.id}
-              className="hover:bg-gray-50"
-            
-            >
-              {/* Products Column */}
-              <td className="py-2 px-4 border-b">
-                {order.gadgets.map((gadget) => (
-                  <div key={gadget.sellerOrderItemId} 
+    <div className="container mx-auto">
+      <div className="grid grid-cols-1 gap-6 mx-auto">
+        {orders.map((order) => (
+          <div
+            key={order.id}
+            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
+          >
+            {/* Order Header */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-2 font-semibold">
+                  <p>Mã đơn hàng:</p>
+                  <span className="font-medium text-gray-800">{order.id}</span>
+                  <button
+                    onClick={(e) => handleCopy(order.id, e)}
+                    className={`p-1 mb-1 rounded-md transition-colors duration-200 ${copiedStates[order.id]
+                      ? 'bg-green-500 text-white'
+                      : 'bg-primary/75 text-white hover:bg-secondary/85'
+                      }`}
+                    aria-label={copiedStates[order.id] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
+                  >
+                    {copiedStates[order.id] ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                <span
+                  className={`px-3 py-1 text-xs font-semibold rounded-full 
+                    ${order.status === "Success" ? "bg-green-100 text-green-800"
+                      : order.status === "Pending" ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"}`}
+                >
+                  {order.status === "Success" ? "Thành công"
+                    : order.status === "Pending" ? "Đang chờ"
+                      : order.status === "Cancelled" ? "Đã hủy"
+                        : order.status}
+                </span>
+              </div>
+              <div className="text-sm text-gray-500">
+                Ngày đặt: {formatDate(order.createdAt)}
+              </div>
+            </div>
+
+            {/* Products List */}
+            <div className="p-4">
+              {order.gadgets.map((gadget) => (
+                <div
+                  key={gadget.sellerOrderItemId}
                   onClick={() => navigate(`/gadget/detail/${slugify(gadget.name)}`, {
-                    state: {
-                        productId: gadget.gadgetId,
-                    }
-                })}
-                  className="flex items-center space-x-4 py-2 cursor-pointer">
+                    state: { productId: gadget.gadgetId }
+                  })}
+                  className="flex items-center space-x-3 py-2 cursor-pointer hover:bg-gray-50 rounded-lg p-2"
+                >
+                  <div className="relative w-16 h-16">
                     <img
                       src={gadget.thumbnailUrl}
                       alt={gadget.name}
-                      className="w-12 h-12 object-contain rounded"
+                      className="w-full h-full object-contain rounded"
                     />
-                    <div>
-                      <p className="font-semibold">{gadget.name}</p>
-                      {gadget.discountPercentage > 0 ? (
-                        <div className="flex items-center space-x-2">
-                          <p className="text-red-500 font-semibold text-sm">
-                            {gadget.quantity} x {gadget.discountPrice.toLocaleString()}₫
-                          </p>
-                          <p className="line-through text-gray-500 text-xs">
-                            {gadget.price.toLocaleString()}₫
-                          </p>
-                          <span className="bg-red-100 text-red-600 text-xs font-semibold px-1.5 py-0.5 rounded">
-                            -{gadget.discountPercentage}%
-                          </span>
+                    <span className="absolute bottom-0 right-0 bg-gray-800/75 text-white px-1.5 py-0.5 text-xs rounded-tl">
+                      x{gadget.quantity}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-gray-800">{gadget.name}</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                          <span>Người bán: </span>
+                          <Store className="h-4 w-4" />
+                          <span>{order.sellerInfo.shopName}</span>
                         </div>
-                      ) : (
-                        <p className="text-gray-600">
-                          {gadget.quantity} x {gadget.discountPrice.toLocaleString()}₫
-                        </p>
-                      )}
+                      </div>
+                      <div className="text-right">
+                        {gadget.discountPercentage > 0 ? (
+                          <div className="flex flex-col items-end gap-1">
+
+                            <div className="flex items-center gap-2">
+
+                              <span className="text-red-500 font-medium">
+                                {gadget.discountPrice.toLocaleString()}₫
+                              </span>
+                              <span className="line-through text-gray-400 text-sm">
+                                {gadget.price.toLocaleString()}₫
+                              </span>
+                              <span className="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded">
+                                -{gadget.discountPercentage}%
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="text-gray-700">
+                              {gadget.price.toLocaleString()}₫
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                ))}
-              </td>
+                </div>
+              ))}
+            </div>
 
-              {/* Total Amount Column */}
-              <td className="py-2 px-4 border-b text-center">{order.amount.toLocaleString()}₫</td>
+            {/* Order Footer */}
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex flex-col items-end gap-2">
+                {expandedOrders[order.id] && order.discountAmount > 0 && (
+                  <div className="w-full border border-gray-200 rounded-lg p-4 mb-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-600">Tổng tiền hàng:</span>
+                      <span className="font-medium">{order.beforeAppliedDiscountAmount.toLocaleString()}₫</span>
+                    </div>
+                    <div className="flex justify-between items-center text-red-400">
+                      <span>Phí giảm giá:</span>
+                      <span className="font-medium">-{order.discountAmount.toLocaleString()}₫</span>
+                    </div>
+                  </div>
+                )}
 
-              {/* Status Column */}
-              <td className="py-2 px-4 border-b text-center">
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-        ${order.status === "Success" ? "bg-green-100 text-green-800" : order.status === "Pending" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}
-                >
-                  {order.status === "Success"
-                    ? "Thành công"
-                    : order.status === "Pending"
-                    ? "Đang chờ"
-                    : order.status === "Cancelled"
-                    ? "Đã hủy"
-                    : order.status}
-                </span>
-              </td>
-
-              {/* Order Date Column */}
-              <td className="py-2 px-4 border-b text-center">{formatDate(order.createdAt)}</td>
-
-              {/* Actions Column */}
-              {/* {hasPendingOrders && (
-                <td className="py-2 px-4 border-b text-center">
-                  {order.status === "Pending" && (
+                <div className="text-gray-700 flex items-center">
+                  Thành tiền: <span className="font-semibold text-lg ml-2">{order.amount.toLocaleString()}₫</span>
+                  {order.discountAmount > 0 && (
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openCancelModal(order.id);
-                      }}
-                      className="text-primary/70 hover:text-secondary/80"
+                      onClick={() => toggleOrderDetails(order.id)}
+                      className="ml-2 focus:outline-none"
                     >
-                      <Eye className="h-5 w-5 items-center" />
+                      {expandedOrders[order.id] ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                     </button>
                   )}
-                </td>
-              )} */}
-                <td>
-                  <button
-                onClick={() => handleOrderClick(order.id)}
-                    className="text-primary/70 hover:text-secondary/80"
-                  >
-                    <Eye className="h-5 w-5 items-center" />
-                  </button>
-                </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {/* Pagination Controls */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {getPaginationRange().map((pageNumber) => (
-          <button
-            key={pageNumber}
-            onClick={() => handleChangePage(pageNumber)}
-            className={`px-4 py-2 rounded-md ${
-              pageNumber === currentPage
-                ? 'bg-primary/80 text-white'
-                : 'bg-gray-200 text-gray-700'
-            }`}
-            // disabled={isLoading}
-          >
-            {pageNumber}
-          </button>
+                </div>
+
+                <button
+                  onClick={() => handleOrderClick(order.id)}
+                  className="flex items-center gap-2 text-primary hover:text-secondary transition-colors duration-200"
+                >
+                  <Eye className="h-5 w-5" />
+                  <span>Chi tiết</span>
+                </button>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Cancel Order Modal */}
-      {/* {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-lg font-semibold mb-4">Hủy đơn hàng</h2>
-            <p className="text-gray-700 mb-4">Vui lòng nhập lý do hủy :</p>
-            <textarea
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-              rows="4"
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              placeholder="Nhập lý do ở đây..."
-            ></textarea>
-            <div className="flex justify-end space-x-4">
-              <button
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={() => setShowCancelModal(false)}
-              >
-                Hủy
-              </button>
-              <button
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                onClick={handleCancelOrder}
-              >
-                Gửi
-              </button>
-            </div>
-          </div>
+      {/* Updated Pagination Controls */}
+      <div className="mt-4">
+        <div className="flex justify-center mt-4">
+          <nav className="flex items-center space-x-2">
+            {(() => {
+              const maxVisiblePages = 5;
+              const totalPages = Math.ceil(totalItems / pageSize);
+              let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+              let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+              if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+              }
+
+              return Array.from({ length: totalPages }, (_, index) => index + 1)
+                .filter(number => number >= startPage && number <= endPage)
+                .map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => setCurrentPage(number)}
+                    className={`px-4 py-2 rounded-md ${number === currentPage
+                      ? "bg-primary/70 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                  >
+                    {number}
+                  </button>
+                ));
+            })()}
+          </nav>
         </div>
-      )} */}
+      </div>
     </div>
   );
 };

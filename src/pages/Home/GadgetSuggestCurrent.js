@@ -82,7 +82,7 @@ const SuggestGadgetCurrent = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <h1 className="text-2xl font-bold mb-4">Gợi ý sản phẩm cho bạn</h1>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"> {/* Changed from grid-cols-4 to grid-cols-5 and adjusted gap */}
         {suggestedGadgets.slice(0, visibleCount).map((product) => (
           <div

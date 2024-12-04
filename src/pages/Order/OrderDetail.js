@@ -1,7 +1,7 @@
 // orderId = sellerorderId 
 import { CreditCardOutlined, HomeOutlined, ShopOutlined } from "@ant-design/icons";
 import { ArrowBack } from "@mui/icons-material";
-import { AlignLeft } from "lucide-react";
+import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
@@ -16,22 +16,26 @@ const OrderDetail = () => {
     const [cancelReason, setCancelReason] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const [copiedStates, setCopiedStates] = useState({});
+    const [showFullId, setShowFullId] = useState(false);
+    const [showTotalBreakdown, setShowTotalBreakdown] = useState(false);
+
+    const fetchOrderDetails = async () => {
+        try {
+            const [orderDetailsResponse, orderItemsResponse] = await Promise.all([
+                AxiosInterceptor.get(`/api/seller-orders/${orderId}`),
+                AxiosInterceptor.get(`/api/seller-order/${orderId}/items`),
+            ]);
+
+            setOrderDetails(orderDetailsResponse.data);
+            setOrderItems(orderItemsResponse.data.items);
+        } catch (error) {
+            console.error("Error fetching order details:", error);
+            navigate('/404');
+        }
+    };
+
     useEffect(() => {
-        const fetchOrderDetails = async () => {
-            try {
-                const [orderDetailsResponse, orderItemsResponse] = await Promise.all([
-                    AxiosInterceptor.get(`/api/seller-orders/${orderId}`),
-                    AxiosInterceptor.get(`/api/seller-order/${orderId}/items`),
-                ]);
-
-                setOrderDetails(orderDetailsResponse.data);
-                setOrderItems(orderItemsResponse.data.items);
-            } catch (error) {
-                console.error("Error fetching order details:", error);
-                toast.error("Failed to fetch order details");
-            }
-        };
-
         fetchOrderDetails();
     }, []);
 
@@ -70,12 +74,7 @@ const OrderDetail = () => {
                 reason: cancelReason.trim() || "",
             });
 
-            setOrderDetails((prevDetails) => ({
-                ...prevDetails,
-                status: "Cancelled",
-                cancelledReason: cancelReason.trim(),
-                sellerOrderUpdatedAt: new Date().toISOString(),
-            }));
+            await fetchOrderDetails(); // Re-fetch data after successful cancellation
 
             setShowCancelModal(false);
             setCancelReason("");
@@ -113,13 +112,51 @@ const OrderDetail = () => {
                 return "bg-gray-100 text-white-700";
         }
     };
+    const handleCopy = (id, e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(id).then(() => {
+            setCopiedStates((prev) => ({
+                ...prev,
+                [id]: true, // Đánh dấu giao dịch cụ thể là đã sao chép
+            }));
+            setTimeout(() => {
+                setCopiedStates((prev) => ({
+                    ...prev,
+                    [id]: false, // Reset trạng thái sau 2 giây
+                }));
+            }, 2000);
+        });
+    };
     return (
         <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg">
             <ToastContainer />
-            <h2 className="text-xl font-semibold mb-4 text-center">
-                Chi tiết đơn hàng #{orderId}
-            </h2>
-
+            <div className="flex flex-col items-center justify-center">
+                <div className="flex items-center space-x-4">
+                    <h2 className="text-xl font-semibold text-gray-700">
+                        Chi tiết đơn hàng #{showFullId ? orderId : `${orderId.slice(0, 8)}...`}
+                    </h2>
+                    <button
+                        onClick={() => setShowFullId(!showFullId)}
+                        className="ml-2 px-2 py-1 text-sm text-primary/75 hover:text-secondary/85 hover:underline focus:outline-none"
+                    >
+                        ({showFullId ? 'Thu gọn' : 'Xem đầy đủ'})
+                    </button>
+                    <button
+                        onClick={(e) => handleCopy(orderId, e)}
+                        className={`p-1 mb-1 rounded-md transition-colors duration-200 ${copiedStates[orderId]
+                            ? 'bg-green-500 text-white'
+                            : 'bg-primary/75 text-white hover:bg-secondary/85'
+                            }`}
+                        aria-label={copiedStates[orderId] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
+                    >
+                        {copiedStates[orderId] ? (
+                            <Check className="h-4 w-4" />
+                        ) : (
+                            <Copy className="h-4 w-4" />
+                        )}
+                    </button>
+                </div>
+            </div>
             {/* Thông tin trạng thái đơn hàng */}
             {orderDetails.status === "Cancelled" && (
                 <div className="mt-6 p-4 bg-red-100 rounded-lg">
@@ -240,10 +277,37 @@ const OrderDetail = () => {
             </div>
 
             {/* Tổng cộng */}
-            <div className="text-right">
-                <p className="font-semibold text-red-500 text-lg">
-                    Tổng cộng: {orderDetails.totalAmount.toLocaleString()}₫
-                </p>
+            <div className="text-right mt-6">
+                {showTotalBreakdown && orderDetails.discountAmount > 0 && (
+                    <div className="w-full border border-gray-200 rounded-lg p-4 mb-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-600">Tổng tiền hàng:</span>
+                      <span className="font-medium">{orderDetails.beforeAppliedDiscountAmount.toLocaleString()}₫</span>
+                    </div>
+                    <div className="flex justify-between items-center text-red-400">
+                      <span>Phí giảm giá:</span>
+                      <span className="font-medium">-{orderDetails.discountAmount.toLocaleString()}₫</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end items-center">
+                    <p className="font-semibold text-red-500 text-lg mr-2">
+                        Tổng cộng: {orderDetails.totalAmount.toLocaleString()}₫
+                    </p>
+                    {orderDetails.discountAmount > 0 && (
+                        <button
+                            onClick={() => setShowTotalBreakdown(!showTotalBreakdown)}
+                            className="focus:outline-none"
+                        >
+                            {showTotalBreakdown ? (
+                                <ChevronUp className="h-5 w-5 text-gray-500" />
+                            ) : (
+                                <ChevronDown className="h-5 w-5 text-gray-500" />
+                            )}
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Cancel Order Button */}

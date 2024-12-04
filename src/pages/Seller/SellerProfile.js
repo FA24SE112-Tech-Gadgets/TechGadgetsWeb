@@ -45,7 +45,7 @@ const SellerProfilePage = () => {
     const [originalProfile, setOriginalProfile] = useState({});
     const [hasChanges, setHasChanges] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-
+    const [status, setStatus] = useState(false);
     useEffect(() => {
         const getCurrentUser = async () => {
             try {
@@ -65,6 +65,7 @@ const SellerProfilePage = () => {
 
                 setProfile(loadedProfile);
                 setOriginalProfile(loadedProfile);
+                setStatus(userData.user.status);
             } catch (error) {
                 console.error('Error fetching seller profile:', error);
             }
@@ -145,6 +146,9 @@ const SellerProfilePage = () => {
                         <button onClick={() => setIsEditing(!isEditing)} className="text-gray-500 hover:text-gray-700 text-xl">
                             <FaPencilAlt />
                         </button>
+                        {status === "Inactive" && (
+              <span className="ml-2 text-red-500">Tài khoản của bạn đã bị khóa</span>
+            )}
                     </div>
                     <button onClick={openModal} className="text-gray-500 hover:text-gray-700 text-xl">
                         <FaKey />

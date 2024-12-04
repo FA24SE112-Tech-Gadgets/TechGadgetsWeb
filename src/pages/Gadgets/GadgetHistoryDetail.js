@@ -48,7 +48,7 @@ const GadgetHistoryDetail = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-2xl font-bold mb-4">Sản phẩm đã xem</h1>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
 
       {/* Custom Navigation Buttons */}
       <div className="relative max-w-md mx-auto"> {/* Thêm max-w-md và mx-auto */}
@@ -68,8 +68,8 @@ const GadgetHistoryDetail = () => {
           className="w-full" // Thêm w-full
         >
           {gadgets.length > 0 ? (
-            gadgets.map((gadget) => (
-              <SwiperSlide key={gadget.id} className="flex justify-center"> {/* Thêm flex và justify-center */}
+            gadgets.map((gadget,index) => (
+              <SwiperSlide key={`${gadget.id}-${index}`} className="flex justify-center"> {/* Thêm flex và justify-center */}
                 <div
                   onClick={() =>
                     navigate(`/gadget/detail/${slugify(gadget.name)}`, {

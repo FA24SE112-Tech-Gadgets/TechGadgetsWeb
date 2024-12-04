@@ -56,6 +56,10 @@ const SellerPage = () => {
     const fetchSellerDetails = async () => {
         try {
             const response = await axios.get(`${apiBaseUrl}/api/sellers/${sellerId}`);
+            if (response.data.status === "Inactive") {
+                navigate('/404');
+                return;
+            }
             setSeller(response.data);
         } catch (error) {
             console.error("Error fetching seller details:", error);

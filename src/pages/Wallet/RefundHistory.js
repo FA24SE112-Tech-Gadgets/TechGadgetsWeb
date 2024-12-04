@@ -8,11 +8,11 @@ const RefundHistory = () => {
   const [refunds, setRefunds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const [pageSize] = useState(10); 
+  const [pageSize] = useState(10);
 
   useEffect(() => {
     const fetchRefunds = async () => {
@@ -21,7 +21,7 @@ const navigate = useNavigate();
         setRefunds(response.data.items);
         setTotalItems(response.data.totalItems);
         setLoading(false);
-        
+
       } catch (err) {
         setError('Không thể lấy lịch sử hoàn tiền');
         setLoading(false);
@@ -30,7 +30,7 @@ const navigate = useNavigate();
     };
 
     fetchRefunds();
-  }, [currentPage]); 
+  }, [currentPage]);
 
 
   const formatDate = (dateString) => {
@@ -73,38 +73,67 @@ const navigate = useNavigate();
         ) : (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
-            <tr>
-              {['Mã đơn hàng','Số tiền', 'Trạng thái', 'Thời gian hoàn tiền', 'Ngày tạo giao dịch'].map((header) => (
-                <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {header}
-                </th>
-              ))}
-            </tr>
+              <tr>
+                {[
+                  'Mã đơn hàng',
+                  'Số dư trước',
+                  'Biến động',
+                  'Trạng thái',
+                  'Thời gian hoàn tiền',
+                  'Ngày tạo giao dịch'
+                ].map((header) => (
+                  <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {header}
+                  </th>
+                ))}
+              </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {refunds.map((refund) => (
-                <tr key={refund.id}
-                onClick={() => navigate(`/order/detail/${refund.sellerOrderId}`)}
-                className="cursor-pointer hover:bg-gray-50 transition-colors" >
-                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{refund.sellerOrderId}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(refund.amount)}</td>
+                <tr
+                  key={refund.id}
+                  onClick={() => navigate(`/order/detail/${refund.sellerOrderId}`)}
+                  className="cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {refund.sellerOrderId}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {refund.balanceBeforeChange !== null ? (
+                      formatCurrency(refund.balanceBeforeChange)
+                    ) : (
+                      <span className="text-gray-400">--</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      refund.status === 'Success' ? 'bg-green-100 text-green-800' :
-                      refund.status === 'Pending' && refund.refundedAt === null ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
+                    <div className="flex items-center space-x-1">
+                      <span className={`text-sm ${refund.status === 'Success' ? 'text-green-600' : 'text-gray-600'}`}>
+                        {refund.status === 'Success' ? '+' : ''}{formatCurrency(refund.amount)}
+                      </span>
+                      {refund.balanceBeforeChange !== null && refund.status === 'Success' && (
+                        <span className="text-xs text-gray-400">
+                          → {formatCurrency(refund.balanceBeforeChange + refund.amount)}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${refund.status === 'Success' ? 'bg-green-100 text-green-800' :
+                        refund.status === 'Pending' && refund.refundedAt === null ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                      }`}>
                       {refund.status === 'Success' ? 'Thành công' :
-                       refund.status === 'Pending'  ? 'Đang chờ' :
-                       refund.status === 'Cancelled' ? 'Đã hủy' :
-                       refund.status}
+                        refund.status === 'Pending' ? 'Đang chờ' :
+                          refund.status === 'Cancelled' ? 'Đã hủy' :
+                            refund.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {refund.refundedAt ? formatDate(refund.refundedAt) : 'Đang chờ...'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(refund.createdAt)}</td>
-        
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {formatDate(refund.createdAt)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -132,11 +161,10 @@ const navigate = useNavigate();
                   <button
                     key={number}
                     onClick={() => setCurrentPage(number)}
-                    className={`px-4 py-2 rounded-md ${
-                      number === currentPage 
-                        ? "bg-primary/70 text-white" 
+                    className={`px-4 py-2 rounded-md ${number === currentPage
+                        ? "bg-primary/70 text-white"
                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                      }`}
                   >
                     {number}
                   </button>

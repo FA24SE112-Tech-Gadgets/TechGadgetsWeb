@@ -3,6 +3,7 @@ import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import { Check, Copy } from 'lucide-react';
 
 export default function SellerTransfer() {
   const [deposits, setDeposits] = useState([]);
@@ -12,7 +13,8 @@ export default function SellerTransfer() {
   const [totalItems, setTotalItems] = useState(0);
   const [pageSize] = useState(10);
   const [sortByDate, setSortByDate] = useState('DESC');
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [copiedStates, setCopiedStates] = useState({});
   const fetchDeposits = async () => {
     try {
       const response = await AxiosInterceptor.get(`/api/wallet-trackings?SortByDate=${sortByDate}&Page=${currentPage}&PageSize=${pageSize}`);
@@ -61,7 +63,21 @@ const navigate = useNavigate();
       </span>
     </div>
   );
-
+  const handleCopy = (id, e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(id).then(() => {
+      setCopiedStates((prev) => ({
+        ...prev,
+        [id]: true, // Đánh dấu giao dịch cụ thể là đã sao chép
+      }));
+      setTimeout(() => {
+        setCopiedStates((prev) => ({
+          ...prev,
+          [id]: false, // Reset trạng thái sau 2 giây
+        }));
+      }, 2000);
+    });
+  };
   if (error) return <div className="text-center mt-8 text-red-600">{error}</div>;
 
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -95,13 +111,31 @@ const navigate = useNavigate();
       ) : (
         <div className="space-y-4">
           {deposits.map((deposit) => (
-            <div key={deposit.id}
-            onClick={() => navigate(`/order/detail-seller/${deposit.sellerOrderId}`)}
-            className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex items-center justify-between cursor-pointer">
+            <div
+              key={deposit.id}
+              onClick={() => navigate(`/order/detail-seller/${deposit.sellerOrderId}`)}
+              className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex items-center justify-between cursor-pointer"
+            >
               <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-700">
-                  Mã giao dịch: <span className="text-gray-900">{deposit.sellerOrderId}</span>
-                </p>
+                <div className="flex items-center">
+                  <p className="text-sm font-semibold text-gray-700">
+                    Mã giao dịch: <span className="text-gray-900">{deposit.sellerOrderId}</span>
+                  </p>
+                  <button
+                    onClick={(e) => handleCopy(deposit.sellerOrderId, e)}
+                    className={`p-1 mb-1 ml-2 rounded-md transition-colors duration-200 ${copiedStates[deposit.sellerOrderId]
+                        ? 'bg-green-500 text-white'
+                        : 'bg-primary/75 text-white hover:bg-secondary/85'
+                      }`}
+                    aria-label={copiedStates[deposit.sellerOrderId] ? "Đã sao chép" : "Sao chép mã đơn hàng"}
+                  >
+                    {copiedStates[deposit.sellerOrderId] ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
                 <p className="text-sm text-gray-500">Loại giao dịch: Tự động</p>
                 <div className="flex items-center mt-1">
                   <p className="text-sm font-semibold text-gray-700">Trạng thái:</p>
@@ -119,17 +153,26 @@ const navigate = useNavigate();
                             deposit.status}
                   </span>
                 </div>
+                {deposit.balanceBeforeChange !== null && deposit.status === 'Success' && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    <span>Số dư trước: {formatCurrency(deposit.balanceBeforeChange)}</span>
+                    <span className="mx-2">→</span>
+                    <span>Số dư sau: {formatCurrency(deposit.balanceBeforeChange + deposit.amount)}</span>
+                  </div>
+                )}
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col items-end">
                 <p className="text-sm font-semibold text-gray-700">
-                  Số tiền: <span className="text-green-600">+ {formatCurrency(deposit.amount)}</span>
+                  Số tiền: {' '}
+                  <span className={`${deposit.status === 'Success' ? 'text-green-600' : 'text-gray-600'}`}>
+                    {deposit.status === 'Success' ? '+ ' : ''}{formatCurrency(deposit.amount)}
+                  </span>
                 </p>
                 <p className="text-xs text-gray-500 mt-5">
                   Ngày tạo: {formatDate(deposit.createdAt)}
                 </p>
               </div>
             </div>
-
           ))}
         </div>
       )}
@@ -154,11 +197,10 @@ const navigate = useNavigate();
                   <button
                     key={number}
                     onClick={() => handleChangePage(number)}
-                    className={`px-4 py-2 rounded-md ${
-                      number === currentPage 
-                        ? "bg-primary/70 text-white" 
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                    className={`px-4 py-2 rounded-md ${number === currentPage
+                      ? "bg-primary/70 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
                   >
                     {number}
                   </button>

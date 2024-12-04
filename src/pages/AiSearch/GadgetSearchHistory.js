@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 import slugify from '~/ultis/config';
 
 const GadgetSearchHistory = () => {
   const [history, setHistory] = useState([]);
-  const [selectedGadget, setSelectedGadget] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -26,21 +24,11 @@ const GadgetSearchHistory = () => {
   }, []);
 
   const handleProductClick = (item) => {
-    setSelectedGadget(item);
-  };
-
-  const handleConfirmNavigation = () => {
-    if (selectedGadget) {
-      navigate(`/gadget/detail/${slugify(selectedGadget.name)}`, {
-        state: {
-          productId: selectedGadget.id,
-        }
-      });
-    }
-  };
-
-  const handleCloseModal = () => {
-    setSelectedGadget(null);
+    navigate(`/gadget/detail/${slugify(item.name)}`, {
+      state: {
+        productId: item.id,
+      }
+    });
   };
 
   return (
@@ -49,8 +37,8 @@ const GadgetSearchHistory = () => {
         position: 'sticky',
         top: 0,
         height: '100vh',
-        scrollbarWidth: 'none', // Firefox (ẩn thanh cuộn)
-        msOverflowStyle: 'none', // IE/Edge (ẩn thanh cuộn)
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
       }}>
       <h2 className="text-lg font-bold mb-4">Lịch sử tìm kiếm</h2>
       {loading ? (
@@ -62,7 +50,6 @@ const GadgetSearchHistory = () => {
            Loading...
          </span>
        </div>
-   
       ) : history.length > 0 ? (
         <ul>
           {history.map((item) => (
@@ -112,22 +99,6 @@ const GadgetSearchHistory = () => {
         </ul>
       ) : (
         <p className="text-center text-gray-500">Không có lịch sử tìm kiếm</p>
-      )}
-      {selectedGadget && createPortal(
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" style={{ zIndex: 1000 }} onClick={handleCloseModal}>
-          <div className="bg-white p-6 rounded-md shadow-md" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold mb-4">Xác nhận</h2>
-            <p>Bạn có muốn đến trang chi tiết sản phẩm không?</p>
-            <div className="mt-4 flex justify-end space-x-2">
-              <button onClick={handleCloseModal} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
-                Hủy
-              </button>
-              <button onClick={handleConfirmNavigation} className="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600 bg-primary/80">
-                Đồng ý
-              </button>
-            </div>
-          </div>
-        </div>, document.body
       )}
     </div>
   );
