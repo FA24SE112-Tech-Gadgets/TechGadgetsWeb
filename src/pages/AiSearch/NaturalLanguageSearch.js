@@ -174,7 +174,7 @@ const NaturalLanguageSearch = () => {
     const fetchGadgets = async () => {
         setLoading(true);
         try {
-            const response = await AxiosInterceptor.post('/api/natural-languages/search', {
+            const response = await AxiosInterceptor.post('/api/natural-languages-v2/search', {
                 input: searchText,
             });
             setResultType(response.data.type);
