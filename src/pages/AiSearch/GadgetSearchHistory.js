@@ -32,7 +32,7 @@ const GadgetSearchHistory = () => {
   };
 
   return (
-    <div className="w-1/4 p-2 border-r bg-gray-100 overflow-y-auto"
+    <div className="w-[280px] min-w-[280px] p-2 border-r bg-gray-100 overflow-y-auto"
       style={{
         position: 'sticky',
         top: 0,
@@ -84,7 +84,7 @@ const GadgetSearchHistory = () => {
                     </div>
                     {item.gadget.status === "Inactive" ? (
                     <div className="text-red-500 font-semibold text-sm">
-                        Sản phẩm đã bị khóa do vi phạm chính sách TechGadget
+                        Sản phẩm đã bị khóa 
                       </div>
                     ) : !item.gadget.isForSale && (
                       <div className="text-red-500 font-semibold text-sm">
