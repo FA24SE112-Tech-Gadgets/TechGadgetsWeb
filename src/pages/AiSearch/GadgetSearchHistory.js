@@ -53,7 +53,7 @@ const GadgetSearchHistory = () => {
       ) : history.length > 0 ? (
         <ul>
           {history.map((item) => (
-            <li key={item.id} onClick={() => handleProductClick(item.gadget)} className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105 hover:border-primary/50">
+            <li key={item.id} onClick={() => handleProductClick(item.gadget)} className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105 hover:border-primary/50 cursor-pointer">
               <div className="flex items-center p-2">
                 {item.gadget.discountPercentage > 0 && (
                   <div className="absolute top-0 left-0 bg-red-600 text-white font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md" style={{ fontSize: '0.625rem' }}>

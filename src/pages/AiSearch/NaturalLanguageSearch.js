@@ -343,7 +343,7 @@ const NaturalLanguageSearch = () => {
             <div className="flex-1 flex flex-col min-w-0"> {/* add min-w-0 to prevent flex item from expanding */}
                 {/* Header */}
                 <div className="sticky top-0 bg-white p-4 z-10 border-b">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between ">
                         <button onClick={() => navigate("/")} className="font-bold text-2xl sm:text-3xl flex gap-2">
                             <img src={Logo} alt="Logo" className="w-10" />
                             Tech Gadget
@@ -358,7 +358,7 @@ const NaturalLanguageSearch = () => {
                             <p className="text-center text-gray-500">Đang tải...</p>
                         ) : resultType === 'gadget' ? (
                             displayedGadgets.length > 0 ? (
-                                <div className="container w-full max-w-screen-lg mx-auto grid grid-cols-4 gap-4 h-[400px] overflow-y-hiden">
+                                <div className="container w-full max-w-screen-lg mx-auto grid grid-cols-4 gap-4 h-[500px] overflow-y-hiden">
                                     {displayedGadgets.map((gadget) => (
                                         <div
                                             key={gadget.id}

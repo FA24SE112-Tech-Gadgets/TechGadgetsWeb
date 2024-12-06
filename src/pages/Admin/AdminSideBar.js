@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUsersCog, FaSignOutAlt, FaChartBar } from "react-icons/fa";
 import useAuth from '~/context/auth/useAuth';
 import { useDeviceToken } from '~/context/auth/Noti';
 import icon from "~/assets/icon.ico";
+import AxiosInterceptor from '~/components/api/AxiosInterceptor';
 
 const AdminSideBar = ({ minHeight = 'min-h-screen' }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { deleteDeviceToken } = useDeviceToken();
   const { logout } = useAuth();
-
+  const [adminName, setAdminName] = useState('');
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await AxiosInterceptor.get("/api/users/current");
+        setAdminName(response.data.admin.fullName);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
   const handleLogout = async () => {
-    await deleteDeviceToken(); 
+    await deleteDeviceToken();
     logout();
   };
 
@@ -25,22 +37,22 @@ const AdminSideBar = ({ minHeight = 'min-h-screen' }) => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className={`bg-primary/40 px-[25px] ${minHeight} relative`}>   
+    <div className={`bg-primary/40 px-[25px] ${minHeight} relative`}>
       <div className='px-[15px] py-[30px] flex flex-col items-center justify-center border-b-[1px] border-[#EDEDED]/[0.3]'>
-        <div className="h-[80px] w-[80px] rounded-full cursor-pointer flex items-center justify-center relative z-40 mb-3">
+        <div className="h-[80px] w-[80px] rounded-full cursor-pointer flex items-center justify-center relative z-40">
           <img src={icon} alt="" className="h-full w-full rounded-full object-cover" />
         </div>
+        <p className="mt-2 text-black font-medium">Xin chào, {adminName}</p>
       </div>
 
       <div className='py-[30px] border-b-[1px] border-black'>
         <h2 className="text-sm font-semibold text-black/60 mb-4 px-3">MENU QUẢN LÝ</h2>
         {menuItems.map((item) => (
-          <div 
+          <div
             key={item.path}
-            className={`flex items-center justify-between gap-[10px] py-[12px] cursor-pointer px-3 rounded-lg transition-all duration-300 ${
-              isActive(item.path)
-               ? 'bg-black/20' : 'hover:bg-black/10'
-            }`}
+            className={`flex items-center justify-between gap-[10px] py-[12px] cursor-pointer px-3 rounded-lg transition-all duration-300 ${isActive(item.path)
+                ? 'bg-black/20' : 'hover:bg-black/10'
+              }`}
             onClick={() => navigate(item.path)}
           >
             <div className='flex items-center gap-[10px]'>
@@ -54,7 +66,7 @@ const AdminSideBar = ({ minHeight = 'min-h-screen' }) => {
       </div>
 
       <div className='absolute bottom-0 left-0 w-full border-t border-[#EDEDED]/[0.3] bg-primary/20'>
-        <div 
+        <div
           className='flex items-center gap-2 cursor-pointer hover:bg-black/10 p-4 transition-all duration-300'
           onClick={handleLogout}
         >

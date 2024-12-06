@@ -60,6 +60,7 @@ import ErrorPage from "./pages/404";
 import ErrorPageSeller from "./pages/404Seller";
 import AdminKeyWord from "./pages/Manager/KeyWord/ManagerKeyWord";
 import CreateKeyWordGroup from "./pages/Manager/KeyWord/CreateKeyWordGroup";
+import PromptManagement from "./pages/Manager/Prompts/prompts";
 
 
 
@@ -245,6 +246,9 @@ function App() {
         } />
         <Route path='/manage-create-keyword-group' element={
           <CreateKeyWordGroup />
+        } />
+        <Route path='/manage-prompts' element={
+          <PromptManagement />
         } />
       </Route>
 
