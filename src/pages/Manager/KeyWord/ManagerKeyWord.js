@@ -1,3 +1,4 @@
+import { Search } from 'lucide-react'
 import React, { useState, useEffect, useCallback } from 'react'
 import { FaChevronDown, FaChevronUp, FaPencilAlt, FaTrash, FaPlus, FaTimes, FaCheck } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
@@ -62,10 +63,14 @@ export default function ManagerKeyWord() {
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
 
+  const [searchValue, setSearchValue] = useState("");
+  const [tempSearch, setTempSearch] = useState("");
+
+
 
   const fetchGroups = useCallback(async () => {
     try {
-      const response = await AxiosInterceptor.get(`/api/natual-language-keyword-groups?Page=${page}&PageSize=${pageSize}`)
+      const response = await AxiosInterceptor.get(`/api/natual-language-keyword-groups?Name=${searchValue}&Page=${page}&PageSize=${pageSize}`)
       setGroups(response.data.items.map(group => ({
         ...group,
         isExpanded: expandedGroups[group.id] || false
@@ -75,12 +80,23 @@ export default function ManagerKeyWord() {
       console.error('Error fetching groups:', error)
       toast.error('Không thể lấy danh sách nhóm từ khóa')
     }
-  }, [page, pageSize, expandedGroups])
+  }, [page, pageSize, expandedGroups, searchValue])
+
+  const handleSearchChange = (event) => {
+    setTempSearch(event.target.value);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      setSearchValue(tempSearch);
+      setPage(1);
+    }
+  };
 
   useEffect(() => {
     fetchGroups()
     fetchCategories()
-  }, [fetchGroups])
+  }, [fetchGroups, searchValue])
 
   const fetchCategories = async () => {
     try {
@@ -347,13 +363,27 @@ export default function ManagerKeyWord() {
           <h1 className="text-3xl font-bold text-black">Quản lý từ khóa</h1>
         </div>
         <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">Danh sách nhóm</h2>
-            <Link to="/manage-create-keyword-group"
-              className="px-4 py-2 bg-primary/75 text-white rounded-lg hover:bg-secondary/85 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-            >
-              Tạo nhóm mới
-            </Link>
+          <div className="mb-6 space-y-4">
+            <div className="relative w-72 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm"
+                value={tempSearch}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/70"
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold text-gray-800">Danh sách nhóm</h2>
+              <Link
+                to="/manage-create-keyword-group"
+                className="px-4 py-2 bg-primary/75 text-white rounded-lg hover:bg-secondary/85 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+              >
+                Tạo nhóm mới
+              </Link>
+            </div>
           </div>
 
           <div className="space-y-6">
@@ -573,6 +603,11 @@ export default function ManagerKeyWord() {
                 )}
               </div>
             ))}
+            {groups.length === 0 && (
+              <div className="p-4 text-center text-gray-500 bg-white rounded-lg shadow-md">
+                Không tìm thấy bất kỳ từ khóa nào!!!
+              </div>
+            )}
           </div>
         </div>
       </div>
