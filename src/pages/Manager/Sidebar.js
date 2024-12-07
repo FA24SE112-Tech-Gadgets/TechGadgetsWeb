@@ -1,12 +1,15 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { FaTachometerAlt, FaRegSun, FaWrench, FaStickyNote, FaRegChartBar, FaRegCalendarAlt, FaWpforms, FaSignOutAlt, FaProductHunt, FaKey } from "react-icons/fa"
 import { useNavigate, useLocation } from 'react-router-dom';
 import icon from "~/assets/icon.ico"
 import { useDeviceToken } from '~/context/auth/Noti';
 import useAuth from '~/context/auth/useAuth';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import AxiosInterceptor from '~/components/api/AxiosInterceptor';
+
 
 const Sidebar = ({ minHeight = 'min-h-screen' }) => {
+    const [managerName, setManagerName] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
     const { deleteDeviceToken } = useDeviceToken();
@@ -17,6 +20,18 @@ const Sidebar = ({ minHeight = 'min-h-screen' }) => {
         logout();
     };
 
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await AxiosInterceptor.get("/api/users/current");
+                setManagerName(response.data.manager.fullName);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+        fetchUserData();
+    }, []);
+
     const menuItems = [
         { path: '/manage-dashboard', icon: QueryStatsIcon, text: 'Thống kê bán hàng' },
         { path: '/manage-gadget', icon: FaProductHunt, text: 'Quản lý sản phẩm' },
@@ -24,6 +39,7 @@ const Sidebar = ({ minHeight = 'min-h-screen' }) => {
         { path: '/specification-key', icon: FaRegSun, text: 'Quản lý thông số' },
         { path: '/brand', icon: FaWrench, text: 'Quản lý thương hiệu' },
         { path: '/manage-keyword', icon: FaKey , text: 'Quản lý từ khóa' },
+        { path: '/manage-prompts', icon: FaKey , text: 'Quản lý từ khóa gợi ý' },
     ];
 
     const MenuItem = ({ path, icon: Icon, text }) => {
@@ -45,10 +61,11 @@ const Sidebar = ({ minHeight = 'min-h-screen' }) => {
 
     return (
         <div className={`bg-primary/40 px-[25px] ${minHeight} relative`}>   
-            <div className='px-[15px] py-[30px] flex items-center justify-center border-b-[1px] border-[#EDEDED]/[0.3]'>
+            <div className='px-[15px] py-[30px] flex flex-col items-center justify-center border-b-[1px] border-[#EDEDED]/[0.3]'>
                 <div className="h-[80px] w-[80px] rounded-full cursor-pointer flex items-center justify-center relative z-40">
                     <img src={icon} alt="" className="h-full w-full rounded-full object-cover" />
                 </div>
+                <p className="mt-2 text-black font-medium">Xin chào, {managerName}</p>
             </div>
             <div className='pt-[15px] border-b-[1px] border-black'>
                 {menuItems.map((item, index) => (

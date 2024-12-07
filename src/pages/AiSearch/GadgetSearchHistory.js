@@ -32,7 +32,7 @@ const GadgetSearchHistory = () => {
   };
 
   return (
-    <div className="w-1/4 p-2 border-r bg-gray-100 overflow-y-auto"
+    <div className="w-[280px] min-w-[280px] p-2 border-r bg-gray-100 overflow-y-auto"
       style={{
         position: 'sticky',
         top: 0,
@@ -53,7 +53,7 @@ const GadgetSearchHistory = () => {
       ) : history.length > 0 ? (
         <ul>
           {history.map((item) => (
-            <li key={item.id} onClick={() => handleProductClick(item.gadget)} className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105 hover:border-primary/50">
+            <li key={item.id} onClick={() => handleProductClick(item.gadget)} className="relative border-2 rounded-2xl shadow-sm flex flex-col justify-between transition-transform duration-200 transform hover:scale-105 hover:border-primary/50 cursor-pointer">
               <div className="flex items-center p-2">
                 {item.gadget.discountPercentage > 0 && (
                   <div className="absolute top-0 left-0 bg-red-600 text-white font-bold text-center py-1 px-2 rounded-tr-md rounded-b-md" style={{ fontSize: '0.625rem' }}>
@@ -84,7 +84,7 @@ const GadgetSearchHistory = () => {
                     </div>
                     {item.gadget.status === "Inactive" ? (
                     <div className="text-red-500 font-semibold text-sm">
-                        Sản phẩm đã bị khóa do vi phạm chính sách TechGadget
+                        Sản phẩm đã bị khóa 
                       </div>
                     ) : !item.gadget.isForSale && (
                       <div className="text-red-500 font-semibold text-sm">
