@@ -534,7 +534,13 @@ export default function ManagerKeyWord() {
                                   ? `Giá từ ${criteria.minPrice?.toLocaleString()}đ đến ${criteria.maxPrice?.toLocaleString()}đ`
                                   : criteria.type === 'Specification'
                                     ? `Bao gồm thông số: ${criteria.specificationKey?.name} - ${criteria.contains}`
-                                    : `Phải chứa: ${criteria.contains}`
+                                    : criteria.type === 'Name'
+                                      ? `Tên phải chứa: ${criteria.contains}`
+                                      : criteria.type === 'Condition'
+                                        ? `Tình Trạng phải chứa: ${criteria.contains}`
+                                        : criteria.type === 'Description'
+                                          ? `Mô tả phải chứa: ${criteria.contains}`
+                                          : `Phải chứa: ${criteria.contains}`
                                 }
                               </span>
                               <div className="text-sm text-gray-500">
@@ -579,8 +585,8 @@ export default function ManagerKeyWord() {
               key={pageNumber}
               onClick={() => setPage(pageNumber)}
               className={`px-4 py-2 rounded-md transition-colors duration-200 ${pageNumber === page
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-primary text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
             >
               {pageNumber}

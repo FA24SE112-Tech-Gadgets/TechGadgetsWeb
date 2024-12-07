@@ -208,8 +208,8 @@ export default function CreateKeyWordGroup() {
     } else if (criteriaForm.type === 'Giá') {
       return (
         criteriaForm.categories.length > 0 &&
-        (criteriaForm.minPrice === '' || criteriaForm.maxPrice === '' || 
-         (parseFloat(criteriaForm.minPrice) >= 0 && parseFloat(criteriaForm.maxPrice) > parseFloat(criteriaForm.minPrice)))
+        (criteriaForm.minPrice === '' || criteriaForm.maxPrice === '' ||
+          (parseFloat(criteriaForm.minPrice) >= 0 && parseFloat(criteriaForm.maxPrice) > parseFloat(criteriaForm.minPrice)))
       );
     } else {
       return (
@@ -287,7 +287,13 @@ export default function CreateKeyWordGroup() {
                         ? `Giá từ ${c.minPrice.toLocaleString()}đ đến ${c.maxPrice.toLocaleString()}đ`
                         : c.type === 'Specification'
                           ? `Bao gồm thông số: ${specifications.find(spec => spec.id === c.specificationKeyId)?.name} - ${c.contains}`
-                          : `Phải chứa: ${c.contains}`
+                          : c.type === 'Name'
+                            ? `Tên phải chứa: ${c.contains}`
+                            : c.type === 'Condition'
+                              ? `Tình Trạng phải chứa: ${c.contains}`
+                              : c.type === 'Description'
+                                ? `Mô tả phải chứa: ${c.contains}`
+                                : `Phải chứa: ${c.contains}`
                       }
                     </span>
                     <div className="text-sm text-gray-500">
@@ -309,7 +315,6 @@ export default function CreateKeyWordGroup() {
                   </button>
                 </div>
               ))}
-
             </div>
             <button
               type="button"
