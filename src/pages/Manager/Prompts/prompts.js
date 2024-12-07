@@ -50,12 +50,12 @@ const PromptManagement = () => {
         await AxiosInterceptor.patch(`/api/natural-language-prompts/${editingPrompt.id}`, {
           prompt: promptInput
         });
-        toast.success("Cập nhật prompt thành công!");
+        toast.success("Cập nhật gợi ý thành công!");
       } else {
         await AxiosInterceptor.post("/api/natural-language-prompts", {
           prompt: promptInput
         });
-        toast.success("Thêm prompt thành công!");
+        toast.success("Thêm gợi ý thành công!");
       }
       setIsModalVisible(false);
       setPromptInput("");
@@ -77,7 +77,7 @@ const PromptManagement = () => {
   const handleDelete = async (id) => {
     try {
       await AxiosInterceptor.delete(`/api/natural-language-prompts/${id}`);
-      toast.success("Xóa prompt thành công!");
+      toast.success("Xóa gợi ý thành công!");
       setIsDeleteModalVisible(false);
       setPromptToDelete(null);
       fetchPrompts();
@@ -180,7 +180,7 @@ const PromptManagement = () => {
             {prompts.length === 0 && (
               <tr>
                 <td colSpan={3} className="p-4 text-center text-gray-500">
-                  Không tìm thấy prompt!!!
+                  Không tìm thấy bất kỳ gợi ý nào!!!
                 </td>
               </tr>
             )}
@@ -192,14 +192,14 @@ const PromptManagement = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg w-[500px]">
             <h2 className="text-xl font-semibold mb-4">
-              {editingPrompt ? "Chỉnh sửa Prompt" : "Thêm Prompt Mới"}
+              {editingPrompt ? "Chỉnh sửa gợi ý" : "Thêm gợi ý Mới"}
             </h2>
             <form onSubmit={handleSubmit}>
               <input
                 type="text"
                 value={promptInput}
                 onChange={(e) => setPromptInput(e.target.value)}
-                placeholder="Nhập nội dung prompt"
+                placeholder="Nhập nội dung gợi ý"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
               <div className="mt-4 flex justify-end space-x-2">
@@ -226,7 +226,7 @@ const PromptManagement = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg w-[400px]">
             <h2 className="text-xl font-semibold mb-4">Xác nhận xóa</h2>
-            <p className="mb-4">Bạn có chắc chắn muốn xóa prompt này?</p>
+            <p className="mb-4">Bạn có chắc chắn muốn xóa gợi ý này?</p>
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => {

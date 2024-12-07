@@ -298,15 +298,16 @@ const NaturalLanguageSearch = () => {
     }, [prompts]);
 
     const canScrollLeft = promptsIndex > 0;
-    const canScrollRight = promptsIndex < contentWidth - containerWidth;
+    const canScrollRight = promptsIndex < contentWidth - containerWidth + 25;
 
     const scroll = useCallback((direction) => {
-        const scrollAmount = 100; // Adjust this value to change scroll speed
+        const scrollAmount = 100;
         setPromptsIndex((prevIndex) => {
             if (direction === 'left') {
                 return Math.max(0, prevIndex - scrollAmount);
             } else {
-                return Math.min(contentWidth - containerWidth, prevIndex + scrollAmount);
+                const maxScroll = Math.max(0, contentWidth - containerWidth + 25);
+                return Math.min(maxScroll, prevIndex + scrollAmount);
             }
         });
     }, [contentWidth, containerWidth]);
@@ -616,17 +617,17 @@ const NaturalLanguageSearch = () => {
                 <div className="border-t bg-white p-4">
                     {/* Prompts */}
                     <div className="mb-2 relative" ref={containerRef}>
-                        <div className="overflow-hidden px-8">
+                        <div className="overflow-hidden px-4">
                             <div
                                 ref={contentRef}
-                                className="flex transition-transform duration-300 ease-in-out"
+                                className="flex transition-transform duration-300 ease-in-out pr-4"
                                 style={{ transform: `translateX(-${promptsIndex}px)` }}
                             >
                                 {prompts.map((item) => (
                                     <button
                                         key={item.id}
                                         onClick={() => handlePromptClick(item.prompt)}
-                                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors whitespace-nowrap mr-2 flex-shrink-0"
+                                        className="px-2 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors whitespace-nowrap mr-2 flex-shrink-0"
                                     >
                                         {item.prompt}
                                     </button>
