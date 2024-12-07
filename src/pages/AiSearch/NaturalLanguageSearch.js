@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { Search, ChevronLeft, ChevronRight, Mic, MicOff, AudioLines } from 'lucide-react';
 import AxiosInterceptor from '~/components/api/AxiosInterceptor';
@@ -26,6 +26,13 @@ const NaturalLanguageSearch = () => {
     const [reviewData, setReviewData] = useState({});
     const [userLocation, setUserLocation] = useState(null);
     const [prompts, setPrompts] = useState([]);
+    const [promptsIndex, setPromptsIndex] = useState(0);
+    const [containerWidth, setContainerWidth] = useState(0);
+    const [contentWidth, setContentWidth] = useState(0);
+    const containerRef = useRef(null);
+    const contentRef = useRef(null);
+    const longPressTimerRef = useRef(null);
+    const isLongPressingRef = useRef(false);
     const {
         transcript,
         listening,
@@ -282,6 +289,68 @@ const NaturalLanguageSearch = () => {
         setCurrentPage(1);
         await fetchGadgets();
     };
+
+    useEffect(() => {
+        if (containerRef.current && contentRef.current) {
+            setContainerWidth(containerRef.current.offsetWidth);
+            setContentWidth(contentRef.current.scrollWidth);
+        }
+    }, [prompts]);
+
+    const canScrollLeft = promptsIndex > 0;
+    const canScrollRight = promptsIndex < contentWidth - containerWidth;
+
+    const scroll = useCallback((direction) => {
+        const scrollAmount = 100; // Adjust this value to change scroll speed
+        setPromptsIndex((prevIndex) => {
+            if (direction === 'left') {
+                return Math.max(0, prevIndex - scrollAmount);
+            } else {
+                return Math.min(contentWidth - containerWidth, prevIndex + scrollAmount);
+            }
+        });
+    }, [contentWidth, containerWidth]);
+
+    const startLongPress = useCallback((direction) => {
+        if (longPressTimerRef.current === null) {
+            longPressTimerRef.current = setInterval(() => {
+                scroll(direction);
+            }, 100); // Adjust this value to change scroll frequency
+        }
+    }, [scroll]);
+
+    const endLongPress = useCallback(() => {
+        if (longPressTimerRef.current !== null) {
+            clearInterval(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+        isLongPressingRef.current = false;
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (longPressTimerRef.current !== null) {
+                clearInterval(longPressTimerRef.current);
+            }
+        };
+    }, []);
+
+    const handleMouseDown = (direction) => {
+        isLongPressingRef.current = true;
+        startLongPress(direction);
+    };
+
+    const handleMouseUp = () => {
+        if (!isLongPressingRef.current) {
+            scroll(isLongPressingRef.current ? 'left' : 'right');
+        }
+        endLongPress();
+    };
+
+    const handleMouseLeave = () => {
+        endLongPress();
+    };
+
     const handlePromptClick = (prompt) => {
         setSearchText(prompt);
     };
@@ -546,44 +615,44 @@ const NaturalLanguageSearch = () => {
                 {/* Search bar area - fixed at bottom */}
                 <div className="border-t bg-white p-4">
                     {/* Prompts */}
-                    <div
-                        className="mb-2 overflow-x-auto"
-                        style={{
-                            msOverflowStyle: 'none',
-                            scrollbarWidth: 'none',
-                            WebkitOverflowScrolling: 'touch',
-                            cursor: 'grab',
-                            userSelect: 'none'
-                        }}
-                        onMouseDown={(e) => {
-                            const ele = e.currentTarget;
-                            const startX = e.pageX - ele.scrollLeft;
-
-                            const onMouseMove = (e) => {
-                                ele.scrollLeft = e.pageX - startX;
-                                e.preventDefault();
-                            };
-
-                            const onMouseUp = () => {
-                                document.removeEventListener('mousemove', onMouseMove);
-                                document.removeEventListener('mouseup', onMouseUp);
-                            };
-
-                            document.addEventListener('mousemove', onMouseMove);
-                            document.addEventListener('mouseup', onMouseUp);
-                        }}
-                    >
-                        <div className="inline-flex gap-2 pb-2">
-                            {prompts.map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => handlePromptClick(item.prompt)}
-                                    className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors whitespace-nowrap"
-                                >
-                                    {item.prompt}
-                                </button>
-                            ))}
+                    <div className="mb-2 relative" ref={containerRef}>
+                        <div className="overflow-hidden px-8">
+                            <div
+                                ref={contentRef}
+                                className="flex transition-transform duration-300 ease-in-out"
+                                style={{ transform: `translateX(-${promptsIndex}px)` }}
+                            >
+                                {prompts.map((item) => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => handlePromptClick(item.prompt)}
+                                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors whitespace-nowrap mr-2 flex-shrink-0"
+                                    >
+                                        {item.prompt}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
+                        {canScrollLeft && (
+                            <button
+                                onMouseDown={() => handleMouseDown('left')}
+                                onMouseUp={handleMouseUp}
+                                onMouseLeave={handleMouseLeave}
+                                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white p-1 rounded-full shadow-md"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </button>
+                        )}
+                        {canScrollRight && (
+                            <button
+                                onMouseDown={() => handleMouseDown('right')}
+                                onMouseUp={handleMouseUp}
+                                onMouseLeave={handleMouseLeave}
+                                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white p-1 rounded-full shadow-md"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
+                        )}
                     </div>
 
                     {/* Search input */}
