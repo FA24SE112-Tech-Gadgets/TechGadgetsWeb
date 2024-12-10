@@ -189,10 +189,10 @@ const PromptManagement = () => {
       </div>
 
       {isModalVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-[500px]">
             <h2 className="text-xl font-semibold mb-4">
-              {editingPrompt ? "Chỉnh sửa gợi ý" : "Thêm gợi ý Mới"}
+              {editingPrompt ? "Chỉnh sửa gợi ý" : "Thêm gợi ý mới"}
             </h2>
             <form onSubmit={handleSubmit}>
               <input
@@ -223,7 +223,7 @@ const PromptManagement = () => {
       )}
 
       {isDeleteModalVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-[400px]">
             <h2 className="text-xl font-semibold mb-4">Xác nhận xóa</h2>
             <p className="mb-4">Bạn có chắc chắn muốn xóa gợi ý này?</p>
