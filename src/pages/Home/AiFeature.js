@@ -35,7 +35,7 @@ const AiFeature = () => {
                     <div className="md:w-3/5 p-8 relative">
                         <div className="relative z-10">
                             <h1 className="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
-                                Khám phá tính năng tìm kiếm sản phẩm bằng ngôn ngữ tự nhiện
+                                Khám phá tính năng tìm kiếm sản phẩm bằng ngôn ngữ tự nhiên
                             </h1>
                             <p className="text-lg text-white mb-8 leading-relaxed drop-shadow-md">
                                 Tính năng tìm kiếm sản phẩm bằng ngôn ngữ tự nhiên giúp bạn dễ dàng tìm thấy sản phẩm và cửa hàng một cách nhanh chóng và chính xác. Hệ thống có
